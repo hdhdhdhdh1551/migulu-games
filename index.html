@@ -4,148 +4,130 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>美咕噜的游戏 · 小米手环 / 手表 GALGAME 移植下载</title>
-<meta name="description" content="美咕噜移植的免费 GALGAME：星光咖啡馆与死神之蝶、片轮少女、水仙、心跳文学部。先选你的表，再下载。适配手环 9 Pro / 10 Pro、手表 S3/S4/S5、手环 8/9/10/11、红米 Watch 6。">
+<meta name="description" content="美咕噜移植的免费 GALGAME：星光咖啡馆与死神之蝶、片轮少女、水仙、心跳文学部。选择你的手表，再下载。适配手环 9 Pro / 10 Pro、手表 S3/S4/S5、手环 8/9/10/11、红米 Watch 6。">
 <style>
+/* ============ Apple 化 v8：黑顶栏 / 浅灰底 / 黑字 / 蓝按钮 / 白卡片 ============ */
 :root{
   --bg:#f5f5f7; --ink:#1d1d1f; --ink2:#6e6e73; --ink3:#3a3a3e;
-  --line:rgba(0,0,0,.08);
-  --accent:#f975b0; --blue:#0071e3; --blue-deep:#0077ed;
-  --glass:rgba(255,255,255,.62); --glass-brd:rgba(255,255,255,.8);
-  --card:#fff;
-  --seg-bg:rgba(0,0,0,.06);
-  --r-lg:28px; --r-md:20px; --r-sm:14px;
-  --shadow:0 20px 50px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.05);
+  --line:rgba(0,0,0,.1);
+  --blue:#0071e3; --blue-hover:#0077ed;
+  --card:#fff; --card2:#fbfbfd;
+  --seg-bg:#e8e8ed;
+  --r-lg:18px; --r-md:14px;
+  --shadow:0 4px 20px rgba(0,0,0,.06);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.1);
 }
 [data-theme="dark"]{
   --bg:#000; --ink:#f5f5f7; --ink2:#a1a1a6; --ink3:#d7d7db;
-  --line:rgba(255,255,255,.12);
-  --glass:rgba(28,28,34,.6); --glass-brd:rgba(255,255,255,.16);
-  --card:#1c1c1e;
-  --seg-bg:rgba(255,255,255,.1);
-  --shadow:0 20px 50px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.4);
+  --line:rgba(255,255,255,.14);
+  --card:#1d1d1f; --card2:#161617;
+  --seg-bg:rgba(255,255,255,.12);
+  --shadow:0 4px 20px rgba(0,0,0,.4);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.5);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   background:var(--bg); color:var(--ink); line-height:1.5; overflow-x:hidden;
-  transition:background .4s ease, color .4s ease;
 }
 a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
 img{display:block;max-width:100%}
 .wrap{max-width:1020px;margin:0 auto;padding:0 22px}
 .view{display:none}
-.view.on{display:block;animation:fadein .35s ease}
-@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.view.on{display:block;animation:fadein .3s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
 
-/* ---------- liquid glass (subtle, Apple-like) ---------- */
-.glass{
-  background:linear-gradient(180deg, rgba(255,255,255,.32), rgba(255,255,255,0) 30%), var(--glass);
-  -webkit-backdrop-filter:blur(24px) saturate(200%);
-  backdrop-filter:blur(24px) saturate(200%);
-  border:1px solid var(--glass-brd);
-  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.5);
-}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:0 8px 30px rgba(0,0,0,.05);overflow:hidden}
-
-/* ---------- nav: Apple-like, one line, categories only ---------- */
-.nav{
-  position:sticky; top:0; z-index:50;
-  background:color-mix(in srgb, var(--bg) 72%, transparent);
-  -webkit-backdrop-filter:blur(20px) saturate(180%);
-  backdrop-filter:blur(20px) saturate(180%);
-  border-bottom:1px solid var(--line);
-}
-.nav-in{max-width:1020px;margin:0 auto;padding:0 22px;height:52px;display:flex;align-items:center;gap:4px}
-.nav-logo{font-weight:700;font-size:17px;color:var(--ink);margin-right:14px;white-space:nowrap;cursor:pointer}
-.nav-logo b{color:var(--accent)}
+/* ---------- 顶栏：苹果黑底 ---------- */
+.nav{position:sticky;top:0;z-index:50;background:rgba(22,22,23,.82);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%)}
+.nav-in{max-width:1020px;margin:0 auto;padding:0 22px;height:48px;display:flex;align-items:center;gap:4px}
+.nav-logo{font-weight:600;font-size:15px;color:#f5f5f7;margin-right:18px;white-space:nowrap;cursor:pointer}
 .nav-links{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
 .nav-links::-webkit-scrollbar{display:none}
-.nav-links button{
-  border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--ink);
-  opacity:.82;padding:8px 11px;border-radius:999px;white-space:nowrap;
-}
-.nav-links button:hover{opacity:1;background:rgba(127,127,127,.1)}
-.nav-links button.on{opacity:1;font-weight:700;background:rgba(127,127,127,.12)}
-.theme-btn{
-  flex:none;cursor:pointer;border:1px solid var(--line);border-radius:999px;
-  background:var(--glass);color:var(--ink);font-size:13px;font-weight:600;padding:6px 12px;margin-left:8px;
-  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-}
+.nav-links button{border:none;background:transparent;cursor:pointer;font-size:12px;color:#f5f5f7;opacity:.85;padding:8px 10px;border-radius:8px;white-space:nowrap}
+.nav-links button:hover{opacity:1}
+.nav-links button.on{opacity:1;font-weight:600}
+.theme-btn,.nav-menu-btn{flex:none;cursor:pointer;border:1px solid rgba(255,255,255,.3);border-radius:999px;background:transparent;color:#f5f5f7;font-size:12px;font-weight:500;padding:5px 11px;margin-left:8px}
+.nav-menu-btn{display:none;font-size:15px;padding:4px 11px}
 
-/* ---------- hero: one headline, nothing else stacked ---------- */
-.hero{padding:88px 0 56px;text-align:center}
-.eyebrow{font-size:15px;font-weight:600;letter-spacing:.12em;color:var(--ink2);text-transform:uppercase}
-.hero h1{font-size:clamp(38px,7vw,68px);line-height:1.1;font-weight:700;letter-spacing:-.02em;margin:16px 0 18px}
-.hero h1 .grad{background:linear-gradient(92deg,#ff8fc0,#f975b0 45%,#5b8def);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero p{font-size:clamp(16px,2.4vw,20px);color:var(--ink2);max-width:560px;margin:0 auto}
-.hero .byline{margin-top:14px;font-size:14px;color:var(--ink2)}
-.hero-cta{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:none;font-size:16px;font-weight:600;padding:12px 26px;border-radius:999px;will-change:transform;user-select:none}
-.btn-blue{background:var(--blue);color:#fff;box-shadow:0 8px 20px rgba(0,113,227,.3)}
-.btn-ghost{background:transparent;color:var(--blue);border:1px solid rgba(0,113,227,.35)}
+/* ---------- Hero：苹果产品页 ---------- */
+.hero{padding:72px 0 48px;text-align:center;background:var(--bg)}
+.hero .eyebrow{font-size:14px;font-weight:600;color:var(--ink2)}
+.hero h1{font-size:clamp(40px,7vw,64px);line-height:1.08;font-weight:700;letter-spacing:-.03em;margin:14px 0 16px;color:var(--ink)}
+.hero p{font-size:clamp(16px,2.4vw,20px);color:var(--ink2);max-width:580px;margin:0 auto}
+.hero .byline{margin-top:12px;font-size:13px;color:var(--ink2)}
+.hero-cta{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:26px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:none;font-size:15px;font-weight:500;padding:11px 24px;border-radius:999px;will-change:transform;user-select:none}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:var(--blue-hover);text-decoration:none}
+.btn-link{background:transparent;color:var(--blue);font-size:15px;padding:11px 8px}
+.btn-link:hover{text-decoration:underline}
+.hero-gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:1020px;margin:44px auto 0;padding:0 22px}
+.hero-gallery figure{border-radius:var(--r-lg);overflow:hidden;background:#000;box-shadow:var(--shadow)}
+.hero-gallery img{width:100%;aspect-ratio:4/3;object-fit:cover}
+.hero-gallery figcaption{font-size:12px;color:var(--ink2);padding:9px 12px;background:var(--card);text-align:left}
 
-/* ---------- section titles: Apple style, left aligned, lots of air ---------- */
-.section{padding:44px 0 8px}
-.section-head{margin-bottom:22px}
-.section-head h2{font-size:clamp(26px,4vw,34px);font-weight:700;letter-spacing:-.02em}
-.section-head p{color:var(--ink2);font-size:16px;margin-top:6px}
-.group-label{font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--ink2);text-transform:uppercase;margin:34px 0 14px}
+/* ---------- 区块标题 ---------- */
+.section{padding:56px 0 8px}
+.section-head{margin-bottom:24px}
+.section-head h2{font-size:clamp(28px,4.4vw,38px);font-weight:700;letter-spacing:-.025em}
+.section-head p{color:var(--ink2);font-size:17px;margin-top:8px}
+.group-label{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:600;color:var(--ink2);margin:36px 0 16px}
+.group-label::after{content:"";flex:1;height:1px;background:var(--line)}
 
-/* ---------- device category cards (home only) ---------- */
-.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.cat{
-  cursor:pointer;text-align:left;border-radius:var(--r-lg);padding:26px 26px 22px;
-  display:flex;flex-direction:column;min-height:230px;will-change:transform;
-}
-.cat:hover{box-shadow:0 24px 60px rgba(0,0,0,.12)}
-.cat-shape{height:96px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:18px}
-.shape{border-radius:18px;background:linear-gradient(180deg,#ffd6e8,#ff8fc0 55%,#e85a9a);box-shadow:0 14px 30px rgba(249,117,176,.35), inset 0 1px 0 rgba(255,255,255,.6)}
-.shape-long{width:56px;height:84px;border-radius:14px}
-.shape-round{width:84px;height:84px;border-radius:50%;background:linear-gradient(180deg,#bcd8ff,#5b8def 60%,#3b6fd4)}
-.shape-capsule{width:44px;height:92px;border-radius:999px;background:linear-gradient(180deg,#d9c8ff,#8b5cf6 60%,#6d3fd4)}
-.shape-rw6{width:64px;height:78px;border-radius:16px;background:linear-gradient(180deg,#ffe1a8,#f5a623 60%,#e8890c)}
-.cat h3{font-size:22px;font-weight:700}
-.cat p{color:var(--ink2);font-size:14px;margin-top:4px}
-.cat .go{margin-top:auto;padding-top:16px;font-size:15px;font-weight:600;color:var(--blue)}
-.home-note{text-align:center;color:var(--ink2);font-size:14px;margin:34px 0 8px}
+/* ---------- 机型卡：苹果产品行 ---------- */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cat{cursor:pointer;text-align:left;border-radius:var(--r-lg);padding:28px 26px 24px;display:flex;flex-direction:column;min-height:220px;will-change:transform;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+.cat:hover{box-shadow:var(--shadow-lg)}
+.cat-shape{height:92px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:18px}
+.shape{border-radius:16px;background:#1d1d1f}
+.shape-long{width:54px;height:82px;border-radius:12px}
+.shape-round{width:82px;height:82px;border-radius:50%;background:var(--blue)}
+.shape-capsule{width:42px;height:90px;border-radius:999px;background:#6e6e73}
+.shape-rw6{width:62px;height:76px;border-radius:14px;background:#f5a623}
+.shape{border:1px solid rgba(0,0,0,.14)}
+[data-theme="dark"] .shape{border-color:rgba(255,255,255,.22)}
+[data-theme="dark"] .shape-long{background:#f5f5f7}
+[data-theme="dark"] .shape-capsule{background:#a1a1a6}
+.cat h3{font-size:22px;font-weight:700;letter-spacing:-.01em}
+.cat p{color:var(--ink2);font-size:14px;margin-top:4px;line-height:1.55}
+.cat .go{margin-top:auto;padding-top:16px;font-size:15px;color:var(--blue)}
+.home-note{text-align:center;color:var(--ink2);font-size:14px;margin:32px 0 10px}
 .home-links{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
 .home-links button{border:none;background:none;cursor:pointer;color:var(--blue);font-size:15px}
 
-/* ---------- device page ---------- */
-.back{border:none;background:none;cursor:pointer;color:var(--blue);font-size:15px;padding:0;margin-bottom:14px}
-.device-head{padding:26px 0 6px}
-.device-head h2{font-size:clamp(30px,5vw,44px);font-weight:700;letter-spacing:-.02em}
+/* ---------- 机型页 ---------- */
+.back{border:none;background:none;cursor:pointer;color:var(--blue);font-size:15px;padding:0;margin-bottom:12px}
+.device-head{padding:28px 0 4px}
+.device-head h2{font-size:clamp(32px,5vw,44px);font-weight:700;letter-spacing:-.025em}
 .device-head p{color:var(--ink2);font-size:16px;margin-top:6px}
-.picker{margin:22px 0 6px;border-radius:var(--r-md);padding:14px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.picker-label{font-size:13px;font-weight:700;color:var(--ink2)}
+.picker{margin:22px 0 6px;border-radius:var(--r-md);padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line)}
+.picker-label{font-size:13px;font-weight:600;color:var(--ink2)}
 .seg{position:relative;display:inline-flex;background:var(--seg-bg);border-radius:999px;padding:3px}
-.seg-ind{position:absolute;top:3px;bottom:3px;border-radius:999px;z-index:0;background:linear-gradient(180deg,#fff,#f2f2f4);box-shadow:0 2px 8px rgba(0,0,0,.14), inset 0 1px 0 #fff;will-change:transform,width}
-[data-theme="dark"] .seg-ind{background:linear-gradient(180deg,#3a3a42,#2c2c32);box-shadow:0 2px 8px rgba(0,0,0,.5)}
-.seg button{position:relative;z-index:1;border:none;background:transparent;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--ink2);padding:7px 15px;border-radius:999px;white-space:nowrap}
-.seg button.on{color:var(--ink)}
+.seg-ind{position:absolute;top:3px;bottom:3px;border-radius:999px;z-index:0;background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.14);will-change:transform,width}
+.seg button{position:relative;z-index:1;border:none;background:transparent;cursor:pointer;font-size:13.5px;font-weight:500;color:var(--ink2);padding:7px 15px;border-radius:999px;white-space:nowrap}
+.seg button.on{color:var(--ink);font-weight:600}
 .picker-hint{margin-left:auto;font-size:13px;color:var(--ink2)}
 
-/* ---------- game cards: one per game, one download button ---------- */
-.game-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
-.game{display:flex;flex-direction:column}
+/* ---------- 游戏卡：一个游戏一张卡，一个主下载按钮 ---------- */
+.game-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+.game{display:flex;flex-direction:column;will-change:transform}
 .game-cover{aspect-ratio:16/9;overflow:hidden;background:#111}
-.game-cover img{width:100%;height:100%;object-fit:cover}
+.game-cover img{width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.game:hover .game-cover img{transform:scale(1.05)}
 .game-body{padding:22px 22px 20px;display:flex;flex-direction:column;flex:1}
 .game-body h3{font-size:21px;font-weight:700;letter-spacing:-.01em}
-.game-body .en{color:var(--ink2);font-size:12px;letter-spacing:.05em;margin-top:3px}
+.game-body .en{color:var(--ink2);font-size:12px;margin-top:3px}
 .game-body .desc{color:var(--ink3);font-size:14.5px;margin:10px 0 14px}
 .meta{font-size:13px;color:var(--ink2);margin-bottom:16px}
 .dl-main{margin-top:auto}
 .dl-label{font-size:14px;font-weight:600}
 .dl-size{font-size:13px;color:var(--ink2);margin-top:2px}
-.dl-btn{
-  display:block;width:100%;text-align:center;cursor:pointer;border:none;margin-top:12px;
-  font-size:15px;font-weight:700;color:#fff;padding:11px 18px;border-radius:999px;
-  background:var(--blue);box-shadow:0 8px 20px rgba(0,113,227,.28);will-change:transform;
-}
-.dl-btn:disabled{background:#c7c7cc;box-shadow:none;cursor:default}
-.dl-btn.pink{background:linear-gradient(180deg,#ff8fc0,#f975b0);box-shadow:0 8px 20px rgba(249,117,176,.35)}
+.dl-btn{display:block;width:100%;text-align:center;cursor:pointer;border:none;margin-top:12px;font-size:15px;font-weight:500;color:#fff;padding:11px 18px;border-radius:999px;background:var(--blue);will-change:transform}
+.dl-btn:hover{background:var(--blue-hover);text-decoration:none}
+.dl-btn:disabled{background:#c7c7cc;cursor:default}
 .dl-other{margin-top:12px}
 .dl-other summary{cursor:pointer;font-size:13.5px;color:var(--blue);list-style:none}
 .dl-other summary::-webkit-details-marker{display:none}
@@ -157,46 +139,209 @@ img{display:block;max-width:100%}
 .missing button{border:none;background:none;cursor:pointer;color:var(--blue);font-size:14.5px;padding:0}
 .empty{border-radius:var(--r-lg);padding:44px 24px;text-align:center;color:var(--ink2);margin-top:20px}
 .empty h3{color:var(--ink);font-size:20px;margin-bottom:8px}
-.empty button{margin-top:16px}
 
-/* ---------- install / faq / about: each its own page ---------- */
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+/* ---------- 安装 / 常见问题 / 关于 ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
 .step{border-radius:var(--r-md);padding:26px 24px}
-.step .num{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;background:var(--blue);margin-bottom:14px}
+.step .num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;color:#fff;background:var(--blue);margin-bottom:14px}
 .step h4{font-size:18px;margin-bottom:8px}
 .step p{font-size:14.5px;color:var(--ink3)}
-.warn{margin-top:18px;border-radius:var(--r-md);padding:18px 22px;font-size:14.5px;background:rgba(255,244,230,.75);border:1px solid rgba(255,190,90,.5);color:#7a4a00;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.warn{margin-top:18px;border-radius:var(--r-md);padding:18px 22px;font-size:14.5px;background:#fff4e6;border:1px solid rgba(255,190,90,.5);color:#7a4a00}
 [data-theme="dark"] .warn{background:rgba(80,55,0,.5);border-color:rgba(255,190,90,.3);color:#ffcf87}
-.faq{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+.faq{display:flex;flex-direction:column;gap:10px;margin-top:20px}
 .faq-item{border-radius:var(--r-md);overflow:hidden}
 .faq-item summary{list-style:none;cursor:pointer;padding:18px 22px;font-size:16px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .faq-item summary::-webkit-details-marker{display:none}
-.faq-item summary .chev{flex:none;font-size:13px;color:var(--ink2)}
+.faq-item summary .chev{flex:none;font-size:12px;color:var(--ink2)}
 .faq-item .a{padding:0 22px 18px;font-size:14.5px;color:var(--ink3)}
 .contact{border-radius:var(--r-lg);padding:38px 28px;text-align:center;margin-top:20px}
 .contact h3{font-size:26px;font-weight:700}
 .contact p{color:var(--ink2);margin-top:8px;font-size:15px}
-.contact .qq{display:inline-flex;align-items:center;gap:10px;margin-top:22px;cursor:pointer;font-size:21px;font-weight:700;color:var(--ink);padding:14px 28px;border-radius:999px;background:var(--card);border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.08)}
-.contact .qq small{font-size:13px;font-weight:600;color:var(--ink2)}
+.contact .qq{display:inline-flex;align-items:center;gap:10px;margin-top:22px;cursor:pointer;font-size:21px;font-weight:700;color:var(--ink);padding:14px 28px;border-radius:999px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+.contact .qq small{font-size:13px;font-weight:500;color:var(--ink2)}
 .contact .author{margin-top:18px;font-size:14px;color:var(--ink2)}
 .contact .author b{color:var(--ink)}
-footer{margin-top:80px;padding:40px 0 54px;border-top:1px solid var(--line);color:var(--ink2);font-size:13.5px}
-footer .fine{font-size:12px;color:#9a9aa0;line-height:1.7;margin-top:18px}
-.fab{position:fixed;right:20px;bottom:24px;z-index:60;width:48px;height:48px;border-radius:50%;border:1px solid var(--glass-brd);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:19px;color:var(--ink);opacity:0;pointer-events:none;transition:opacity .3s ease;background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);box-shadow:0 10px 28px rgba(0,0,0,.18)}
+
+/* ---------- 菜单：白底薄片 ---------- */
+.menu-overlay{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-end;justify-content:center;padding:18px;background:rgba(0,0,0,.22);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);opacity:0;pointer-events:none;transition:opacity .25s ease}
+.menu-overlay.open{opacity:1;pointer-events:auto}
+.menu-card{
+  --mx:50%; --my:0%;
+  width:100%;max-width:440px;border-radius:26px;padding:22px 20px 14px;
+  background:
+    radial-gradient(280px 150px at var(--mx) var(--my), rgba(255,255,255,.75), rgba(255,255,255,0) 70%),
+    linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,.08) 30%),
+    rgba(255,255,255,.68);
+  -webkit-backdrop-filter:blur(36px) saturate(240%) brightness(1.06);
+  backdrop-filter:blur(36px) saturate(240%) brightness(1.06);
+  border:1px solid rgba(255,255,255,.75);
+  box-shadow:0 24px 60px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.8), inset 0 -1px 0 rgba(255,255,255,.15), inset 1px 0 0 rgba(255,255,255,.25);
+  transform:translateY(12px) scale(.985);transition:transform .3s cubic-bezier(.2,.8,.2,1);
+}
+[data-theme="dark"] .menu-card{
+  background:
+    radial-gradient(280px 150px at var(--mx) var(--my), rgba(255,255,255,.22), rgba(255,255,255,0) 70%),
+    linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.04) 30%),
+    rgba(28,28,34,.62);
+  border-color:rgba(255,255,255,.2);
+  box-shadow:0 24px 60px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.25);
+}
+.menu-overlay.open .menu-card{transform:none}
+/* 菜单打开：每行逐个弹簧浮现 */
+.menu-overlay.open .menu-row{animation:menuRowIn .38s cubic-bezier(.2,.8,.2,1) both}
+.menu-overlay.open .menu-row:nth-child(3){animation-delay:.03s}
+.menu-overlay.open .menu-row:nth-child(4){animation-delay:.06s}
+.menu-overlay.open .menu-row:nth-child(5){animation-delay:.09s}
+.menu-overlay.open .menu-row:nth-child(6){animation-delay:.12s}
+.menu-overlay.open .menu-row:nth-child(7){animation-delay:.15s}
+.menu-overlay.open .menu-row:nth-child(8){animation-delay:.18s}
+.menu-overlay.open .menu-row:nth-child(9){animation-delay:.21s}
+.menu-overlay.open .menu-row:nth-child(10){animation-delay:.24s}
+.menu-overlay.open .menu-row:nth-child(11){animation-delay:.27s}
+@keyframes menuRowIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.menu-row{transition:background .25s ease, transform .25s ease}
+.menu-row:hover{background:rgba(255,255,255,.45)}
+[data-theme="dark"] .menu-row:hover{background:rgba(255,255,255,.09)}
+.menu-head{display:flex;align-items:center;justify-content:space-between}
+.menu-head h3{font-size:21px;font-weight:700}
+.menu-close{border:none;background:rgba(127,127,127,.14);cursor:pointer;width:30px;height:30px;border-radius:50%;font-size:14px;color:var(--ink)}
+.menu-sub{color:var(--ink2);font-size:14px;margin:6px 0 12px}
+.menu-row{display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:none;background:transparent;cursor:pointer;padding:12px 10px;border-radius:14px;color:var(--ink)}
+.menu-row:hover{background:rgba(127,127,127,.08)}
+.menu-shape{flex:none;width:26px;height:38px;border-radius:8px}
+.menu-shape.shape-round{width:38px;height:38px;border-radius:50%}
+.menu-shape.shape-capsule{width:20px;height:38px;border-radius:999px}
+.menu-shape.shape-rw6{width:30px;height:36px}
+.menu-text{flex:1;display:flex;flex-direction:column}
+.menu-text b{font-size:16px;font-weight:600}
+.menu-text small{font-size:13px;color:var(--ink2);margin-top:1px}
+.menu-arrow{font-size:20px;color:var(--ink2)}
+
+/* ---------- 页脚：苹果式 ---------- */
+footer{margin-top:80px;padding:36px 0 48px;border-top:1px solid var(--line);color:var(--ink2);font-size:12px;line-height:1.7}
+footer .f-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:20px}
+footer h5{color:var(--ink);font-size:13px;margin-bottom:8px}
+footer p{margin-bottom:4px}
+footer .fine{color:#9a9aa0}
+.fab{position:fixed;right:20px;bottom:24px;z-index:60;width:48px;height:48px;border-radius:50%;border:1px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--ink);opacity:0;pointer-events:none;transition:opacity .3s ease;background:var(--card);box-shadow:var(--shadow-lg)}
 .fab.show{opacity:1;pointer-events:auto}
 [data-reveal]{opacity:0;will-change:transform,opacity}
+
+/* ---------- 液态玻璃（像之前那个）：顶光 + 折射边 + 跟手高光 + 实时模糊 ---------- */
+.card,.cat,.picker,.menu-card{
+  --mx:50%; --my:0%;
+  background:
+    radial-gradient(240px 130px at var(--mx) var(--my), rgba(255,255,255,.65), rgba(255,255,255,0) 70%),
+    linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0) 24%),
+    var(--card);
+  -webkit-backdrop-filter:blur(24px) saturate(200%);
+  backdrop-filter:blur(24px) saturate(200%);
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.7), inset 0 -1px 0 rgba(255,255,255,.1);
+}
+[data-theme="dark"] .card,[data-theme="dark"] .cat,[data-theme="dark"] .picker,[data-theme="dark"] .menu-card{
+  background:
+    radial-gradient(240px 130px at var(--mx) var(--my), rgba(255,255,255,.14), rgba(255,255,255,0) 70%),
+    linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0) 26%),
+    var(--card);
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.14);
+}
+.seg{box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+.dl-btn,.btn-blue{box-shadow:0 8px 20px rgba(0,113,227,.28), inset 0 1px 0 rgba(255,255,255,.35)}
+.picker-group{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* ---------- 液态玻璃是全局的：所有面板、选择器、按钮、菜单、页脚组件 ---------- */
+.card,.cat,.picker,.menu-card,.step,.faq-item,.contact,.empty,.missing,.warn,.hero-gallery figure,.fab{
+  --mx:50%; --my:0%;
+  background:
+    radial-gradient(320px 180px at var(--mx) var(--my), rgba(255,255,255,.75), rgba(255,255,255,0) 70%),
+    linear-gradient(180deg, rgba(255,255,255,.6), rgba(255,255,255,.05) 26%),
+    var(--card);
+  -webkit-backdrop-filter:blur(28px) saturate(220%);
+  backdrop-filter:blur(28px) saturate(220%);
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.8), inset 1px 0 0 rgba(255,255,255,.3), inset -1px 0 0 rgba(255,255,255,.3), inset 0 -1px 0 rgba(255,255,255,.12);
+}
+[data-theme="dark"] .card,[data-theme="dark"] .cat,[data-theme="dark"] .picker,[data-theme="dark"] .menu-card,[data-theme="dark"] .step,[data-theme="dark"] .faq-item,[data-theme="dark"] .contact,[data-theme="dark"] .empty,[data-theme="dark"] .missing,[data-theme="dark"] .warn,[data-theme="dark"] .hero-gallery figure,[data-theme="dark"] .fab{
+  background:
+    radial-gradient(320px 180px at var(--mx) var(--my), rgba(255,255,255,.2), rgba(255,255,255,0) 70%),
+    linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.04) 26%),
+    var(--card);
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.22), inset 1px 0 0 rgba(255,255,255,.08), inset -1px 0 0 rgba(255,255,255,.08);
+}
+.nav{box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.seg{box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 1px 4px rgba(0,0,0,.06)}
+.seg-shape{display:inline-block;vertical-align:-2px;margin-right:5px;width:9px;height:14px;border-radius:3px;background:#1d1d1f}
+.seg-shape.shape-round{width:14px;height:14px;border-radius:50%;background:var(--blue)}
+.seg-shape.shape-capsule{width:7px;height:14px;border-radius:999px;background:#6e6e73}
+.seg-shape.shape-rw6{width:11px;height:14px;background:#f5a623}
+[data-theme="dark"] .seg-shape.shape-long{background:#f5f5f7}
+[data-theme="dark"] .seg-shape.shape-capsule{background:#a1a1a6}
+.dl-btn,.btn-blue{box-shadow:0 8px 20px rgba(0,113,227,.28), inset 0 1px 0 rgba(255,255,255,.35)}
+
+/* ---------- 液态玻璃全局：导航、Hero、画廊、选择器、卡片、页脚、回到顶部 ---------- */
+.nav,.hero-gallery figure,.fab,.seg,.theme-btn,.nav-menu-btn{
+  --mx:50%; --my:0%;
+}
+.hero-gallery figure{
+  background:
+    radial-gradient(200px 110px at var(--mx) var(--my), rgba(255,255,255,.55), rgba(255,255,255,0) 70%),
+    linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,0) 26%),
+    var(--card);
+  -webkit-backdrop-filter:blur(20px) saturate(190%);
+  backdrop-filter:blur(20px) saturate(190%);
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.6);
+}
+.nav{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,0) 60%),
+    rgba(22,22,23,.72);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 8px 30px rgba(0,0,0,.18);
+}
+
+/* 按钮与菜单行也带液态玻璃 */
+.btn,.theme-btn,.nav-menu-btn,.back,.menu-close,.menu-row,.fab{
+  --mx:50%; --my:0%;
+  -webkit-backdrop-filter:blur(16px) saturate(200%);
+  backdrop-filter:blur(16px) saturate(200%);
+}
+.btn-link,.theme-btn,.nav-menu-btn,.back,.menu-close{
+  background:
+    radial-gradient(160px 90px at var(--mx) var(--my), rgba(255,255,255,.7), rgba(255,255,255,0) 70%),
+    linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,.08) 40%),
+    rgba(255,255,255,.55);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), inset 1px 0 0 rgba(255,255,255,.25), inset -1px 0 0 rgba(255,255,255,.25), 0 2px 8px rgba(0,0,0,.06);
+}
+.menu-row{
+  background:
+    radial-gradient(240px 120px at var(--mx) var(--my), rgba(255,255,255,.55), rgba(255,255,255,0) 70%),
+    rgba(255,255,255,.32);
+}
+[data-theme="dark"] .btn-link,[data-theme="dark"] .theme-btn,[data-theme="dark"] .nav-menu-btn,[data-theme="dark"] .back,[data-theme="dark"] .menu-close{
+  background:
+    radial-gradient(160px 90px at var(--mx) var(--my), rgba(255,255,255,.16), rgba(255,255,255,0) 70%),
+    linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.03) 40%),
+    rgba(255,255,255,.08);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 2px 8px rgba(0,0,0,.3);
+}
+[data-theme="dark"] .menu-row{background:rgba(255,255,255,.06)}
 @media (max-width:760px){
+
+
+
+
+  .nav-links{display:none}
+  .nav-menu-btn{display:flex;align-items:center;justify-content:center}
   .cat-grid,.game-grid{grid-template-columns:1fr}
+  .hero-gallery{grid-template-columns:1fr 1fr}
   .steps{grid-template-columns:1fr}
-  .nav-links button{padding:8px 8px}
-  .hero{padding:64px 0 44px}
+  .hero{padding:56px 0 40px}
   .picker-hint{display:none}
+  footer .f-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 <nav class="nav"><div class="nav-in">
-  <span class="nav-logo" data-go="home">美咕噜<b> · 游戏</b></span>
+  <span class="nav-logo" data-go="home" data-spring>美咕噜 · 游戏</span>
   <div class="nav-links" id="navLinks">
     <button data-go="home" data-nav="home">首页</button>
     <button data-go="long" data-nav="long">长表</button>
@@ -206,77 +351,97 @@ footer .fine{font-size:12px;color:#9a9aa0;line-height:1.7;margin-top:18px}
     <button data-go="games" data-nav="games">全部游戏</button>
   </div>
   <button class="theme-btn" id="themeBtn" data-spring>深色</button>
+  <button class="nav-menu-btn" id="navMenuBtn" aria-label="菜单" data-spring>☰</button>
 </div></nav>
 
 <main class="wrap">
 
-<!-- ================= HOME: only categories, no games stacked ================= -->
+<!-- ================= HOME ================= -->
 <section class="view on" id="view-home">
-  <header class="hero">
-    <div class="eyebrow" data-reveal>小米手环 · 手表 GALGAME 移植</div>
-    <h1 data-reveal>把喜欢的故事，<br><span class="grad">装进口袋。</span></h1>
-    <p data-reveal>全中文移植，免费下载。先选你的表，再下载对应的版本。</p>
-    <p class="byline" data-reveal>by 等我刷个美咕噜</p>
-    <div class="hero-cta" data-reveal>
-      <button class="btn btn-blue" data-go="long" data-spring>选你的表 ↓</button>
-      <button class="btn btn-ghost" data-go="games" data-spring>先看看游戏</button>
+  <header class="hero" id="heroEl">
+    <div class="hero-in" id="heroIn">
+      <div class="eyebrow" data-reveal>小米手环 · 手表 GALGAME 移植</div>
+      <h1 data-reveal>把喜欢的故事，<br>装进口袋。</h1>
+      <p data-reveal>全中文移植，免费下载。选择你的手表，获取适配版本。</p>
+      <p class="byline" data-reveal>by 等我刷个美咕噜</p>
+      <div class="hero-cta" data-reveal>
+        <button class="btn btn-blue" data-menu="watch" data-spring id="heroPickBtn">选择你的手表</button>
+        <button class="btn btn-link" data-go="games" data-spring>浏览全部游戏 &gt;</button>
+      </div>
+      <p class="byline" id="heroCurrent" data-reveal>请选择你的手表</p>
     </div>
   </header>
+  <div class="hero-gallery" data-reveal>
+    <figure><img src="covers/cafestella.jpg" alt="星光咖啡馆与死神之蝶"><figcaption>星光咖啡馆与死神之蝶</figcaption></figure>
+    <figure><img src="covers/katawa.jpg" alt="片轮少女"><figcaption>片轮少女</figcaption></figure>
+    <figure><img src="covers/narcissu.jpg" alt="水仙"><figcaption>水仙</figcaption></figure>
+    <figure><img src="covers/ddlc.png" alt="心跳文学部" style="object-fit:contain;background:#fff"><figcaption>心跳文学部</figcaption></figure>
+  </div>
 
   <section class="section">
     <div class="section-head" data-reveal>
-      <h2>按你的表选</h2>
-      <p>点进一种表，只看这种表能装的游戏。</p>
+      <h2>选择你的手表</h2>
+      <p>选择一款手表，仅查看适配的游戏。</p>
     </div>
     <div class="cat-grid">
-      <article class="cat glass" data-go="long" data-reveal data-spring>
+      <article class="cat" data-go="long" data-reveal data-spring data-tilt>
         <div class="cat-shape"><div class="shape shape-long"></div></div>
         <h3>长表</h3>
         <p>手环 9 Pro · 10 Pro<br>336 × 480</p>
-        <span class="go">2 款游戏 ›</span>
+        <span class="go">2 款游戏 &gt;</span>
       </article>
-      <article class="cat glass" data-go="round" data-reveal data-spring>
+      <article class="cat" data-go="round" data-reveal data-spring data-tilt>
         <div class="cat-shape"><div class="shape shape-round"></div></div>
         <h3>圆表</h3>
         <p>小米手表 S3 / S4 / S5<br>466 × 466</p>
-        <span class="go">4 款游戏 ›</span>
+        <span class="go">4 款游戏 &gt;</span>
       </article>
-      <article class="cat glass" data-go="capsule" data-reveal data-spring>
+      <article class="cat" data-go="capsule" data-reveal data-spring data-tilt>
         <div class="cat-shape"><div class="shape shape-capsule"></div></div>
         <h3>胶囊表</h3>
         <p>手环 8 / 9 / 10 / 11<br>192 × 490</p>
-        <span class="go">4 款游戏 ›</span>
+        <span class="go">4 款游戏 &gt;</span>
       </article>
-      <article class="cat glass" data-go="rw6" data-reveal data-spring>
+      <article class="cat" data-go="rw6" data-reveal data-spring data-tilt>
         <div class="cat-shape"><div class="shape shape-rw6"></div></div>
         <h3>红米 Watch 6</h3>
         <p>红米 Watch 5 / 6<br>432 × 514</p>
-        <span class="go">1 款游戏 ›</span>
+        <span class="go">1 款游戏 &gt;</span>
       </article>
     </div>
-    <p class="home-note">免费下载 · 全中文 · 9 Pro 和 10 Pro 用同一个包</p>
+    <p class="home-note">免费 · 全中文 · 手环 9 Pro 与 10 Pro 共用同一安装包</p>
     <div class="home-links">
-      <button data-go="install">怎么装 →</button>
-      <button data-go="faq">常见问题 →</button>
-      <button data-go="about">关于作者 →</button>
+      <button data-go="install" data-spring>安装方法 &gt;</button>
+      <button data-go="faq" data-spring>常见问题 &gt;</button>
+      <button data-go="about" data-spring>关于作者 &gt;</button>
     </div>
   </section>
 </section>
 
-<!-- ================= DEVICE PAGE: rendered by JS, one device at a time ================= -->
+<!-- ================= DEVICE ================= -->
 <section class="view" id="view-device">
   <div class="section">
-    <button class="back" data-go="home">‹ 所有机型</button>
+    <button class="back" data-go="home" data-spring>‹ 全部机型</button>
     <div class="device-head">
       <h2 id="deviceTitle">长表</h2>
       <p id="deviceSub"></p>
     </div>
-    <div class="picker glass">
+    <div class="picker">
       <span class="picker-label">版本</span>
       <div class="seg" id="segVersion">
         <div class="seg-ind"></div>
         <button data-v="clean" class="on">干净版</button>
         <button data-v="full">完整版</button>
+      </div>
+      <div class="picker-group">
+        <span class="picker-label">机型</span>
+        <div class="seg" id="segDevice">
+          <div class="seg-ind"></div>
+          <button data-d="long"><span class="seg-shape shape-long"></span>长表</button>
+          <button data-d="round"><span class="seg-shape shape-round"></span>圆表</button>
+          <button data-d="capsule"><span class="seg-shape shape-capsule"></span>胶囊表</button>
+          <button data-d="rw6"><span class="seg-shape shape-rw6"></span>红米 Watch 6</button>
+        </div>
       </div>
       <span class="picker-hint" id="pickerHint"></span>
     </div>
@@ -285,17 +450,18 @@ footer .fine{font-size:12px;color:#9a9aa0;line-height:1.7;margin-top:18px}
     <div class="empty card" id="deviceEmpty" style="display:none">
       <h3>这个版本暂无</h3>
       <p id="deviceEmptyText"></p>
-      <button class="btn btn-blue" id="deviceEmptyBtn" data-spring>换完整版看看</button>
+      <button class="btn btn-blue" id="deviceEmptyBtn" data-spring>查看完整版</button>
+      <button class="btn btn-link" data-menu="watch" data-spring style="margin-top:8px">更换机型 &gt;</button>
     </div>
   </div>
 </section>
 
-<!-- ================= ALL GAMES: browse only, grouped by type ================= -->
+<!-- ================= ALL GAMES ================= -->
 <section class="view" id="view-games">
   <div class="section">
     <div class="section-head">
       <h2>全部游戏</h2>
-      <p>共 4 款。先挑喜欢的故事，再按你的表去下载。</p>
+      <p>共 4 款。选择你喜欢的故事。</p>
     </div>
     <div class="group-label">长篇恋爱</div>
     <div class="game-grid" id="gamesLong"></div>
@@ -307,13 +473,13 @@ footer .fine{font-size:12px;color:#9a9aa0;line-height:1.7;margin-top:18px}
 <!-- ================= INSTALL ================= -->
 <section class="view" id="view-install">
   <div class="section">
-    <div class="section-head"><h2>安装方法</h2><p>三步装好。装之前先对一下字节数，下载很容易断。</p></div>
+    <div class="section-head"><h2>安装方法</h2><p>三步完成安装。开始之前，请核对文件大小。</p></div>
     <div class="steps">
-      <div class="step card" data-reveal><div class="num">1</div><h4>先停小米运动健康</h4><p>装机前先停掉小米运动健康，再打开 AstroBox，不然装不上。</p></div>
-      <div class="step card" data-reveal><div class="num">2</div><h4>AstroBox 安装</h4><p>在 AstroBox 里选择下载好的 .rpk / .bin 文件，安装到手环 / 手表上。</p></div>
-      <div class="step card" data-reveal><div class="num">3</div><h4>看版本号确认</h4><p>装好后看主界面左下角的版本号，对上就说明装的是这个版本。</p></div>
+      <div class="step card" data-reveal><div class="num">1</div><h4>停用小米运动健康</h4><p>安装前，请停用小米运动健康，然后打开 AstroBox。</p></div>
+      <div class="step card" data-reveal><div class="num">2</div><h4>使用 AstroBox 安装</h4><p>在 AstroBox 中选择已下载的 .rpk / .bin 文件，安装至手环或手表。</p></div>
+      <div class="step card" data-reveal><div class="num">3</div><h4>核对版本号</h4><p>安装完成后，查看主界面左下角的版本号。</p></div>
     </div>
-    <div class="warn" data-reveal>⚠️ 下载经常在 10.3 MB 左右断掉，装之前务必核对文件大小（字节数）和 MD5，对不上就重新下。不要装一半的文件，装到 100% 黑屏过。</div>
+    <div class="warn" data-reveal>下载可能在 10.3 MB 左右中断。安装前请核对文件大小与 MD5；如不一致，请重新下载。切勿安装未下载完整的文件。</div>
   </div>
 </section>
 
@@ -322,12 +488,12 @@ footer .fine{font-size:12px;color:#9a9aa0;line-height:1.7;margin-top:18px}
   <div class="section">
     <div class="section-head"><h2>常见问题</h2><p>点一下展开。</p></div>
     <div class="faq">
-      <details class="faq-item card" data-reveal><summary>干净版和完整版有什么区别？<span class="chev">▼</span></summary><div class="a">干净版删掉了成人剧情和成人 CG，可以公开分享；完整版是全内容，适合自己玩。少 HCG 版只删了成人图，成人文字还在。</div></details>
-      <details class="faq-item card" data-reveal><summary>我的表该下哪个？<span class="chev">▼</span></summary><div class="a">按形状选：长表是手环 9 Pro（336×480）和手环 10 Pro（480×336）；圆表是小米手表 S3 / S4 / S5（466×466）；胶囊表是小米手环 8 / 9 / 10 / 11（192×490）；红米 Watch 5 / 6（432×514）单独选。9 Pro 和 10 Pro 屏幕一样，用同一个包。</div></details>
-      <details class="faq-item card" data-reveal><summary>下载完了怎么核对？<span class="chev">▼</span></summary><div class="a">看文件大小（字节数）跟页面上写的是不是一模一样，点一下 MD5 那行可以复制完整 MD5 去对。大小对不上就是下载断了，重新下。</div></details>
-      <details class="faq-item card" data-reveal><summary>装到 100% 失败 / 黑屏怎么办？<span class="chev">▼</span></summary><div class="a">先核对大小和 MD5，大概率是文件下断了。确认文件完整还失败的话，先停掉小米运动健康再装一次，不要连续重装。</div></details>
-      <details class="faq-item card" data-reveal><summary>干净版的旧存档还能用吗？<span class="chev">▼</span></summary><div class="a">不能。干净版删了剧情，行号全变了，旧存档会错乱，装干净版之前先把旧存档删掉重开。</div></details>
-      <details class="faq-item card" data-reveal><summary>谜语小丑怎么没有？<span class="chev">▼</span></summary><div class="a">暂时不上这个站。想玩的话加 QQ 群问作者。</div></details>
+      <details class="faq-item card" data-reveal><summary>干净版和完整版有什么区别？<span class="chev">▼</span></summary><div class="a">干净版已移除成人剧情与成人 CG，仅保留全年龄内容；完整版包含全部内容。少 HCG 版仅移除成人图片，文字内容保持不变。</div></details>
+      <details class="faq-item card" data-reveal><summary>我的手表应该下载哪个版本？<span class="chev">▼</span></summary><div class="a">按形状选择：长表为手环 9 Pro（336×480）与手环 10 Pro（480×336）；圆表为小米手表 S3 / S4 / S5（466×466）；胶囊表为小米手环 8 / 9 / 10 / 11（192×490）；红米 Watch 5 / 6（432×514）单独选择。9 Pro 与 10 Pro 屏幕相同，共用同一安装包。</div></details>
+      <details class="faq-item card" data-reveal><summary>下载完成后如何核对？<span class="chev">▼</span></summary><div class="a">请核对文件大小（字节数）是否与页面标注一致；轻点 MD5 可复制完整值进行比对。如大小不符，说明下载已中断，请重新下载。</div></details>
+      <details class="faq-item card" data-reveal><summary>装到 100% 失败 / 黑屏怎么办？<span class="chev">▼</span></summary><div class="a">请先核对文件大小与 MD5，多数情况下是文件未下载完整。确认文件完整后仍失败，请停用小米运动健康后重新安装；请勿连续重复安装。</div></details>
+      <details class="faq-item card" data-reveal><summary>干净版可以使用旧存档吗？<span class="chev">▼</span></summary><div class="a">不能。干净版删除了部分剧情，旧存档将失效；安装干净版前，请删除旧存档并重新开始。</div></details>
+      <details class="faq-item card" data-reveal><summary>为什么没有谜语小丑？<span class="chev">▼</span></summary><div class="a">暂未上架本站。如需了解，请加入 QQ 群咨询作者。</div></details>
     </div>
   </div>
 </section>
@@ -336,20 +502,51 @@ footer .fine{font-size:12px;color:#9a9aa0;line-height:1.7;margin-top:18px}
 <section class="view" id="view-about">
   <div class="section">
     <div class="section-head"><h2>关于</h2><p>免费移植，仅供个人学习交流。</p></div>
-    <div class="contact glass" data-reveal>
-      <h3>找作者</h3>
-      <p>有问题、想催更、或者想玩别的游戏，都可以来群里说。</p>
-      <div class="qq" id="qqCopy" title="点一下复制群号">QQ 群 590248751 <small>点一下复制</small></div>
+    <div class="contact card" data-reveal>
+      <h3>联系作者</h3>
+      <p>如有问题、更新建议，或希望移植其他游戏，欢迎加入 QQ 群。</p>
+      <div class="qq" id="qqCopy" data-spring title="点一下复制群号">QQ 群 590248751 <small>点一下复制</small></div>
       <p class="author">作者：<b>等我刷个美咕噜</b> · 引擎作者：<b>hezdaaa</b></p>
     </div>
   </div>
 </section>
 
 <footer>
-  <p>QQ 群：590248751 · 作者：等我刷个美咕噜 · 引擎作者：hezdaaa</p>
-  <p>星光咖啡馆与死神之蝶 © YuzuSoft · 片轮少女 © Four Leaf Studios · 水仙 © stage-nana · 心跳文学部 © Team Salvato</p>
+  <div class="f-grid">
+    <div><h5>联系</h5><p>QQ 群：590248751</p><p>作者：等我刷个美咕噜</p><p>引擎作者：hezdaaa</p></div>
+    <div><h5>原作</h5><p>星光咖啡馆与死神之蝶 © YuzuSoft</p><p>片轮少女 © Four Leaf Studios</p><p>水仙 © stage-nana</p><p>心跳文学部 © Team Salvato</p></div>
+    <div><h5>更多</h5><p><a href="#" data-go="install">安装方法</a></p><p><a href="#" data-go="faq">常见问题</a></p><p><a href="#" data-go="about">关于作者</a></p></div>
+  </div>
   <p class="fine">本移植仅供个人学习交流，与 AstroBox、小米及其他设备厂商无关。原作版权归各自权利方所有。如有问题，加 QQ 群 590248751。</p>
 </footer>
+
+<!-- 导航菜单（手机） -->
+<div class="menu-overlay" id="navMenu" aria-hidden="true">
+  <div class="menu-card" role="dialog" aria-label="导航">
+    <div class="menu-head"><h3>导航</h3><button class="menu-close" data-close-nav aria-label="关闭">✕</button></div>
+    <p class="menu-sub">所有页面，尽在此处。</p>
+    <button class="menu-row" data-go="home" data-spring><span class="menu-text"><b>首页</b><small>按你的表选</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="long" data-spring><span class="menu-text"><b>长表</b><small>手环 9 Pro · 10 Pro</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="round" data-spring><span class="menu-text"><b>圆表</b><small>小米手表 S3 / S4 / S5</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="capsule" data-spring><span class="menu-text"><b>胶囊表</b><small>手环 8 / 9 / 10 / 11</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="rw6" data-spring><span class="menu-text"><b>红米 Watch 6</b><small>红米 Watch 5 / 6</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="games" data-spring><span class="menu-text"><b>全部游戏</b><small>长篇恋爱 · 短篇</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="install" data-spring><span class="menu-text"><b>安装方法</b><small>三步装好</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="faq" data-spring><span class="menu-text"><b>常见问题</b><small>干净版 / 核对 / 黑屏</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="about" data-spring><span class="menu-text"><b>关于作者</b><small>QQ 群 590248751</small></span><span class="menu-arrow">›</span></button>
+  </div>
+</div>
+<!-- 选表菜单 -->
+<div class="menu-overlay" id="watchMenu" aria-hidden="true">
+  <div class="menu-card" role="dialog" aria-label="选择你的手表">
+    <div class="menu-head"><h3>选择你的手表</h3><button class="menu-close" data-close-menu aria-label="关闭">✕</button></div>
+    <p class="menu-sub">选择一款手表，仅查看适配的游戏。</p>
+    <button class="menu-row" data-go="long" data-spring><span class="menu-shape shape-long"></span><span class="menu-text"><b>长表</b><small>手环 9 Pro · 10 Pro · 336 × 480</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="round" data-spring><span class="menu-shape shape-round"></span><span class="menu-text"><b>圆表</b><small>小米手表 S3 / S4 / S5 · 466 × 466</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="capsule" data-spring><span class="menu-shape shape-capsule"></span><span class="menu-text"><b>胶囊表</b><small>手环 8 / 9 / 10 / 11 · 192 × 490</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="rw6" data-spring><span class="menu-shape shape-rw6"></span><span class="menu-text"><b>红米 Watch 6</b><small>红米 Watch 5 / 6 · 432 × 514</small></span><span class="menu-arrow">›</span></button>
+  </div>
+</div>
 </main>
 <button class="fab" id="fabBtn" aria-label="回到顶部" data-spring>↑</button>
 
@@ -404,7 +601,7 @@ var GAMES = [
 function mb(bytes){ return (bytes / 1048576).toFixed(1) + " MB"; }
 function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
-/* ---- tiny spring engine: real spring physics, interruptible ---- */
+/* ---- spring engine (reduced, no big bounce; scale spring starts at 1) ---- */
 (function(){
   "use strict";
   var raf = window.requestAnimationFrame.bind(window);
@@ -433,47 +630,115 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     if (!running){ running = true; raf(tick); }
   };
   function makeTransform(el, k, c){
-    var st = { y: 0, s: 1 };
+    if (el._ctl) return el._ctl;
+    var st = { y: 0, s: 1, rx: 0, ry: 0 };
     var sy = new Spring(function(v){ st.y = v; paint(); }, k, c);
     var ss = new Spring(function(v){ st.s = v; paint(); }, k, c);
-    function paint(){ el.style.transform = "translateY(" + st.y.toFixed(2) + "px) scale(" + st.s.toFixed(4) + ")"; }
-    return { setY: function(t, from){ sy.go(t, from); }, setS: function(t, from){ ss.go(t, from); } };
+    ss.x = 1; ss.t = 1;
+    var srx = new Spring(function(v){ st.rx = v; paint(); }, 200, 28);
+    var sry = new Spring(function(v){ st.ry = v; paint(); }, 200, 28);
+    function paint(){ el.style.transform = "translateY(" + st.y.toFixed(2) + "px) scale(" + st.s.toFixed(4) + ") rotateX(" + st.rx.toFixed(2) + "deg) rotateY(" + st.ry.toFixed(2) + "deg)"; }
+    var ctl = { setY: function(t, from){ sy.go(t, from); }, setS: function(t, from){ ss.go(t, from); },
+      setRX: function(t){ srx.go(t); }, setRY: function(t){ sry.go(t); } };
+    el._ctl = ctl;
+    return ctl;
+  }
+  /* 液态玻璃跟手高光：手指/鼠标到哪，高光跟到哪 */
+  document.addEventListener("pointermove", function(e){
+    var t = e.target.closest ? e.target.closest(".card,.cat,.picker,.menu-card,.menu-row,.step,.faq-item,.contact,.seg,.fab,.hero-gallery figure,.nav,.btn,.theme-btn,.nav-menu-btn,.back,.menu-close,.game") : null;
+    if (!t) return;
+    var r = t.getBoundingClientRect();
+    t.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100).toFixed(1) + "%");
+    t.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100).toFixed(1) + "%");
+  }, { passive: true });
+  function bindTilt(root){
+    if (!window.matchMedia("(pointer:fine)").matches) return;
+    (root || document).querySelectorAll("[data-tilt], .game, .step, .faq-item").forEach(function(el){
+      if (el._tilt) return; el._tilt = true;
+      var ctl = makeTransform(el, 200, 28);
+      el.addEventListener("pointermove", function(e){
+        var r = el.getBoundingClientRect();
+        var dx = (e.clientX - r.left) / r.width - 0.5;
+        var dy = (e.clientY - r.top) / r.height - 0.5;
+        ctl.setRY(dx * 3); ctl.setRX(-dy * 3);
+      });
+      ["pointerleave","pointercancel"].forEach(function(ev){
+        el.addEventListener(ev, function(){ ctl.setRX(0); ctl.setRY(0); });
+      });
+    });
   }
   var io = new IntersectionObserver(function(entries){
     entries.forEach(function(en){
       if (!en.isIntersecting) return;
       var el = en.target; io.unobserve(el);
-      if (el._spring) el._spring.setY(0);
-      var op = new Spring(function(v){ el.style.opacity = v.toFixed(3); }, 120, 20);
-      op.go(1, 0);
+      var delay = el._delay || 0;
+      setTimeout(function(){
+        if (el._spring) el._spring.setY(0);
+        var op = new Spring(function(v){ el.style.opacity = v.toFixed(3); }, 140, 26);
+        op.go(1, 0);
+      }, delay);
     });
   }, { threshold: 0.12 });
   function armReveal(root){
-    (root || document).querySelectorAll("[data-reveal]").forEach(function(el){
+    (root || document).querySelectorAll(".section-head, footer p").forEach(function(el){
+      if (!el.hasAttribute("data-reveal")) el.setAttribute("data-reveal", "");
+    });
+    var list = (root || document).querySelectorAll("[data-reveal]");
+    list.forEach(function(el, i){
       if (el._spring) return;
-      var ctl = makeTransform(el, 150, 20);
-      el._spring = ctl; ctl.setY(26, 26); el.style.opacity = "0"; io.observe(el);
+      el._delay = (i % 4) * 50;
+      var ctl = makeTransform(el, 170, 26);
+      el._spring = ctl; ctl.setY(14, 14); el.style.opacity = "0"; io.observe(el);
     });
   }
   function bindPress(root){
+    (root || document).querySelectorAll("button, a.dl-btn, a.btn, summary, .nav-logo, .qq, .game, .step, .faq-item, .hero-gallery figure, .contact, .menu-row, .cat").forEach(function(el){
+      if (!el.hasAttribute("data-spring")) el.setAttribute("data-spring", "");
+    });
     (root || document).querySelectorAll("[data-spring]").forEach(function(el){
       if (el._press) return; el._press = true;
-      var ctl = makeTransform(el, 260, 18);
-      el.addEventListener("pointerdown", function(){ ctl.setS(0.93); });
+      var ctl = makeTransform(el, 220, 28);
+      el.addEventListener("pointerdown", function(e){ if (e.target.closest && e.target.closest("[data-spring]") !== el) return; ctl.setS(0.97); });
       ["pointerup","pointerleave","pointercancel"].forEach(function(ev){
         el.addEventListener(ev, function(){ ctl.setS(1); });
       });
     });
+    bindTilt(root);
+  }
+  function animateIn(root){
+    var cards = (root || document).querySelectorAll(".game,.cat,.step,.faq-item,.section-head,.device-head,.picker,.group-label,.contact,.home-note,.missing,.empty,.hero-gallery figure,.menu-row,.menu-head,.menu-sub");
+    cards.forEach(function(el, i){
+      var ctl = makeTransform(el, 170, 26);
+      el.style.opacity = "0";
+      setTimeout(function(){
+        ctl.setY(0, 12);
+        var op = new Spring(function(v){ el.style.opacity = v.toFixed(3); }, 140, 26);
+        op.go(1, 0);
+      }, i * 50);
+    });
   }
 
-  /* ---- state: version remembered, device is the page itself ---- */
-  var state = { version: "clean", device: "long" };
+  /* 逻辑：机型一旦选好就记下来，不再反复问。默认 long 只是占位，未选之前不算已选。 */
+  var state = { version: "clean", device: "long", chosen: false };
   try {
     var saved = JSON.parse(localStorage.getItem("migulu-picker") || "{}");
     if (saved.version === "clean" || saved.version === "full") state.version = saved.version;
+    if (saved.device && DEVICES[saved.device]){ state.device = saved.device; state.chosen = true; }
   } catch(e){}
+  function savePicker(){ try { localStorage.setItem("migulu-picker", JSON.stringify({ version: state.version, device: state.device })); } catch(e){} }
+  function updateHeroCurrent(){
+    var el = document.getElementById("heroCurrent");
+    var btn = document.getElementById("heroPickBtn");
+    if (!el) return;
+    if (state.chosen){
+      el.textContent = "已选：" + DEVICES[state.device].name + " · " + DEVICES[state.device].sub;
+      if (btn) btn.textContent = "更换手表";
+    } else {
+      el.textContent = "请选择你的手表";
+      if (btn) btn.textContent = "选择你的手表";
+    }
+  }
 
-  /* ---- view switching: one page at a time, never stacked ---- */
   var VIEWS = { home: "view-home", device: "view-device", games: "view-games", install: "view-install", faq: "view-faq", about: "view-about" };
   function showView(key, device){
     Object.keys(VIEWS).forEach(function(k){
@@ -483,21 +748,36 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
       var nav = b.getAttribute("data-nav");
       b.classList.toggle("on", nav === key || (key === "device" && nav === device) || (key === "home" && nav === "home"));
     });
-    if (key === "device" && device){ state.device = device; renderDevice(); }
+    if (key === "device" && device){ state.device = device; state.chosen = true; savePicker(); renderDevice(); }
+    if (key === "home"){ updateHeroCurrent(); }
     if (key === "games"){ renderGames(); }
-    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+    window.scrollTo({ top: 0 });
     armReveal(document.getElementById(VIEWS[key]));
     bindPress(document.getElementById(VIEWS[key]));
+    animateIn(document.getElementById(VIEWS[key]));
   }
+
+  var watchMenu = document.getElementById("watchMenu");
+  var navMenu = document.getElementById("navMenu");
+  function openMenu(){ if (watchMenu){ watchMenu.classList.add("open"); watchMenu.setAttribute("aria-hidden", "false"); animateIn(watchMenu); bindPress(watchMenu); } }
+  function closeMenu(){ if (watchMenu){ watchMenu.classList.remove("open"); watchMenu.setAttribute("aria-hidden", "true"); } }
+  function openNav(){ if (navMenu){ navMenu.classList.add("open"); navMenu.setAttribute("aria-hidden", "false"); animateIn(navMenu); bindPress(navMenu); } }
+  function closeNav(){ if (navMenu){ navMenu.classList.remove("open"); navMenu.setAttribute("aria-hidden", "true"); } }
   document.addEventListener("click", function(e){
+    if (e.target.closest("#navMenuBtn")){ openNav(); return; }
+    if (e.target.closest("[data-close-nav]") || e.target === navMenu){ closeNav(); return; }
+    if (e.target.closest("[data-menu='watch']")){ openMenu(); return; }
+    if (e.target.closest("[data-close-menu]") || e.target === watchMenu){ closeMenu(); return; }
     var t = e.target.closest("[data-go]");
     if (!t) return;
+    if (t.tagName === "A") e.preventDefault();
+    closeMenu(); closeNav();
     var go = t.getAttribute("data-go");
     if (DEVICES[go]){ showView("device", go); }
     else { showView(go); }
   });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape"){ closeMenu(); closeNav(); } });
 
-  /* ---- device page: one card per game, one main download button ---- */
   function matchingFiles(game, device, version){
     return game.files.filter(function(f){
       return f.d === device && (f.v === "all" || f.v === version);
@@ -505,13 +785,26 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
   }
   function cardHTML(game, files, browse){
     var coverStyle = game.id === "ddlc" ? ' style="object-fit:contain;background:#fff;padding:24px"' : "";
-    var html = '<article class="game card"><div class="game-cover"><img src="' + game.cover + '" alt="' + esc(game.title) + ' 封面" loading="lazy"' + coverStyle + '></div><div class="game-body">';
+    var html = '<article class="game card" data-tilt data-spring><div class="game-cover"><img src="' + game.cover + '" alt="' + esc(game.title) + ' 封面" loading="lazy"' + coverStyle + '></div><div class="game-body">';
     html += '<h3>' + esc(game.title) + '</h3><div class="en">' + esc(game.en) + '</div><p class="desc">' + esc(game.desc) + '</p><div class="meta">' + esc(game.meta) + '</div>';
     if (browse){
       var avail = [];
       game.files.forEach(function(f){ if (avail.indexOf(DEVICE_LABEL[f.d]) === -1) avail.push(DEVICE_LABEL[f.d]); });
       html += '<div class="dl-main"><div class="dl-label">可装机型</div><div class="dl-size">' + avail.join(" · ") + '</div>';
-      html += '<button class="dl-btn" data-go="' + firstDevice(game) + '" data-spring>去选机型下载</button></div>';
+      if (!state.chosen){
+        html += '<button class="dl-btn" data-menu="watch" data-spring>选择机型下载</button></div>';
+      } else {
+        var cur = matchingFiles(game, state.device, state.version);
+        if (cur.length){
+          var cm = cur[0];
+          html += '<div class="dl-label" style="margin-top:10px">' + esc(cm.label) + '</div><div class="dl-size">' + mb(cm.bytes) + ' · ' + cm.bytes.toLocaleString("en-US") + ' 字节</div>';
+          html += '<a class="dl-btn" data-spring href="' + cm.file + '" download>下载</a>';
+          html += '<div style="text-align:center;margin-top:10px"><button style="border:none;background:none;cursor:pointer;color:var(--blue);font-size:14px" data-menu="watch" data-spring>更换机型 ›</button></div></div>';
+        } else {
+          html += '<button class="dl-btn" disabled>暂无' + DEVICE_LABEL[state.device] + '版</button>';
+          html += '<div style="text-align:center;margin-top:10px"><button style="border:none;background:none;cursor:pointer;color:var(--blue);font-size:14px" data-menu="watch" data-spring>选择其他机型 ›</button></div></div>';
+        }
+      }
     } else if (files.length === 0){
       html += '<div class="dl-main"><button class="dl-btn" disabled>暂无此版本</button></div>';
     } else {
@@ -528,9 +821,7 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     html += '</div></article>';
     return html;
   }
-  function firstDevice(game){
-    return game.files[0].d;
-  }
+  function firstDevice(game){ return game.files[0].d; }
   function renderDevice(){
     var d = DEVICES[state.device];
     document.getElementById("deviceTitle").textContent = d.name;
@@ -539,6 +830,9 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     var seg = document.getElementById("segVersion");
     seg.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-v") === state.version); });
     moveIndicator(seg);
+    var segD = document.getElementById("segDevice");
+    segD.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-d") === state.device); });
+    moveIndicator(segD);
     var grid = document.getElementById("deviceGrid");
     var html = "", missing = [];
     GAMES.forEach(function(g){
@@ -552,15 +846,15 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     if (!html){
       empty.style.display = "block";
       document.getElementById("deviceEmptyText").textContent = d.name + "暂无" + (state.version === "clean" ? "干净版" : "完整版") + "，换个版本试试。";
-      document.getElementById("deviceEmptyBtn").textContent = state.version === "clean" ? "换完整版看看" : "换干净版看看";
+      document.getElementById("deviceEmptyBtn").textContent = state.version === "clean" ? "查看完整版" : "查看干净版";
     } else { empty.style.display = "none"; }
     if (missing.length && html){
       missEl.style.display = "block";
       missEl.innerHTML = "这个机型暂时没有：<b>" + missing.map(function(g){ return esc(g.title); }).join("、") + "</b>，去" +
         (state.device === "long" ? '<button data-go="round">圆表 ›</button> 或 <button data-go="capsule">胶囊表 ›</button>' : '<button data-go="home">看看其他机型 ›</button>') + "下载。";
     } else { missEl.style.display = "none"; }
-    bindPress(grid); bindMD5(grid);
-    try { localStorage.setItem("migulu-picker", JSON.stringify({ version: state.version })); } catch(e){}
+    bindPress(grid); bindPress(missEl); bindMD5(grid); animateIn(grid);
+    savePicker();
   }
   function renderGames(){
     var longHtml = "", shortHtml = "";
@@ -571,14 +865,27 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     document.getElementById("gamesLong").innerHTML = longHtml;
     document.getElementById("gamesShort").innerHTML = shortHtml;
     bindPress(document.getElementById("view-games"));
+    animateIn(document.getElementById("view-games"));
   }
   function moveIndicator(seg){
     var ind = seg.querySelector(".seg-ind");
     var on = seg.querySelector("button.on");
     if (!ind || !on) return;
-    ind.style.width = on.offsetWidth + "px";
-    ind.style.transform = "translateX(" + (on.offsetLeft - 3) + "px)";
+    var tx = on.offsetLeft - 3, tw = on.offsetWidth;
+    if (!seg._sx){
+      seg._sx = new Spring(function(v){ ind.style.transform = "translateX(" + v.toFixed(2) + "px)"; }, 220, 30);
+      seg._sw = new Spring(function(v){ ind.style.width = v.toFixed(2) + "px"; }, 220, 30);
+      seg._sx.go(tx, tx); seg._sw.go(tw, tw);
+      return;
+    }
+    seg._sx.go(tx); seg._sw.go(tw);
   }
+  document.getElementById("segDevice").querySelectorAll("button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var d = btn.getAttribute("data-d");
+      if (d && d !== state.device){ showView("device", d); }
+    });
+  });
   document.getElementById("segVersion").querySelectorAll("button").forEach(function(btn){
     btn.addEventListener("click", function(){
       document.getElementById("segVersion").querySelectorAll("button").forEach(function(b){ b.classList.remove("on"); });
@@ -592,9 +899,8 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     state.version = state.version === "clean" ? "full" : "clean";
     renderDevice();
   });
-  window.addEventListener("resize", function(){ moveIndicator(document.getElementById("segVersion")); });
+  window.addEventListener("resize", function(){ moveIndicator(document.getElementById("segVersion")); moveIndicator(document.getElementById("segDevice")); });
 
-  /* ---- click MD5 to copy ---- */
   function bindMD5(root){
     (root || document).querySelectorAll(".dl-other .md5[data-md5]").forEach(function(el){
       if (el._bound) return; el._bound = true;
@@ -611,12 +917,28 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     });
   }
 
-  /* ---- back to top ---- */
+  /* Hero 渐进：滚动时轻轻收缩淡出（苹果产品页做法） */
+  var heroIn = document.getElementById("heroIn");
+  var heroScale = 1, heroTarget = 1, heroOp = 1, heroOpTarget = 1, heroTicking = false;
+  function heroFrame(){
+    heroTicking = false;
+    heroScale += (heroTarget - heroScale) * 0.12;
+    heroOp += (heroOpTarget - heroOp) * 0.12;
+    if (heroIn){ heroIn.style.transform = "scale(" + heroScale.toFixed(4) + ")"; heroIn.style.opacity = heroOp.toFixed(3); }
+    if (Math.abs(heroTarget - heroScale) > 0.0005 || Math.abs(heroOpTarget - heroOp) > 0.0005){ heroTicking = true; raf(heroFrame); }
+  }
   var fab = document.getElementById("fabBtn");
   fab.addEventListener("click", function(){ window.scrollTo({ top: 0, behavior: "smooth" }); });
-  window.addEventListener("scroll", function(){ fab.classList.toggle("show", (window.scrollY || 0) > 600); }, { passive: true });
+  window.addEventListener("scroll", function(){
+    var y = window.scrollY || 0;
+    fab.classList.toggle("show", y > 600);
+    if (document.getElementById("view-home").classList.contains("on")){
+      var p = Math.min(y / 420, 1);
+      heroTarget = 1 - p * 0.06; heroOpTarget = 1 - p * 0.4;
+      if (!heroTicking){ heroTicking = true; raf(heroFrame); }
+    }
+  }, { passive: true });
 
-  /* ---- dark mode ---- */
   var themeBtn = document.getElementById("themeBtn");
   var savedTheme = null;
   try { savedTheme = localStorage.getItem("migulu-theme"); } catch(e){}
@@ -627,7 +949,6 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     else { document.documentElement.setAttribute("data-theme", "dark"); themeBtn.textContent = "浅色"; try { localStorage.setItem("migulu-theme", "dark"); } catch(e){} }
   });
 
-  /* ---- click QQ number to copy ---- */
   var qq = document.getElementById("qqCopy");
   if (qq){
     qq.addEventListener("click", function(){
@@ -644,6 +965,8 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
   armReveal(document);
   bindPress(document);
   renderGames();
+  updateHeroCurrent();
+  animateIn(document.getElementById("view-home"));
 })();
 </script>
 </body>
