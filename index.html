@@ -4,24 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>美咕噜的游戏 · 小米手环 / 手表 GALGAME 移植下载</title>
-<meta name="description" content="美咕噜移植的免费 GALGAME：星光咖啡馆与死神之蝶、片轮少女、水仙、心跳文学部。选版本、选机型，免费下载。适配小米手环 9 Pro、手表 S3/S4/S5、手环 8/9/10/11、红米 Watch 6。">
+<meta name="description" content="美咕噜移植的免费 GALGAME：星光咖啡馆与死神之蝶、片轮少女、水仙、心跳文学部。先选你的表，再下载。适配手环 9 Pro / 10 Pro、手表 S3/S4/S5、手环 8/9/10/11、红米 Watch 6。">
 <style>
 :root{
   --bg:#f5f5f7; --ink:#1d1d1f; --ink2:#6e6e73; --ink3:#3a3a3e;
   --line:rgba(0,0,0,.08);
-  --accent:#f975b0; --accent-deep:#e85a9a; --blue:#0071e3;
-  --glass:rgba(255,255,255,.55); --glass-brd:rgba(255,255,255,.75);
-  --glass-dark:rgba(20,20,28,.45); --glass-dark-brd:rgba(255,255,255,.16);
-  --row-bg:rgba(255,255,255,.6); --row-brd:rgba(255,255,255,.85);
+  --accent:#f975b0; --blue:#0071e3; --blue-deep:#0077ed;
+  --glass:rgba(255,255,255,.62); --glass-brd:rgba(255,255,255,.8);
+  --card:#fff;
   --seg-bg:rgba(0,0,0,.06);
   --r-lg:28px; --r-md:20px; --r-sm:14px;
-  --shadow:0 20px 50px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.06);
+  --shadow:0 20px 50px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.05);
 }
 [data-theme="dark"]{
   --bg:#000; --ink:#f5f5f7; --ink2:#a1a1a6; --ink3:#d7d7db;
   --line:rgba(255,255,255,.12);
-  --glass:rgba(28,28,34,.55); --glass-brd:rgba(255,255,255,.16);
-  --row-bg:rgba(255,255,255,.07); --row-brd:rgba(255,255,255,.12);
+  --glass:rgba(28,28,34,.6); --glass-brd:rgba(255,255,255,.16);
+  --card:#1c1c1e;
   --seg-bg:rgba(255,255,255,.1);
   --shadow:0 20px 50px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.4);
 }
@@ -34,392 +33,382 @@ body{
 }
 a{color:var(--blue);text-decoration:none}
 img{display:block;max-width:100%}
-.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+.wrap{max-width:1020px;margin:0 auto;padding:0 22px}
+.view{display:none}
+.view.on{display:block;animation:fadein .35s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-/* ---------- liquid glass: specular top light + blur + edge ---------- */
+/* ---------- liquid glass (subtle, Apple-like) ---------- */
 .glass{
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 28%),
-    var(--glass);
+  background:linear-gradient(180deg, rgba(255,255,255,.32), rgba(255,255,255,0) 30%), var(--glass);
   -webkit-backdrop-filter:blur(24px) saturate(200%);
   backdrop-filter:blur(24px) saturate(200%);
   border:1px solid var(--glass-brd);
-  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.55);
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.5);
 }
-.glass-dark{
-  background:var(--glass-dark);
-  -webkit-backdrop-filter:blur(24px) saturate(170%);
-  backdrop-filter:blur(24px) saturate(170%);
-  border:1px solid var(--glass-dark-brd);
-  box-shadow:0 20px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.16);
-}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:0 8px 30px rgba(0,0,0,.05);overflow:hidden}
 
-/* ---------- nav ---------- */
+/* ---------- nav: Apple-like, one line, categories only ---------- */
 .nav{
   position:sticky; top:0; z-index:50;
-  background:color-mix(in srgb, var(--bg) 68%, transparent);
+  background:color-mix(in srgb, var(--bg) 72%, transparent);
   -webkit-backdrop-filter:blur(20px) saturate(180%);
   backdrop-filter:blur(20px) saturate(180%);
   border-bottom:1px solid var(--line);
 }
-.nav-in{max-width:1080px;margin:0 auto;padding:0 22px;height:52px;display:flex;align-items:center;gap:26px}
-.nav-logo{font-weight:700;font-size:17px;letter-spacing:.02em;color:var(--ink)}
-.nav-logo b{color:var(--accent-deep)}
-.nav-links{display:flex;gap:22px;margin-left:auto}
-.nav-links a{color:var(--ink);font-size:14px;opacity:.85}
-.nav-links a:hover{opacity:1}
+.nav-in{max-width:1020px;margin:0 auto;padding:0 22px;height:52px;display:flex;align-items:center;gap:4px}
+.nav-logo{font-weight:700;font-size:17px;color:var(--ink);margin-right:14px;white-space:nowrap;cursor:pointer}
+.nav-logo b{color:var(--accent)}
+.nav-links{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links button{
+  border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--ink);
+  opacity:.82;padding:8px 11px;border-radius:999px;white-space:nowrap;
+}
+.nav-links button:hover{opacity:1;background:rgba(127,127,127,.1)}
+.nav-links button.on{opacity:1;font-weight:700;background:rgba(127,127,127,.12)}
 .theme-btn{
   flex:none;cursor:pointer;border:1px solid var(--line);border-radius:999px;
-  background:var(--glass);color:var(--ink);font-size:13px;font-weight:600;
-  padding:6px 13px;will-change:transform;
+  background:var(--glass);color:var(--ink);font-size:13px;font-weight:600;padding:6px 12px;margin-left:8px;
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
 }
 
-/* ---------- hero ---------- */
-.hero{position:relative;overflow:hidden;color:#fff;background:#000;border-radius:0 0 40px 40px}
-.hero-bg{position:absolute;inset:0;overflow:hidden}
-.orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.75;will-change:transform}
-.orb-pink{width:520px;height:520px;background:#ff5fa2;top:-160px;left:-80px}
-.orb-blue{width:460px;height:460px;background:#3b82f6;bottom:-200px;right:-60px}
-.orb-violet{width:340px;height:340px;background:#8b5cf6;top:38%;left:56%}
-.hero-in{position:relative;max-width:1080px;margin:0 auto;padding:96px 22px 88px;text-align:center;will-change:transform,opacity}
-.eyebrow{font-size:15px;font-weight:600;letter-spacing:.14em;color:rgba(255,255,255,.75);text-transform:uppercase}
-.hero h1{font-size:clamp(40px,7.2vw,76px);line-height:1.08;font-weight:700;letter-spacing:-.02em;margin:18px 0 20px}
-.hero h1 .grad{background:linear-gradient(92deg,#ffd6e8 0%,#ff8fc0 38%,#a5c8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero p{font-size:clamp(16px,2.4vw,21px);color:rgba(255,255,255,.82);max-width:640px;margin:0 auto}
-.hero .byline{margin-top:16px;font-size:14px;color:rgba(255,255,255,.65)}
-.hero-cta{display:flex;gap:14px;justify-content:center;margin-top:30px;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:none;font-size:16px;font-weight:600;padding:13px 26px;border-radius:999px;will-change:transform;user-select:none}
-.btn-pink{background:linear-gradient(180deg,#ff8fc0,#f975b0);color:#fff;box-shadow:0 10px 28px rgba(249,117,176,.45), inset 0 1px 0 rgba(255,255,255,.5)}
-.btn-glass{color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
-.chips{display:flex;gap:10px;justify-content:center;margin-top:30px;flex-wrap:wrap}
-.chip{font-size:13px;color:rgba(255,255,255,.92);padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+/* ---------- hero: one headline, nothing else stacked ---------- */
+.hero{padding:88px 0 56px;text-align:center}
+.eyebrow{font-size:15px;font-weight:600;letter-spacing:.12em;color:var(--ink2);text-transform:uppercase}
+.hero h1{font-size:clamp(38px,7vw,68px);line-height:1.1;font-weight:700;letter-spacing:-.02em;margin:16px 0 18px}
+.hero h1 .grad{background:linear-gradient(92deg,#ff8fc0,#f975b0 45%,#5b8def);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:clamp(16px,2.4vw,20px);color:var(--ink2);max-width:560px;margin:0 auto}
+.hero .byline{margin-top:14px;font-size:14px;color:var(--ink2)}
+.hero-cta{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:none;font-size:16px;font-weight:600;padding:12px 26px;border-radius:999px;will-change:transform;user-select:none}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 8px 20px rgba(0,113,227,.3)}
+.btn-ghost{background:transparent;color:var(--blue);border:1px solid rgba(0,113,227,.35)}
 
-/* ---------- picker bar (sticky, Apple segmented control) ---------- */
-.picker{
-  position:sticky;top:52px;z-index:40;margin-top:26px;border-radius:var(--r-md);
-  padding:16px 18px;display:flex;flex-wrap:wrap;gap:18px;align-items:center;
+/* ---------- section titles: Apple style, left aligned, lots of air ---------- */
+.section{padding:44px 0 8px}
+.section-head{margin-bottom:22px}
+.section-head h2{font-size:clamp(26px,4vw,34px);font-weight:700;letter-spacing:-.02em}
+.section-head p{color:var(--ink2);font-size:16px;margin-top:6px}
+.group-label{font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--ink2);text-transform:uppercase;margin:34px 0 14px}
+
+/* ---------- device category cards (home only) ---------- */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cat{
+  cursor:pointer;text-align:left;border-radius:var(--r-lg);padding:26px 26px 22px;
+  display:flex;flex-direction:column;min-height:230px;will-change:transform;
 }
-.picker-group{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.picker-label{font-size:13px;font-weight:700;color:var(--ink2);letter-spacing:.04em}
+.cat:hover{box-shadow:0 24px 60px rgba(0,0,0,.12)}
+.cat-shape{height:96px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:18px}
+.shape{border-radius:18px;background:linear-gradient(180deg,#ffd6e8,#ff8fc0 55%,#e85a9a);box-shadow:0 14px 30px rgba(249,117,176,.35), inset 0 1px 0 rgba(255,255,255,.6)}
+.shape-long{width:56px;height:84px;border-radius:14px}
+.shape-round{width:84px;height:84px;border-radius:50%;background:linear-gradient(180deg,#bcd8ff,#5b8def 60%,#3b6fd4)}
+.shape-capsule{width:44px;height:92px;border-radius:999px;background:linear-gradient(180deg,#d9c8ff,#8b5cf6 60%,#6d3fd4)}
+.shape-rw6{width:64px;height:78px;border-radius:16px;background:linear-gradient(180deg,#ffe1a8,#f5a623 60%,#e8890c)}
+.cat h3{font-size:22px;font-weight:700}
+.cat p{color:var(--ink2);font-size:14px;margin-top:4px}
+.cat .go{margin-top:auto;padding-top:16px;font-size:15px;font-weight:600;color:var(--blue)}
+.home-note{text-align:center;color:var(--ink2);font-size:14px;margin:34px 0 8px}
+.home-links{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.home-links button{border:none;background:none;cursor:pointer;color:var(--blue);font-size:15px}
+
+/* ---------- device page ---------- */
+.back{border:none;background:none;cursor:pointer;color:var(--blue);font-size:15px;padding:0;margin-bottom:14px}
+.device-head{padding:26px 0 6px}
+.device-head h2{font-size:clamp(30px,5vw,44px);font-weight:700;letter-spacing:-.02em}
+.device-head p{color:var(--ink2);font-size:16px;margin-top:6px}
+.picker{margin:22px 0 6px;border-radius:var(--r-md);padding:14px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.picker-label{font-size:13px;font-weight:700;color:var(--ink2)}
 .seg{position:relative;display:inline-flex;background:var(--seg-bg);border-radius:999px;padding:3px}
-.seg-ind{
-  position:absolute;top:3px;bottom:3px;border-radius:999px;z-index:0;
-  background:linear-gradient(180deg,#fff,#f2f2f4);
-  box-shadow:0 2px 8px rgba(0,0,0,.14), inset 0 1px 0 #fff;
-  will-change:transform,width;
-}
+.seg-ind{position:absolute;top:3px;bottom:3px;border-radius:999px;z-index:0;background:linear-gradient(180deg,#fff,#f2f2f4);box-shadow:0 2px 8px rgba(0,0,0,.14), inset 0 1px 0 #fff;will-change:transform,width}
 [data-theme="dark"] .seg-ind{background:linear-gradient(180deg,#3a3a42,#2c2c32);box-shadow:0 2px 8px rgba(0,0,0,.5)}
-.seg button{
-  position:relative;z-index:1;border:none;background:transparent;cursor:pointer;
-  font-size:13.5px;font-weight:600;color:var(--ink2);padding:7px 15px;border-radius:999px;
-  white-space:nowrap;transition:color .2s ease;
-}
+.seg button{position:relative;z-index:1;border:none;background:transparent;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--ink2);padding:7px 15px;border-radius:999px;white-space:nowrap}
 .seg button.on{color:var(--ink)}
-.picker-count{margin-left:auto;font-size:13px;color:var(--ink2)}
+.picker-hint{margin-left:auto;font-size:13px;color:var(--ink2)}
 
-/* ---------- sections ---------- */
-.section{padding:64px 0 8px}
-.section-head{text-align:center;margin-bottom:36px}
-.section-head h2{font-size:clamp(30px,4.6vw,44px);font-weight:700;letter-spacing:-.02em}
-.section-head p{color:var(--ink2);font-size:17px;margin-top:10px}
+/* ---------- game cards: one per game, one download button ---------- */
+.game-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+.game{display:flex;flex-direction:column}
+.game-cover{aspect-ratio:16/9;overflow:hidden;background:#111}
+.game-cover img{width:100%;height:100%;object-fit:cover}
+.game-body{padding:22px 22px 20px;display:flex;flex-direction:column;flex:1}
+.game-body h3{font-size:21px;font-weight:700;letter-spacing:-.01em}
+.game-body .en{color:var(--ink2);font-size:12px;letter-spacing:.05em;margin-top:3px}
+.game-body .desc{color:var(--ink3);font-size:14.5px;margin:10px 0 14px}
+.meta{font-size:13px;color:var(--ink2);margin-bottom:16px}
+.dl-main{margin-top:auto}
+.dl-label{font-size:14px;font-weight:600}
+.dl-size{font-size:13px;color:var(--ink2);margin-top:2px}
+.dl-btn{
+  display:block;width:100%;text-align:center;cursor:pointer;border:none;margin-top:12px;
+  font-size:15px;font-weight:700;color:#fff;padding:11px 18px;border-radius:999px;
+  background:var(--blue);box-shadow:0 8px 20px rgba(0,113,227,.28);will-change:transform;
+}
+.dl-btn:disabled{background:#c7c7cc;box-shadow:none;cursor:default}
+.dl-btn.pink{background:linear-gradient(180deg,#ff8fc0,#f975b0);box-shadow:0 8px 20px rgba(249,117,176,.35)}
+.dl-other{margin-top:12px}
+.dl-other summary{cursor:pointer;font-size:13.5px;color:var(--blue);list-style:none}
+.dl-other summary::-webkit-details-marker{display:none}
+.dl-other .row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:13.5px}
+.dl-other .row:first-of-type{margin-top:8px}
+.dl-other .md5{font-size:12px;color:var(--ink2);cursor:pointer;margin-top:8px}
+.dl-other .md5:hover{color:var(--blue)}
+.missing{margin-top:20px;border-radius:var(--r-md);padding:18px 20px;font-size:14.5px;color:var(--ink2);background:rgba(127,127,127,.08)}
+.missing button{border:none;background:none;cursor:pointer;color:var(--blue);font-size:14.5px;padding:0}
+.empty{border-radius:var(--r-lg);padding:44px 24px;text-align:center;color:var(--ink2);margin-top:20px}
+.empty h3{color:var(--ink);font-size:20px;margin-bottom:8px}
+.empty button{margin-top:16px}
 
-/* ---------- game card ---------- */
-.game{border-radius:var(--r-lg);overflow:hidden;margin-bottom:34px;display:grid;grid-template-columns:1.05fr 1fr;min-height:340px}
-.game-cover{position:relative;overflow:hidden;background:#111;min-height:300px}
-.game-cover img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
-.game-cover .fade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.35))}
-.game-body{padding:34px 34px 30px;display:flex;flex-direction:column}
-.game-body h3{font-size:30px;font-weight:700;letter-spacing:-.01em}
-.game-body .en{color:var(--ink2);font-size:13px;letter-spacing:.08em;margin-top:2px;text-transform:uppercase}
-.game-body .desc{color:var(--ink3);font-size:16px;margin:14px 0 18px}
-.tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.tag{font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:999px;background:rgba(127,127,127,.14);color:var(--ink3)}
-.tag.hot{background:#ffe9f3;color:#d6336c}
-.dl-list{display:flex;flex-direction:column;gap:10px;margin-top:auto}
-.dl-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-sm);background:var(--row-bg);border:1px solid var(--row-brd);box-shadow:0 2px 10px rgba(0,0,0,.05)}
-.dl-row.hidden{display:none}
-.dl-info{flex:1;min-width:0}
-.dl-name{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dl-meta{font-size:12px;color:var(--ink2);margin-top:2px;cursor:pointer}
-.dl-meta:hover{color:var(--blue)}
-.dl-btn{flex:none;cursor:pointer;border:none;font-size:14px;font-weight:700;color:#fff;padding:9px 18px;border-radius:999px;background:linear-gradient(180deg,#ff8fc0,#f975b0);box-shadow:0 6px 16px rgba(249,117,176,.35), inset 0 1px 0 rgba(255,255,255,.5);will-change:transform}
-.dl-note{font-size:12.5px;color:var(--ink2);margin-top:14px}
-.empty-note{display:none;font-size:14px;color:var(--ink2);padding:18px;text-align:center;border-radius:var(--r-sm);background:var(--row-bg);border:1px dashed var(--line)}
-.empty-note.show{display:block}
-
-/* ---------- install ---------- */
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+/* ---------- install / faq / about: each its own page ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
 .step{border-radius:var(--r-md);padding:26px 24px}
-.step .num{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;background:linear-gradient(180deg,#ff8fc0,#f975b0);box-shadow:0 6px 16px rgba(249,117,176,.4);margin-bottom:14px}
+.step .num{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;background:var(--blue);margin-bottom:14px}
 .step h4{font-size:18px;margin-bottom:8px}
 .step p{font-size:14.5px;color:var(--ink3)}
 .warn{margin-top:18px;border-radius:var(--r-md);padding:18px 22px;font-size:14.5px;background:rgba(255,244,230,.75);border:1px solid rgba(255,190,90,.5);color:#7a4a00;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
 [data-theme="dark"] .warn{background:rgba(80,55,0,.5);border-color:rgba(255,190,90,.3);color:#ffcf87}
-
-/* ---------- faq ---------- */
-.faq{display:flex;flex-direction:column;gap:12px}
+.faq{display:flex;flex-direction:column;gap:12px;margin-top:20px}
 .faq-item{border-radius:var(--r-md);overflow:hidden}
 .faq-item summary{list-style:none;cursor:pointer;padding:18px 22px;font-size:16px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .faq-item summary::-webkit-details-marker{display:none}
-.faq-item summary .chev{flex:none;font-size:13px;color:var(--ink2);transition:transform .3s ease}
-.faq-item[open ] summary .chev{transform:rotate(180deg)}
+.faq-item summary .chev{flex:none;font-size:13px;color:var(--ink2)}
 .faq-item .a{padding:0 22px 18px;font-size:14.5px;color:var(--ink3)}
-
-/* ---------- contact ---------- */
-.contact{border-radius:var(--r-lg);padding:36px 30px;text-align:center}
+.contact{border-radius:var(--r-lg);padding:38px 28px;text-align:center;margin-top:20px}
 .contact h3{font-size:26px;font-weight:700}
 .contact p{color:var(--ink2);margin-top:8px;font-size:15px}
-.contact .qq{
-  display:inline-flex;align-items:center;gap:10px;margin-top:22px;cursor:pointer;
-  font-size:22px;font-weight:700;letter-spacing:.04em;color:var(--ink);
-  padding:14px 28px;border-radius:999px;background:var(--row-bg);border:1px solid var(--row-brd);
-  box-shadow:0 8px 24px rgba(0,0,0,.08);
-}
+.contact .qq{display:inline-flex;align-items:center;gap:10px;margin-top:22px;cursor:pointer;font-size:21px;font-weight:700;color:var(--ink);padding:14px 28px;border-radius:999px;background:var(--card);border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.08)}
 .contact .qq small{font-size:13px;font-weight:600;color:var(--ink2)}
 .contact .author{margin-top:18px;font-size:14px;color:var(--ink2)}
 .contact .author b{color:var(--ink)}
-
-/* ---------- footer ---------- */
-footer{margin-top:80px;padding:44px 0 54px;border-top:1px solid var(--line);color:var(--ink2);font-size:13.5px}
-footer .f-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
-footer h5{color:var(--ink);font-size:15px;margin-bottom:10px}
-footer p{margin-bottom:8px}
-footer .fine{margin-top:26px;font-size:12px;color:#9a9aa0;line-height:1.7}
-
-/* ---------- back to top ---------- */
-.fab{
-  position:fixed;right:20px;bottom:24px;z-index:60;width:48px;height:48px;border-radius:50%;
-  border:1px solid var(--glass-brd);cursor:pointer;display:flex;align-items:center;justify-content:center;
-  font-size:19px;color:var(--ink);opacity:0;pointer-events:none;
-  transition:opacity .3s ease;will-change:transform;
-  background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
-  box-shadow:0 10px 28px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.5);
-}
+footer{margin-top:80px;padding:40px 0 54px;border-top:1px solid var(--line);color:var(--ink2);font-size:13.5px}
+footer .fine{font-size:12px;color:#9a9aa0;line-height:1.7;margin-top:18px}
+.fab{position:fixed;right:20px;bottom:24px;z-index:60;width:48px;height:48px;border-radius:50%;border:1px solid var(--glass-brd);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:19px;color:var(--ink);opacity:0;pointer-events:none;transition:opacity .3s ease;background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);box-shadow:0 10px 28px rgba(0,0,0,.18)}
 .fab.show{opacity:1;pointer-events:auto}
-
 [data-reveal]{opacity:0;will-change:transform,opacity}
 @media (max-width:760px){
-  .game{grid-template-columns:1fr}
-  .game-cover{min-height:210px;position:relative}
-  .game-cover img{position:relative;height:210px}
+  .cat-grid,.game-grid{grid-template-columns:1fr}
   .steps{grid-template-columns:1fr}
-  .nav-links{display:none}
-  .game-body{padding:26px 22px}
-  footer .f-grid{grid-template-columns:1fr}
-  .picker{top:52px}
-  .picker-count{display:none}
+  .nav-links button{padding:8px 8px}
+  .hero{padding:64px 0 44px}
+  .picker-hint{display:none}
 }
 </style>
 </head>
 <body>
 <nav class="nav"><div class="nav-in">
-  <a class="nav-logo" href="#">美咕噜<b> · 游戏</b></a>
-  <div class="nav-links">
-    <a href="#games">游戏</a><a href="#install">安装方法</a><a href="#faq">常见问题</a><a href="#about">关于</a>
+  <span class="nav-logo" data-go="home">美咕噜<b> · 游戏</b></span>
+  <div class="nav-links" id="navLinks">
+    <button data-go="home" data-nav="home">首页</button>
+    <button data-go="long" data-nav="long">长表</button>
+    <button data-go="round" data-nav="round">圆表</button>
+    <button data-go="capsule" data-nav="capsule">胶囊表</button>
+    <button data-go="rw6" data-nav="rw6">红米 Watch 6</button>
+    <button data-go="games" data-nav="games">全部游戏</button>
   </div>
   <button class="theme-btn" id="themeBtn" data-spring>深色</button>
 </div></nav>
 
-<header class="hero">
-  <div class="hero-bg" aria-hidden="true">
-    <div class="orb orb-pink" data-drift="1"></div>
-    <div class="orb orb-blue" data-drift="2"></div>
-    <div class="orb orb-violet" data-drift="3"></div>
-  </div>
-  <div class="hero-in" id="heroIn">
+<main class="wrap">
+
+<!-- ================= HOME: only categories, no games stacked ================= -->
+<section class="view on" id="view-home">
+  <header class="hero">
     <div class="eyebrow" data-reveal>小米手环 · 手表 GALGAME 移植</div>
     <h1 data-reveal>把喜欢的故事，<br><span class="grad">装进口袋。</span></h1>
-    <p data-reveal>全中文移植，免费下载。抬起手腕，就能继续读下去。</p>
+    <p data-reveal>全中文移植，免费下载。先选你的表，再下载对应的版本。</p>
     <p class="byline" data-reveal>by 等我刷个美咕噜</p>
     <div class="hero-cta" data-reveal>
-      <a class="btn btn-pink" href="#games" data-spring>看看游戏 ↓</a>
-      <a class="btn btn-glass" href="#install" data-spring>安装方法</a>
+      <button class="btn btn-blue" data-go="long" data-spring>选你的表 ↓</button>
+      <button class="btn btn-ghost" data-go="games" data-spring>先看看游戏</button>
     </div>
-    <div class="chips" data-reveal>
-      <span class="chip">免费下载</span><span class="chip">全中文</span>
-      <span class="chip">长表 9 Pro · 10 Pro</span><span class="chip">手表 S3 / S4 / S5</span>
-      <span class="chip">手环 8 / 9 / 10 / 11</span><span class="chip">红米 Watch 6</span>
+  </header>
+
+  <section class="section">
+    <div class="section-head" data-reveal>
+      <h2>按你的表选</h2>
+      <p>点进一种表，只看这种表能装的游戏。</p>
     </div>
-  </div>
-</header>
+    <div class="cat-grid">
+      <article class="cat glass" data-go="long" data-reveal data-spring>
+        <div class="cat-shape"><div class="shape shape-long"></div></div>
+        <h3>长表</h3>
+        <p>手环 9 Pro · 10 Pro<br>336 × 480</p>
+        <span class="go">2 款游戏 ›</span>
+      </article>
+      <article class="cat glass" data-go="round" data-reveal data-spring>
+        <div class="cat-shape"><div class="shape shape-round"></div></div>
+        <h3>圆表</h3>
+        <p>小米手表 S3 / S4 / S5<br>466 × 466</p>
+        <span class="go">4 款游戏 ›</span>
+      </article>
+      <article class="cat glass" data-go="capsule" data-reveal data-spring>
+        <div class="cat-shape"><div class="shape shape-capsule"></div></div>
+        <h3>胶囊表</h3>
+        <p>手环 8 / 9 / 10 / 11<br>192 × 490</p>
+        <span class="go">4 款游戏 ›</span>
+      </article>
+      <article class="cat glass" data-go="rw6" data-reveal data-spring>
+        <div class="cat-shape"><div class="shape shape-rw6"></div></div>
+        <h3>红米 Watch 6</h3>
+        <p>红米 Watch 5 / 6<br>432 × 514</p>
+        <span class="go">1 款游戏 ›</span>
+      </article>
+    </div>
+    <p class="home-note">免费下载 · 全中文 · 9 Pro 和 10 Pro 用同一个包</p>
+    <div class="home-links">
+      <button data-go="install">怎么装 →</button>
+      <button data-go="faq">常见问题 →</button>
+      <button data-go="about">关于作者 →</button>
+    </div>
+  </section>
+</section>
 
-<main class="wrap">
-<section class="section" id="games">
-  <div class="section-head" data-reveal>
-    <h2>游戏</h2>
-    <p>先选版本，再选你的表。点下载直接拿文件。</p>
-  </div>
-
-  <div class="picker glass" data-reveal>
-    <div class="picker-group">
+<!-- ================= DEVICE PAGE: rendered by JS, one device at a time ================= -->
+<section class="view" id="view-device">
+  <div class="section">
+    <button class="back" data-go="home">‹ 所有机型</button>
+    <div class="device-head">
+      <h2 id="deviceTitle">长表</h2>
+      <p id="deviceSub"></p>
+    </div>
+    <div class="picker glass">
       <span class="picker-label">版本</span>
       <div class="seg" id="segVersion">
         <div class="seg-ind"></div>
         <button data-v="clean" class="on">干净版</button>
         <button data-v="full">完整版</button>
       </div>
+      <span class="picker-hint" id="pickerHint"></span>
     </div>
-    <div class="picker-group">
-      <span class="picker-label">机型</span>
-      <div class="seg" id="segDevice">
-        <div class="seg-ind"></div>
-        <button data-d="all" class="on">全部</button>
-        <button data-d="long">长表</button>
-        <button data-d="round">圆表</button>
-        <button data-d="capsule">胶囊表</button>
-        <button data-d="rw6">红米 Watch 6</button>
-      </div>
+    <div class="game-grid" id="deviceGrid"></div>
+    <div class="missing" id="deviceMissing" style="display:none"></div>
+    <div class="empty card" id="deviceEmpty" style="display:none">
+      <h3>这个版本暂无</h3>
+      <p id="deviceEmptyText"></p>
+      <button class="btn btn-blue" id="deviceEmptyBtn" data-spring>换完整版看看</button>
     </div>
-    <span class="picker-count" id="pickerCount"></span>
-  </div>
-
-  <!-- 星光咖啡馆与死神之蝶 -->
-  <article class="game glass" data-reveal style="margin-top:26px">
-    <div class="game-cover"><img src="covers/cafestella.jpg" alt="星光咖啡馆与死神之蝶 封面" loading="lazy"><div class="fade"></div></div>
-    <div class="game-body">
-      <h3>星光咖啡馆与死神之蝶</h3>
-      <div class="en">Café Stella and the Reaper's Butterflies · YuzuSoft</div>
-      <p class="desc">咖啡馆、死神、与五位女主的夏天。全中文，共通线 + 5 条女主路线及后日谈，支持存档、流程图与 CG 画廊。</p>
-      <div class="tags"><span class="tag hot">干净版</span><span class="tag">完整版</span><span class="tag">长表</span><span class="tag">圆表 466</span><span class="tag">胶囊 192</span></div>
-      <div class="dl-list">
-        <div class="dl-row" data-version="clean" data-device="band9p"><div class="dl-info"><div class="dl-name">手环 9 Pro / 10 Pro · 干净版 v1.1.6</div><div class="dl-meta" data-md5="36c29bd950de5062c0deee6007294724" title="点一下复制完整 MD5">14,834,041 字节 · MD5 36c29bd9…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.cafestella.release.1.1.6.clean.q50.rpk" download>下载</a></div>
-        <div class="dl-row" data-version="full" data-device="band9p"><div class="dl-info"><div class="dl-name">手环 9 Pro / 10 Pro · 完整版 v1.1.7</div><div class="dl-meta" data-md5="da420c0a5153e98e1be64d323a202b82" title="点一下复制完整 MD5">14,849,589 字节 · MD5 da420c0a…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.cafestella.release.1.1.7.rpk" download>下载</a></div>
-        <div class="dl-row" data-version="full" data-device="round466"><div class="dl-info"><div class="dl-name">圆表 466 · 全 CG v1.1.6</div><div class="dl-meta" data-md5="93384353311e4f0c44064877596c9b0c" title="点一下复制完整 MD5">18,238,399 字节 · MD5 93384353…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.cafestella.release.1.1.6_round466.rpk" download>下载</a></div>
-        <div class="dl-row" data-version="full" data-device="round466"><div class="dl-info"><div class="dl-name">圆表 466 · 少 HCG v1.1.6</div><div class="dl-meta" data-md5="b6c791a9a09bea5ff9e4c975f4f566a4" title="点一下复制完整 MD5">17,282,860 字节 · MD5 b6c791a9…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.cafestella.release.1.1.6_round466_lite.rpk" download>下载</a></div>
-        <div class="dl-row" data-version="full" data-device="capsule192"><div class="dl-info"><div class="dl-name">胶囊 192 · 全 CG v1.1.6</div><div class="dl-meta" data-md5="ec087a425ad142bb43398aacba319750" title="点一下复制完整 MD5">12,406,667 字节 · MD5 ec087a42…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.cafestella.release.1.1.6_capsule192.rpk" download>下载</a></div>
-        <div class="dl-row" data-version="full" data-device="capsule192"><div class="dl-info"><div class="dl-name">胶囊 192 · 少 HCG v1.1.6</div><div class="dl-meta" data-md5="83e93bdd81c7b47622876a58edfa0863" title="点一下复制完整 MD5">11,795,505 字节 · MD5 83e93bdd…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.cafestella.release.1.1.6_capsule192_lite.rpk" download>下载</a></div>
-      </div>
-      <div class="empty-note">这个组合暂无版本，换个版本或机型试试。</div>
-      <p class="dl-note">干净版：成人内容已移除，老存档失效。圆表 / 胶囊版未在真机上装机实测。</p>
-    </div>
-  </article>
-
-  <!-- 片轮少女 -->
-  <article class="game glass" data-reveal>
-    <div class="game-cover"><img src="covers/katawa.jpg" alt="片轮少女 封面" loading="lazy"><div class="fade"></div></div>
-    <div class="game-body">
-      <h3>片轮少女</h3>
-      <div class="en">Katawa Shoujo · Four Leaf Studios</div>
-      <p class="desc">与五位少女的青春物语。全中文，共通线 + 5 条女主路线，支持存档、流程图与 CG 画廊。</p>
-      <div class="tags"><span class="tag hot">干净版</span><span class="tag">完整版</span><span class="tag">长表</span><span class="tag">红米 Watch 6</span><span class="tag">圆表 466</span><span class="tag">胶囊 192</span></div>
-      <div class="dl-list">
-        <div class="dl-row" data-version="clean" data-device="band9p"><div class="dl-info"><div class="dl-name">手环 9 Pro / 10 Pro · 干净版 v1.0.0</div><div class="dl-meta" data-md5="d77efdfaa093e98d786398c3f872ccc5" title="点一下复制完整 MD5">9,786,675 字节 · MD5 d77efdfa…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.katawa.release.1.0.0.clean.rpk" download>下载</a></div>
-        <div class="dl-row" data-version="full" data-device="band9p"><div class="dl-info"><div class="dl-name">手环 9 Pro / 10 Pro · 完整版 v1.0.0</div><div class="dl-meta" data-md5="3b5d75d765b30362bb265268dbd4cde2" title="点一下复制完整 MD5">10,188,674 字节 · MD5 3b5d75d7…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.katawa.release.1.0.0.rpk" download>下载</a></div>
-        <div class="dl-row" data-version="full" data-device="rw6"><div class="dl-info"><div class="dl-name">红米 Watch 6 · 完整版 v1.0.0</div><div class="dl-meta" data-md5="9816f23da2e6701d397aa94eac01c997" title="点一下复制完整 MD5">13,654,194 字节 · MD5 9816f23d…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.katawa.rw6.debug.1.0.0.bin" download>下载</a></div>
-        <div class="dl-row" data-version="full" data-device="round466"><div class="dl-info"><div class="dl-name">圆表 466 · 全 CG v1.0.0</div><div class="dl-meta" data-md5="f1c7772ba37cd151f217b868efe38565" title="点一下复制完整 MD5">11,030,074 字节 · MD5 f1c7772b…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.katawa.release.1.0.0_round466.rpk" download>下载</a></div>
-        <div class="dl-row" data-version="full" data-device="round466"><div class="dl-info"><div class="dl-name">圆表 466 · 少 HCG v1.0.0</div><div class="dl-meta" data-md5="230584f3b471463ba3f5821e23edd230" title="点一下复制完整 MD5">10,716,460 字节 · MD5 230584f3…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.katawa.release.1.0.0_round466_lite.rpk" download>下载</a></div>
-        <div class="dl-row" data-version="full" data-device="capsule192"><div class="dl-info"><div class="dl-name">胶囊 192 · 全 CG v1.0.0</div><div class="dl-meta" data-md5="e95fc9e617473776b36d7d2ad456dfdb" title="点一下复制完整 MD5">7,579,045 字节 · MD5 e95fc9e6…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.katawa.release.1.0.0_capsule192.rpk" download>下载</a></div>
-        <div class="dl-row" data-version="full" data-device="capsule192"><div class="dl-info"><div class="dl-name">胶囊 192 · 少 HCG v1.0.0</div><div class="dl-meta" data-md5="b05a2daa1902e8c5eaf4425878991d4a" title="点一下复制完整 MD5">7,362,375 字节 · MD5 b05a2daa…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.katawa.release.1.0.0_capsule192_lite.rpk" download>下载</a></div>
-      </div>
-      <div class="empty-note">这个组合暂无版本，换个版本或机型试试。</div>
-      <p class="dl-note">干净版：成人内容已移除。红米 Watch 6 版、圆表 / 胶囊版未在真机上装机实测。</p>
-    </div>
-  </article>
-
-  <!-- 水仙 -->
-  <article class="game glass" data-reveal>
-    <div class="game-cover"><img src="covers/narcissu.jpg" alt="水仙 标题图" loading="lazy"><div class="fade"></div></div>
-    <div class="game-body">
-      <h3>水仙</h3>
-      <div class="en">Narcissu · stage-nana</div>
-      <p class="desc">绝症少女与少年的最后一次旅行。短篇催泪，全年龄，没有成人内容。</p>
-      <div class="tags"><span class="tag">全年龄</span><span class="tag">圆表 466</span><span class="tag">胶囊 192</span></div>
-      <div class="dl-list">
-        <div class="dl-row" data-version="all" data-device="round466"><div class="dl-info"><div class="dl-name">圆表 466 · v1.0.0</div><div class="dl-meta" data-md5="45a7d478f08bc2863541a8aae023857a" title="点一下复制完整 MD5">1,836,313 字节 · MD5 45a7d478…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.narcissu.release.1.0.0_round466.rpk" download>下载</a></div>
-        <div class="dl-row" data-version="all" data-device="capsule192"><div class="dl-info"><div class="dl-name">胶囊 192 · v1.0.0</div><div class="dl-meta" data-md5="8c7f9ce26cad5ec47135bb16c08af5f6" title="点一下复制完整 MD5">1,190,833 字节 · MD5 8c7f9ce2…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.narcissu.release.1.0.0_capsule192.rpk" download>下载</a></div>
-      </div>
-      <div class="empty-note">这个组合暂无版本，换个版本或机型试试。</div>
-      <p class="dl-note">圆表 / 胶囊版未在真机上装机实测。</p>
-    </div>
-  </article>
-
-  <!-- 心跳文学部 -->
-  <article class="game glass" data-reveal>
-    <div class="game-cover"><img src="covers/ddlc.png" alt="心跳文学部 标志" loading="lazy" style="object-fit:contain;background:#fff;padding:40px"><div class="fade"></div></div>
-    <div class="game-body">
-      <h3>心跳文学部</h3>
-      <div class="en">Doki Doki Literature Club! Phase 1 · Team Salvato</div>
-      <p class="desc">心跳文学部 Phase 1。占位图版，剧本先行，立绘与 CG 还是占位图。</p>
-      <div class="tags"><span class="tag">全年龄</span><span class="tag">占位图版</span><span class="tag">圆表 466</span><span class="tag">胶囊 192</span></div>
-      <div class="dl-list">
-        <div class="dl-row" data-version="all" data-device="round466"><div class="dl-info"><div class="dl-name">圆表 466 · v1.0.0</div><div class="dl-meta" data-md5="91c99d5c0a2a4c4c580a7894f0edd840" title="点一下复制完整 MD5">670,147 字节 · MD5 91c99d5c…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.ddlc.release.1.0.0_round466.rpk" download>下载</a></div>
-        <div class="dl-row" data-version="all" data-device="capsule192"><div class="dl-info"><div class="dl-name">胶囊 192 · v1.0.0</div><div class="dl-meta" data-md5="3ef0b07e90ccaa504ffcb2b08799cea4" title="点一下复制完整 MD5">628,640 字节 · MD5 3ef0b07e…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.ddlc.release.1.0.0_capsule192.rpk" download>下载</a></div>
-      </div>
-      <div class="empty-note">这个组合暂无版本，换个版本或机型试试。</div>
-      <p class="dl-note">圆表 / 胶囊版未在真机上装机实测。</p>
-    </div>
-  </article>
-</section>
-
-<section class="section" id="install">
-  <div class="section-head" data-reveal>
-    <h2>安装方法</h2>
-    <p>三步装好。装之前先对一下字节数，下载很容易断。</p>
-  </div>
-  <div class="steps">
-    <div class="step glass" data-reveal><div class="num">1</div><h4>先停小米运动健康</h4><p>装机前先停掉小米运动健康，再打开 AstroBox，不然装不上。</p></div>
-    <div class="step glass" data-reveal><div class="num">2</div><h4>AstroBox 安装</h4><p>在 AstroBox 里选择下载好的 .rpk / .bin 文件，安装到手环 / 手表上。</p></div>
-    <div class="step glass" data-reveal><div class="num">3</div><h4>看版本号确认</h4><p>装好后看主界面左下角的版本号，对上就说明装的是这个版本。</p></div>
-  </div>
-  <div class="warn" data-reveal>⚠️ 下载经常在 10.3 MB 左右断掉，装之前务必核对文件大小（字节数）和 MD5，对不上就重新下。不要装一半的文件，装到 100% 黑屏过。</div>
-</section>
-
-<section class="section" id="faq">
-  <div class="section-head" data-reveal>
-    <h2>常见问题</h2>
-    <p>点一下展开。</p>
-  </div>
-  <div class="faq">
-    <details class="faq-item glass" data-reveal><summary>干净版和完整版有什么区别？<span class="chev">▼</span></summary><div class="a">干净版删掉了成人剧情和成人 CG，可以公开分享；完整版是全内容，适合自己玩。少 HCG 版只删了成人图，成人文字还在。</div></details>
-    <details class="faq-item glass" data-reveal><summary>我的表该下哪个？<span class="chev">▼</span></summary><div class="a">按形状选：长表是手环 9 Pro（336×480）和手环 10 Pro（480×336）；圆表是小米手表 S3 / S4 / S5（466×466）；胶囊表是小米手环 8 / 9 / 10 / 11（192×490）；红米 Watch 5 / 6（432×514）单独选。上面选一下，只会显示你的表能用的包。9 Pro 和 10 Pro 屏幕一样，用同一个包。</div></details>
-    <details class="faq-item glass" data-reveal><summary>下载完了怎么核对？<span class="chev">▼</span></summary><div class="a">看文件大小（字节数）跟页面上写的是不是一模一样，点一下 MD5 那行可以复制完整 MD5 去对。大小对不上就是下载断了，重新下。</div></details>
-    <details class="faq-item glass" data-reveal><summary>装到 100% 失败 / 黑屏怎么办？<span class="chev">▼</span></summary><div class="a">先核对大小和 MD5，大概率是文件下断了。确认文件完整还失败的话，先停掉小米运动健康再装一次，不要连续重装。</div></details>
-    <details class="faq-item glass" data-reveal><summary>干净版的旧存档还能用吗？<span class="chev">▼</span></summary><div class="a">不能。干净版删了剧情，行号全变了，旧存档会错乱，装干净版之前先把旧存档删掉重开。</div></details>
-    <details class="faq-item glass" data-reveal><summary>谜语小丑怎么没有？<span class="chev">▼</span></summary><div class="a">暂时不上这个站。想玩的话加 QQ 群问作者。</div></details>
   </div>
 </section>
 
-<section class="section" id="about">
-  <div class="section-head" data-reveal>
-    <h2>关于</h2>
-    <p>免费移植，仅供个人学习交流。</p>
-  </div>
-  <div class="contact glass" data-reveal>
-    <h3>找作者</h3>
-    <p>有问题、想催更、或者想玩别的游戏，都可以来群里说。</p>
-    <div class="qq" id="qqCopy" title="点一下复制群号">QQ 群 590248751 <small>点一下复制</small></div>
-    <p class="author">作者：<b>等我刷个美咕噜</b> · 引擎作者：<b>hezdaaa</b></p>
-  </div>
-  <footer>
-    <div class="f-grid">
-      <div>
-        <h5>联系</h5>
-        <p>QQ 群：590248751</p>
-        <p>作者：等我刷个美咕噜</p>
-        <p>引擎作者：hezdaaa</p>
-      </div>
-      <div>
-        <h5>原作</h5>
-        <p>星光咖啡馆与死神之蝶 © YuzuSoft</p>
-        <p>片轮少女 © Four Leaf Studios</p>
-        <p>水仙 © stage-nana</p>
-        <p>心跳文学部 © Team Salvato</p>
-      </div>
+<!-- ================= ALL GAMES: browse only, grouped by type ================= -->
+<section class="view" id="view-games">
+  <div class="section">
+    <div class="section-head">
+      <h2>全部游戏</h2>
+      <p>共 4 款。先挑喜欢的故事，再按你的表去下载。</p>
     </div>
-    <p class="fine">本移植仅供个人学习交流，与 AstroBox、小米及其他设备厂商无关。原作版权归各自权利方所有。如有问题，加 QQ 群 590248751。</p>
-  </footer>
+    <div class="group-label">长篇恋爱</div>
+    <div class="game-grid" id="gamesLong"></div>
+    <div class="group-label">短篇</div>
+    <div class="game-grid" id="gamesShort"></div>
+  </div>
 </section>
+
+<!-- ================= INSTALL ================= -->
+<section class="view" id="view-install">
+  <div class="section">
+    <div class="section-head"><h2>安装方法</h2><p>三步装好。装之前先对一下字节数，下载很容易断。</p></div>
+    <div class="steps">
+      <div class="step card" data-reveal><div class="num">1</div><h4>先停小米运动健康</h4><p>装机前先停掉小米运动健康，再打开 AstroBox，不然装不上。</p></div>
+      <div class="step card" data-reveal><div class="num">2</div><h4>AstroBox 安装</h4><p>在 AstroBox 里选择下载好的 .rpk / .bin 文件，安装到手环 / 手表上。</p></div>
+      <div class="step card" data-reveal><div class="num">3</div><h4>看版本号确认</h4><p>装好后看主界面左下角的版本号，对上就说明装的是这个版本。</p></div>
+    </div>
+    <div class="warn" data-reveal>⚠️ 下载经常在 10.3 MB 左右断掉，装之前务必核对文件大小（字节数）和 MD5，对不上就重新下。不要装一半的文件，装到 100% 黑屏过。</div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="view" id="view-faq">
+  <div class="section">
+    <div class="section-head"><h2>常见问题</h2><p>点一下展开。</p></div>
+    <div class="faq">
+      <details class="faq-item card" data-reveal><summary>干净版和完整版有什么区别？<span class="chev">▼</span></summary><div class="a">干净版删掉了成人剧情和成人 CG，可以公开分享；完整版是全内容，适合自己玩。少 HCG 版只删了成人图，成人文字还在。</div></details>
+      <details class="faq-item card" data-reveal><summary>我的表该下哪个？<span class="chev">▼</span></summary><div class="a">按形状选：长表是手环 9 Pro（336×480）和手环 10 Pro（480×336）；圆表是小米手表 S3 / S4 / S5（466×466）；胶囊表是小米手环 8 / 9 / 10 / 11（192×490）；红米 Watch 5 / 6（432×514）单独选。9 Pro 和 10 Pro 屏幕一样，用同一个包。</div></details>
+      <details class="faq-item card" data-reveal><summary>下载完了怎么核对？<span class="chev">▼</span></summary><div class="a">看文件大小（字节数）跟页面上写的是不是一模一样，点一下 MD5 那行可以复制完整 MD5 去对。大小对不上就是下载断了，重新下。</div></details>
+      <details class="faq-item card" data-reveal><summary>装到 100% 失败 / 黑屏怎么办？<span class="chev">▼</span></summary><div class="a">先核对大小和 MD5，大概率是文件下断了。确认文件完整还失败的话，先停掉小米运动健康再装一次，不要连续重装。</div></details>
+      <details class="faq-item card" data-reveal><summary>干净版的旧存档还能用吗？<span class="chev">▼</span></summary><div class="a">不能。干净版删了剧情，行号全变了，旧存档会错乱，装干净版之前先把旧存档删掉重开。</div></details>
+      <details class="faq-item card" data-reveal><summary>谜语小丑怎么没有？<span class="chev">▼</span></summary><div class="a">暂时不上这个站。想玩的话加 QQ 群问作者。</div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section class="view" id="view-about">
+  <div class="section">
+    <div class="section-head"><h2>关于</h2><p>免费移植，仅供个人学习交流。</p></div>
+    <div class="contact glass" data-reveal>
+      <h3>找作者</h3>
+      <p>有问题、想催更、或者想玩别的游戏，都可以来群里说。</p>
+      <div class="qq" id="qqCopy" title="点一下复制群号">QQ 群 590248751 <small>点一下复制</small></div>
+      <p class="author">作者：<b>等我刷个美咕噜</b> · 引擎作者：<b>hezdaaa</b></p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>QQ 群：590248751 · 作者：等我刷个美咕噜 · 引擎作者：hezdaaa</p>
+  <p>星光咖啡馆与死神之蝶 © YuzuSoft · 片轮少女 © Four Leaf Studios · 水仙 © stage-nana · 心跳文学部 © Team Salvato</p>
+  <p class="fine">本移植仅供个人学习交流，与 AstroBox、小米及其他设备厂商无关。原作版权归各自权利方所有。如有问题，加 QQ 群 590248751。</p>
+</footer>
 </main>
 <button class="fab" id="fabBtn" aria-label="回到顶部" data-spring>↑</button>
 
 <script>
+/* ---- data: all 17 files, one source of truth ---- */
+var DEVICES = {
+  long:    { name: "长表",        sub: "手环 9 Pro · 10 Pro · 336 × 480", hint: "9 Pro 和 10 Pro 用同一个包" },
+  round:   { name: "圆表",        sub: "小米手表 S3 / S4 / S5 · 466 × 466", hint: "" },
+  capsule: { name: "胶囊表",      sub: "手环 8 / 9 / 10 / 11 · 192 × 490", hint: "" },
+  rw6:     { name: "红米 Watch 6", sub: "红米 Watch 5 / 6 · 432 × 514", hint: "未在真机上装机实测" }
+};
+var DEVICE_LABEL = { long: "长表", round: "圆表", capsule: "胶囊表", rw6: "红米 Watch 6" };
+var GAMES = [
+  { id: "cafestella", cat: "long-story", title: "星光咖啡馆与死神之蝶", en: "Café Stella and the Reaper's Butterflies · YuzuSoft",
+    desc: "咖啡馆、死神、与五位女主的夏天。全中文，共通线 + 5 条女主路线及后日谈。", meta: "长篇恋爱 · 5 条路线 · 全中文",
+    cover: "covers/cafestella.jpg", note: "干净版：成人内容已移除，老存档失效。圆表 / 胶囊版未在真机上装机实测。",
+    files: [
+      { v: "clean", d: "long",    label: "手环 9 Pro / 10 Pro · 干净版 v1.1.6", file: "downloads/com.migulu.cafestella.release.1.1.6.clean.q50.rpk", bytes: 14834041, md5: "36c29bd950de5062c0deee6007294724" },
+      { v: "full",  d: "long",    label: "手环 9 Pro / 10 Pro · 完整版 v1.1.7", file: "downloads/com.migulu.cafestella.release.1.1.7.rpk", bytes: 14849589, md5: "da420c0a5153e98e1be64d323a202b82" },
+      { v: "full",  d: "round",   label: "圆表 466 · 全 CG v1.1.6", file: "downloads/com.migulu.cafestella.release.1.1.6_round466.rpk", bytes: 18238399, md5: "93384353311e4f0c44064877596c9b0c" },
+      { v: "full",  d: "round",   label: "圆表 466 · 少 HCG v1.1.6", file: "downloads/com.migulu.cafestella.release.1.1.6_round466_lite.rpk", bytes: 17282860, md5: "b6c791a9a09bea5ff9e4c975f4f566a4" },
+      { v: "full",  d: "capsule", label: "胶囊 192 · 全 CG v1.1.6", file: "downloads/com.migulu.cafestella.release.1.1.6_capsule192.rpk", bytes: 12406667, md5: "ec087a425ad142bb43398aacba319750" },
+      { v: "full",  d: "capsule", label: "胶囊 192 · 少 HCG v1.1.6", file: "downloads/com.migulu.cafestella.release.1.1.6_capsule192_lite.rpk", bytes: 11795505, md5: "83e93bdd81c7b47622876a58edfa0863" }
+    ]},
+  { id: "katawa", cat: "long-story", title: "片轮少女", en: "Katawa Shoujo · Four Leaf Studios",
+    desc: "与五位少女的青春物语。全中文，共通线 + 5 条女主路线。", meta: "长篇恋爱 · 5 条路线 · 全中文",
+    cover: "covers/katawa.jpg", note: "干净版：成人内容已移除。红米 Watch 6 版、圆表 / 胶囊版未在真机上装机实测。",
+    files: [
+      { v: "clean", d: "long",    label: "手环 9 Pro / 10 Pro · 干净版 v1.0.0", file: "downloads/com.migulu.katawa.release.1.0.0.clean.rpk", bytes: 9786675, md5: "d77efdfaa093e98d786398c3f872ccc5" },
+      { v: "full",  d: "long",    label: "手环 9 Pro / 10 Pro · 完整版 v1.0.0", file: "downloads/com.migulu.katawa.release.1.0.0.rpk", bytes: 10188674, md5: "3b5d75d765b30362bb265268dbd4cde2" },
+      { v: "full",  d: "rw6",     label: "红米 Watch 6 · 完整版 v1.0.0", file: "downloads/com.migulu.katawa.rw6.debug.1.0.0.bin", bytes: 13654194, md5: "9816f23da2e6701d397aa94eac01c997" },
+      { v: "full",  d: "round",   label: "圆表 466 · 全 CG v1.0.0", file: "downloads/com.migulu.katawa.release.1.0.0_round466.rpk", bytes: 11030074, md5: "f1c7772ba37cd151f217b868efe38565" },
+      { v: "full",  d: "round",   label: "圆表 466 · 少 HCG v1.0.0", file: "downloads/com.migulu.katawa.release.1.0.0_round466_lite.rpk", bytes: 10716460, md5: "230584f3b471463ba3f5821e23edd230" },
+      { v: "full",  d: "capsule", label: "胶囊 192 · 全 CG v1.0.0", file: "downloads/com.migulu.katawa.release.1.0.0_capsule192.rpk", bytes: 7579045, md5: "e95fc9e617473776b36d7d2ad456dfdb" },
+      { v: "full",  d: "capsule", label: "胶囊 192 · 少 HCG v1.0.0", file: "downloads/com.migulu.katawa.release.1.0.0_capsule192_lite.rpk", bytes: 7362375, md5: "b05a2daa1902e8c5eaf4425878991d4a" }
+    ]},
+  { id: "narcissu", cat: "short", title: "水仙", en: "Narcissu · stage-nana",
+    desc: "绝症少女与少年的最后一次旅行。短篇催泪，全年龄，没有成人内容。", meta: "短篇催泪 · 全年龄",
+    cover: "covers/narcissu.jpg", note: "圆表 / 胶囊版未在真机上装机实测。",
+    files: [
+      { v: "all", d: "round",   label: "圆表 466 · v1.0.0", file: "downloads/com.migulu.narcissu.release.1.0.0_round466.rpk", bytes: 1836313, md5: "45a7d478f08bc2863541a8aae023857a" },
+      { v: "all", d: "capsule", label: "胶囊 192 · v1.0.0", file: "downloads/com.migulu.narcissu.release.1.0.0_capsule192.rpk", bytes: 1190833, md5: "8c7f9ce26cad5ec47135bb16c08af5f6" }
+    ]},
+  { id: "ddlc", cat: "short", title: "心跳文学部", en: "Doki Doki Literature Club! Phase 1 · Team Salvato",
+    desc: "心跳文学部 Phase 1。占位图版，剧本先行，立绘与 CG 还是占位图。", meta: "短篇 · Phase 1 · 占位图版",
+    cover: "covers/ddlc.png", note: "圆表 / 胶囊版未在真机上装机实测。",
+    files: [
+      { v: "all", d: "round",   label: "圆表 466 · v1.0.0", file: "downloads/com.migulu.ddlc.release.1.0.0_round466.rpk", bytes: 670147, md5: "91c99d5c0a2a4c4c580a7894f0edd840" },
+      { v: "all", d: "capsule", label: "胶囊 192 · v1.0.0", file: "downloads/com.migulu.ddlc.release.1.0.0_capsule192.rpk", bytes: 628640, md5: "3ef0b07e90ccaa504ffcb2b08799cea4" }
+    ]}
+];
+function mb(bytes){ return (bytes / 1048576).toFixed(1) + " MB"; }
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
 /* ---- tiny spring engine: real spring physics, interruptible ---- */
 (function(){
   "use strict";
   var raf = window.requestAnimationFrame.bind(window);
-  var springs = [];
-  var running = false;
+  var springs = [], running = false;
   function tick(){
     var alive = false;
     for (var i = 0; i < springs.length; i++){
@@ -428,19 +417,15 @@ footer .fine{margin-top:26px;font-size:12px;color:#9a9aa0;line-height:1.7}
       alive = true;
       var dt = 1/60;
       var a = -s.k * (s.x - s.t) - s.c * s.v;
-      s.v += a * dt;
-      s.x += s.v * dt;
-      if (Math.abs(s.x - s.t) < 0.001 && Math.abs(s.v) < 0.001){
-        s.x = s.t; s.v = 0; s.active = false;
-      }
+      s.v += a * dt; s.x += s.v * dt;
+      if (Math.abs(s.x - s.t) < 0.001 && Math.abs(s.v) < 0.001){ s.x = s.t; s.v = 0; s.active = false; }
       s.apply(s.x);
     }
     if (alive){ raf(tick); } else { running = false; }
   }
   function Spring(apply, k, c){
     this.apply = apply; this.k = k || 170; this.c = c || 22;
-    this.x = 0; this.v = 0; this.t = 0; this.active = false;
-    springs.push(this);
+    this.x = 0; this.v = 0; this.t = 0; this.active = false; springs.push(this);
   }
   Spring.prototype.go = function(target, from){
     if (from !== undefined){ this.x = from; this.v = 0; }
@@ -451,112 +436,142 @@ footer .fine{margin-top:26px;font-size:12px;color:#9a9aa0;line-height:1.7}
     var st = { y: 0, s: 1 };
     var sy = new Spring(function(v){ st.y = v; paint(); }, k, c);
     var ss = new Spring(function(v){ st.s = v; paint(); }, k, c);
-    function paint(){
-      el.style.transform = "translateY(" + st.y.toFixed(2) + "px) scale(" + st.s.toFixed(4) + ")";
-    }
-    return {
-      setY: function(t, from){ sy.go(t, from); },
-      setS: function(t, from){ ss.go(t, from); }
-    };
+    function paint(){ el.style.transform = "translateY(" + st.y.toFixed(2) + "px) scale(" + st.s.toFixed(4) + ")"; }
+    return { setY: function(t, from){ sy.go(t, from); }, setS: function(t, from){ ss.go(t, from); } };
   }
-
-  /* ---- scroll reveal with spring ---- */
   var io = new IntersectionObserver(function(entries){
     entries.forEach(function(en){
       if (!en.isIntersecting) return;
-      var el = en.target;
-      io.unobserve(el);
-      var ctl = el._spring;
-      if (ctl){ ctl.setY(0); }
+      var el = en.target; io.unobserve(el);
+      if (el._spring) el._spring.setY(0);
       var op = new Spring(function(v){ el.style.opacity = v.toFixed(3); }, 120, 20);
       op.go(1, 0);
     });
   }, { threshold: 0.12 });
-  document.querySelectorAll("[data-reveal]").forEach(function(el){
-    var ctl = makeTransform(el, 150, 20);
-    el._spring = ctl;
-    ctl.setY(26, 26);
-    el.style.opacity = "0";
-    io.observe(el);
-  });
-
-  /* ---- press feedback: bouncy scale, interruptible ---- */
-  document.querySelectorAll("[data-spring]").forEach(function(el){
-    var ctl = makeTransform(el, 260, 18);
-    el.addEventListener("pointerdown", function(){ ctl.setS(0.93); });
-    ["pointerup","pointerleave","pointercancel"].forEach(function(ev){
-      el.addEventListener(ev, function(){ ctl.setS(1); });
+  function armReveal(root){
+    (root || document).querySelectorAll("[data-reveal]").forEach(function(el){
+      if (el._spring) return;
+      var ctl = makeTransform(el, 150, 20);
+      el._spring = ctl; ctl.setY(26, 26); el.style.opacity = "0"; io.observe(el);
     });
-  });
-
-  /* ---- hero orbs: slow drift + pointer parallax ---- */
-  var orbs = Array.prototype.slice.call(document.querySelectorAll("[data-drift]"));
-  var orbsCtl = orbs.map(function(o, i){
-    var ctl = makeTransform(o, 60, 14);
-    var base = (i - 1) * 14;
-    ctl.setY(base, base);
-    return { ctl: ctl, base: base, f: (i + 1) * 0.35 };
-  });
-  var hero = document.querySelector(".hero");
-  if (hero && window.matchMedia("(pointer:fine)").matches){
-    hero.addEventListener("pointermove", function(e){
-      var r = hero.getBoundingClientRect();
-      var dx = (e.clientX - r.left) / r.width - 0.5;
-      var dy = (e.clientY - r.top) / r.height - 0.5;
-      orbsCtl.forEach(function(o){ o.ctl.setY(o.base + dy * 26 * o.f); });
-      orbs.forEach(function(o, i){
-        o.style.marginLeft = (dx * 18 * (i + 1) * 0.3).toFixed(1) + "px";
+  }
+  function bindPress(root){
+    (root || document).querySelectorAll("[data-spring]").forEach(function(el){
+      if (el._press) return; el._press = true;
+      var ctl = makeTransform(el, 260, 18);
+      el.addEventListener("pointerdown", function(){ ctl.setS(0.93); });
+      ["pointerup","pointerleave","pointercancel"].forEach(function(ev){
+        el.addEventListener(ev, function(){ ctl.setS(1); });
       });
     });
   }
 
-  /* ---- hero scroll: shrink + fade like Apple product pages ---- */
-  var heroIn = document.getElementById("heroIn");
-  var heroScale = 1, heroTarget = 1, heroOp = 1, heroOpTarget = 1;
-  var heroTicking = false;
-  function heroFrame(){
-    heroTicking = false;
-    heroScale += (heroTarget - heroScale) * 0.12;
-    heroOp += (heroOpTarget - heroOp) * 0.12;
-    if (heroIn){
-      heroIn.style.transform = "scale(" + heroScale.toFixed(4) + ")";
-      heroIn.style.opacity = heroOp.toFixed(3);
-    }
-    if (Math.abs(heroTarget - heroScale) > 0.0005 || Math.abs(heroOpTarget - heroOp) > 0.0005){
-      heroTicking = true; raf(heroFrame);
-    }
-  }
-  function onScrollHero(){
-    var y = window.scrollY || 0;
-    var p = Math.min(y / 420, 1);
-    heroTarget = 1 - p * 0.08;
-    heroOpTarget = 1 - p * 0.55;
-    if (!heroTicking){ heroTicking = true; raf(heroFrame); }
-  }
-
-  /* ---- back to top ---- */
-  var fab = document.getElementById("fabBtn");
-  fab.addEventListener("click", function(){ window.scrollTo({ top: 0, behavior: "smooth" }); });
-  function onScrollFab(){
-    var y = window.scrollY || 0;
-    fab.classList.toggle("show", y > 600);
-  }
-  window.addEventListener("scroll", function(){ onScrollHero(); onScrollFab(); }, { passive: true });
-  onScrollFab();
-
-  /* ---- version + device picker ---- */
-  var VERSION_LABEL = { clean: "干净版", full: "完整版" };
-  var DEVICE_LABEL = { all: "全部机型", long: "长表", round: "圆表", capsule: "胶囊表", rw6: "红米 Watch 6" };
-  /* 形状分组：长表 = 手环 9 Pro（336×480）+ 手环 10 Pro（480×336） */
-  var DEVICE_GROUPS = { long: ["band9p", "band10p"], round: ["round466"], capsule: ["capsule192"], rw6: ["rw6"] };
-  var state = { version: "clean", device: "all" };
+  /* ---- state: version remembered, device is the page itself ---- */
+  var state = { version: "clean", device: "long" };
   try {
     var saved = JSON.parse(localStorage.getItem("migulu-picker") || "{}");
     if (saved.version === "clean" || saved.version === "full") state.version = saved.version;
-    if (DEVICE_LABEL[saved.device]) state.device = saved.device;
   } catch(e){}
-  var countEl = document.getElementById("pickerCount");
 
+  /* ---- view switching: one page at a time, never stacked ---- */
+  var VIEWS = { home: "view-home", device: "view-device", games: "view-games", install: "view-install", faq: "view-faq", about: "view-about" };
+  function showView(key, device){
+    Object.keys(VIEWS).forEach(function(k){
+      document.getElementById(VIEWS[k]).classList.toggle("on", k === key);
+    });
+    document.querySelectorAll("#navLinks button").forEach(function(b){
+      var nav = b.getAttribute("data-nav");
+      b.classList.toggle("on", nav === key || (key === "device" && nav === device) || (key === "home" && nav === "home"));
+    });
+    if (key === "device" && device){ state.device = device; renderDevice(); }
+    if (key === "games"){ renderGames(); }
+    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+    armReveal(document.getElementById(VIEWS[key]));
+    bindPress(document.getElementById(VIEWS[key]));
+  }
+  document.addEventListener("click", function(e){
+    var t = e.target.closest("[data-go]");
+    if (!t) return;
+    var go = t.getAttribute("data-go");
+    if (DEVICES[go]){ showView("device", go); }
+    else { showView(go); }
+  });
+
+  /* ---- device page: one card per game, one main download button ---- */
+  function matchingFiles(game, device, version){
+    return game.files.filter(function(f){
+      return f.d === device && (f.v === "all" || f.v === version);
+    });
+  }
+  function cardHTML(game, files, browse){
+    var coverStyle = game.id === "ddlc" ? ' style="object-fit:contain;background:#fff;padding:24px"' : "";
+    var html = '<article class="game card"><div class="game-cover"><img src="' + game.cover + '" alt="' + esc(game.title) + ' 封面" loading="lazy"' + coverStyle + '></div><div class="game-body">';
+    html += '<h3>' + esc(game.title) + '</h3><div class="en">' + esc(game.en) + '</div><p class="desc">' + esc(game.desc) + '</p><div class="meta">' + esc(game.meta) + '</div>';
+    if (browse){
+      var avail = [];
+      game.files.forEach(function(f){ if (avail.indexOf(DEVICE_LABEL[f.d]) === -1) avail.push(DEVICE_LABEL[f.d]); });
+      html += '<div class="dl-main"><div class="dl-label">可装机型</div><div class="dl-size">' + avail.join(" · ") + '</div>';
+      html += '<button class="dl-btn" data-go="' + firstDevice(game) + '" data-spring>去选机型下载</button></div>';
+    } else if (files.length === 0){
+      html += '<div class="dl-main"><button class="dl-btn" disabled>暂无此版本</button></div>';
+    } else {
+      var main = files[0];
+      html += '<div class="dl-main"><div class="dl-label">' + esc(main.label) + '</div><div class="dl-size">' + mb(main.bytes) + ' · ' + main.bytes.toLocaleString("en-US") + ' 字节</div>';
+      html += '<a class="dl-btn" data-spring href="' + main.file + '" download>下载</a></div>';
+      html += '<details class="dl-other"><summary>文件信息' + (files.length > 1 ? ' · 还有 ' + (files.length - 1) + ' 个版本' : '') + ' ›</summary>';
+      files.forEach(function(f){
+        html += '<div class="row"><span>' + esc(f.label) + '<br><span style="color:var(--ink2);font-size:12px">' + mb(f.bytes) + ' · ' + f.bytes.toLocaleString("en-US") + ' 字节</span></span><a href="' + f.file + '" download>下载</a></div>';
+      });
+      html += '<div class="md5" data-md5="' + main.md5 + '" title="点一下复制完整 MD5">MD5 ' + main.md5.slice(0, 8) + '…（点一下复制完整 MD5）</div></details>';
+      html += '<p style="font-size:12.5px;color:var(--ink2);margin-top:12px">' + esc(game.note) + '</p>';
+    }
+    html += '</div></article>';
+    return html;
+  }
+  function firstDevice(game){
+    return game.files[0].d;
+  }
+  function renderDevice(){
+    var d = DEVICES[state.device];
+    document.getElementById("deviceTitle").textContent = d.name;
+    document.getElementById("deviceSub").textContent = d.sub + (d.hint ? " · " + d.hint : "");
+    document.getElementById("pickerHint").textContent = state.version === "clean" ? "干净版：成人内容已移除" : "完整版：全内容";
+    var seg = document.getElementById("segVersion");
+    seg.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-v") === state.version); });
+    moveIndicator(seg);
+    var grid = document.getElementById("deviceGrid");
+    var html = "", missing = [];
+    GAMES.forEach(function(g){
+      var files = matchingFiles(g, state.device, state.version);
+      if (files.length){ html += cardHTML(g, files, false); }
+      else { missing.push(g); }
+    });
+    grid.innerHTML = html;
+    var empty = document.getElementById("deviceEmpty");
+    var missEl = document.getElementById("deviceMissing");
+    if (!html){
+      empty.style.display = "block";
+      document.getElementById("deviceEmptyText").textContent = d.name + "暂无" + (state.version === "clean" ? "干净版" : "完整版") + "，换个版本试试。";
+      document.getElementById("deviceEmptyBtn").textContent = state.version === "clean" ? "换完整版看看" : "换干净版看看";
+    } else { empty.style.display = "none"; }
+    if (missing.length && html){
+      missEl.style.display = "block";
+      missEl.innerHTML = "这个机型暂时没有：<b>" + missing.map(function(g){ return esc(g.title); }).join("、") + "</b>，去" +
+        (state.device === "long" ? '<button data-go="round">圆表 ›</button> 或 <button data-go="capsule">胶囊表 ›</button>' : '<button data-go="home">看看其他机型 ›</button>') + "下载。";
+    } else { missEl.style.display = "none"; }
+    bindPress(grid); bindMD5(grid);
+    try { localStorage.setItem("migulu-picker", JSON.stringify({ version: state.version })); } catch(e){}
+  }
+  function renderGames(){
+    var longHtml = "", shortHtml = "";
+    GAMES.forEach(function(g){
+      if (g.cat === "long-story"){ longHtml += cardHTML(g, [], true); }
+      else { shortHtml += cardHTML(g, [], true); }
+    });
+    document.getElementById("gamesLong").innerHTML = longHtml;
+    document.getElementById("gamesShort").innerHTML = shortHtml;
+    bindPress(document.getElementById("view-games"));
+  }
   function moveIndicator(seg){
     var ind = seg.querySelector(".seg-ind");
     var on = seg.querySelector("button.on");
@@ -564,87 +579,52 @@ footer .fine{margin-top:26px;font-size:12px;color:#9a9aa0;line-height:1.7}
     ind.style.width = on.offsetWidth + "px";
     ind.style.transform = "translateX(" + (on.offsetLeft - 3) + "px)";
   }
-  function applyFilter(){
-    var shown = 0;
-    document.querySelectorAll(".game").forEach(function(card){
-      var vis = 0;
-      card.querySelectorAll(".dl-row").forEach(function(row){
-        var v = row.getAttribute("data-version");
-        var d = row.getAttribute("data-device");
-        var okV = (v === "all" || v === state.version);
-        var okD = (state.device === "all" || (DEVICE_GROUPS[state.device] || []).indexOf(d) !== -1);
-        var show = okV && okD;
-        row.classList.toggle("hidden", !show);
-        if (show){ vis++; shown++; }
-      });
-      var note = card.querySelector(".empty-note");
-      if (note) note.classList.toggle("show", vis === 0);
+  document.getElementById("segVersion").querySelectorAll("button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      document.getElementById("segVersion").querySelectorAll("button").forEach(function(b){ b.classList.remove("on"); });
+      btn.classList.add("on");
+      state.version = btn.getAttribute("data-v");
+      moveIndicator(document.getElementById("segVersion"));
+      renderDevice();
     });
-    if (countEl){
-      countEl.textContent = "已选：" + VERSION_LABEL[state.version] + " · " + DEVICE_LABEL[state.device] + " · 共 " + shown + " 个文件";
-    }
-    try { localStorage.setItem("migulu-picker", JSON.stringify(state)); } catch(e){}
-  }
-  function bindSeg(segId, key, attr){
-    var seg = document.getElementById(segId);
-    if (!seg) return;
-    seg.querySelectorAll("button").forEach(function(btn){
-      btn.addEventListener("click", function(){
-        seg.querySelectorAll("button").forEach(function(b){ b.classList.remove("on"); });
-        btn.classList.add("on");
-        state[key] = btn.getAttribute(attr);
-        moveIndicator(seg);
-        applyFilter();
-      });
-    });
-    // restore saved choice
-    seg.querySelectorAll("button").forEach(function(b){
-      b.classList.toggle("on", b.getAttribute(attr) === state[key]);
-    });
-    moveIndicator(seg);
-  }
-  bindSeg("segVersion", "version", "data-v");
-  bindSeg("segDevice", "device", "data-d");
-  applyFilter();
-  window.addEventListener("resize", function(){
-    moveIndicator(document.getElementById("segVersion"));
-    moveIndicator(document.getElementById("segDevice"));
   });
+  document.getElementById("deviceEmptyBtn").addEventListener("click", function(){
+    state.version = state.version === "clean" ? "full" : "clean";
+    renderDevice();
+  });
+  window.addEventListener("resize", function(){ moveIndicator(document.getElementById("segVersion")); });
+
+  /* ---- click MD5 to copy ---- */
+  function bindMD5(root){
+    (root || document).querySelectorAll(".dl-other .md5[data-md5]").forEach(function(el){
+      if (el._bound) return; el._bound = true;
+      el.addEventListener("click", function(){
+        var md5 = el.getAttribute("data-md5");
+        var done = function(){
+          var old = el.textContent;
+          el.textContent = "已复制完整 MD5 ✓";
+          setTimeout(function(){ el.textContent = old; }, 1400);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(md5).then(done, done); }
+        else { done(); }
+      });
+    });
+  }
+
+  /* ---- back to top ---- */
+  var fab = document.getElementById("fabBtn");
+  fab.addEventListener("click", function(){ window.scrollTo({ top: 0, behavior: "smooth" }); });
+  window.addEventListener("scroll", function(){ fab.classList.toggle("show", (window.scrollY || 0) > 600); }, { passive: true });
 
   /* ---- dark mode ---- */
   var themeBtn = document.getElementById("themeBtn");
   var savedTheme = null;
   try { savedTheme = localStorage.getItem("migulu-theme"); } catch(e){}
-  if (savedTheme === "dark"){
-    document.documentElement.setAttribute("data-theme", "dark");
-    themeBtn.textContent = "浅色";
-  }
+  if (savedTheme === "dark"){ document.documentElement.setAttribute("data-theme", "dark"); themeBtn.textContent = "浅色"; }
   themeBtn.addEventListener("click", function(){
     var dark = document.documentElement.getAttribute("data-theme") === "dark";
-    if (dark){
-      document.documentElement.removeAttribute("data-theme");
-      themeBtn.textContent = "深色";
-      try { localStorage.setItem("migulu-theme", "light"); } catch(e){}
-    } else {
-      document.documentElement.setAttribute("data-theme", "dark");
-      themeBtn.textContent = "浅色";
-      try { localStorage.setItem("migulu-theme", "dark"); } catch(e){}
-    }
-  });
-
-  /* ---- click MD5 to copy full hash ---- */
-  document.querySelectorAll(".dl-meta[data-md5]").forEach(function(el){
-    el.addEventListener("click", function(){
-      var md5 = el.getAttribute("data-md5");
-      var done = function(){
-        var old = el.textContent;
-        el.textContent = "已复制完整 MD5 ✓";
-        setTimeout(function(){ el.textContent = old; }, 1400);
-      };
-      if (navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(md5).then(done, done);
-      } else { done(); }
-    });
+    if (dark){ document.documentElement.removeAttribute("data-theme"); themeBtn.textContent = "深色"; try { localStorage.setItem("migulu-theme", "light"); } catch(e){} }
+    else { document.documentElement.setAttribute("data-theme", "dark"); themeBtn.textContent = "浅色"; try { localStorage.setItem("migulu-theme", "dark"); } catch(e){} }
   });
 
   /* ---- click QQ number to copy ---- */
@@ -656,11 +636,14 @@ footer .fine{margin-top:26px;font-size:12px;color:#9a9aa0;line-height:1.7}
         qq.innerHTML = "已复制群号 ✓";
         setTimeout(function(){ qq.innerHTML = old; }, 1400);
       };
-      if (navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText("590248751").then(done, done);
-      } else { done(); }
+      if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText("590248751").then(done, done); }
+      else { done(); }
     });
   }
+
+  armReveal(document);
+  bindPress(document);
+  renderGames();
 })();
 </script>
 </body>
