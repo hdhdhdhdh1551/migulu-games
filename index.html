@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>美咕噜的游戏 · 小米手环 / 手表 GALGAME 移植下载</title>
+<meta name="description" content="美咕噜移植的免费 GALGAME：星光咖啡馆与死神之蝶、片轮少女、水仙、心跳文学部。适配小米手环 9 Pro、手表 S3/S4/S5、手环 8/9/10/11、红米 Watch 6。">
+<style>
+:root{
+  --bg:#f5f5f7; --ink:#1d1d1f; --ink2:#6e6e73; --line:rgba(0,0,0,.08);
+  --accent:#f975b0; --accent-deep:#e85a9a; --blue:#0071e3;
+  --glass:rgba(255,255,255,.55); --glass-brd:rgba(255,255,255,.7);
+  --glass-dark:rgba(20,20,28,.45); --glass-dark-brd:rgba(255,255,255,.16);
+  --r-lg:28px; --r-md:20px; --r-sm:14px;
+  --shadow:0 20px 50px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg); color:var(--ink); line-height:1.5; overflow-x:hidden;
+}
+a{color:var(--blue);text-decoration:none}
+img{display:block;max-width:100%}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+/* ---------- liquid glass ---------- */
+.glass{
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(22px) saturate(180%);
+  backdrop-filter:blur(22px) saturate(180%);
+  border:1px solid var(--glass-brd);
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.7);
+}
+.glass-dark{
+  background:var(--glass-dark);
+  -webkit-backdrop-filter:blur(22px) saturate(160%);
+  backdrop-filter:blur(22px) saturate(160%);
+  border:1px solid var(--glass-dark-brd);
+  box-shadow:0 20px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.14);
+}
+
+/* ---------- nav ---------- */
+.nav{
+  position:sticky; top:0; z-index:50;
+  background:rgba(245,245,247,.65);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  border-bottom:1px solid var(--line);
+}
+.nav-in{max-width:1080px;margin:0 auto;padding:0 22px;height:52px;display:flex;align-items:center;gap:26px}
+.nav-logo{font-weight:700;font-size:17px;letter-spacing:.02em;color:var(--ink)}
+.nav-logo b{color:var(--accent-deep)}
+.nav-links{display:flex;gap:22px;margin-left:auto}
+.nav-links a{color:var(--ink);font-size:14px;opacity:.85}
+.nav-links a:hover{opacity:1}
+
+/* ---------- hero ---------- */
+.hero{
+  position:relative; overflow:hidden; color:#fff; background:#000;
+  border-radius:0 0 40px 40px;
+}
+.hero-bg{position:absolute;inset:0;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.75;will-change:transform}
+.orb-pink{width:520px;height:520px;background:#ff5fa2;top:-160px;left:-80px}
+.orb-blue{width:460px;height:460px;background:#3b82f6;bottom:-200px;right:-60px}
+.orb-violet{width:340px;height:340px;background:#8b5cf6;top:38%;left:56%}
+.hero-in{position:relative;max-width:1080px;margin:0 auto;padding:96px 22px 88px;text-align:center}
+.eyebrow{font-size:15px;font-weight:600;letter-spacing:.14em;color:rgba(255,255,255,.75);text-transform:uppercase}
+.hero h1{
+  font-size:clamp(40px,7.2vw,76px); line-height:1.08; font-weight:700; letter-spacing:-.02em;
+  margin:18px 0 20px;
+}
+.hero h1 .grad{
+  background:linear-gradient(92deg,#ffd6e8 0%,#ff8fc0 38%,#a5c8ff 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.hero p{font-size:clamp(16px,2.4vw,21px);color:rgba(255,255,255,.82);max-width:640px;margin:0 auto}
+.hero-cta{display:flex;gap:14px;justify-content:center;margin-top:34px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:none;
+  font-size:16px;font-weight:600;padding:13px 26px;border-radius:999px;
+  will-change:transform; user-select:none;
+}
+.btn-pink{background:linear-gradient(180deg,#ff8fc0,#f975b0);color:#fff;box-shadow:0 10px 28px rgba(249,117,176,.45), inset 0 1px 0 rgba(255,255,255,.5)}
+.btn-glass{color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.chips{display:flex;gap:10px;justify-content:center;margin-top:30px;flex-wrap:wrap}
+.chip{
+  font-size:13px;color:rgba(255,255,255,.92);padding:7px 14px;border-radius:999px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+}
+
+/* ---------- sections ---------- */
+.section{padding:72px 0 8px}
+.section-head{text-align:center;margin-bottom:40px}
+.section-head h2{font-size:clamp(30px,4.6vw,44px);font-weight:700;letter-spacing:-.02em}
+.section-head p{color:var(--ink2);font-size:17px;margin-top:10px}
+
+/* ---------- game card ---------- */
+.game{
+  border-radius:var(--r-lg); overflow:hidden; margin-bottom:34px;
+  display:grid; grid-template-columns:1.05fr 1fr; min-height:340px;
+}
+.game-cover{position:relative;overflow:hidden;background:#111;min-height:300px}
+.game-cover img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.game-cover .fade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.35))}
+.game-body{padding:34px 34px 30px;display:flex;flex-direction:column}
+.game-body h3{font-size:30px;font-weight:700;letter-spacing:-.01em}
+.game-body .en{color:var(--ink2);font-size:13px;letter-spacing:.08em;margin-top:2px;text-transform:uppercase}
+.game-body .desc{color:#3a3a3e;font-size:16px;margin:14px 0 18px}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.tag{font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:999px;background:rgba(0,0,0,.055);color:#333}
+.tag.hot{background:#ffe9f3;color:#d6336c}
+.dl-list{display:flex;flex-direction:column;gap:10px;margin-top:auto}
+.dl-row{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-sm);
+  background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);
+  box-shadow:0 2px 10px rgba(0,0,0,.05);
+}
+.dl-info{flex:1;min-width:0}
+.dl-name{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dl-meta{font-size:12px;color:var(--ink2);margin-top:2px;cursor:pointer}
+.dl-meta:hover{color:var(--blue)}
+.dl-btn{
+  flex:none;cursor:pointer;border:none;font-size:14px;font-weight:700;color:#fff;
+  padding:9px 18px;border-radius:999px;
+  background:linear-gradient(180deg,#ff8fc0,#f975b0);
+  box-shadow:0 6px 16px rgba(249,117,176,.35), inset 0 1px 0 rgba(255,255,255,.5);
+  will-change:transform;
+}
+.dl-note{font-size:12.5px;color:var(--ink2);margin-top:14px}
+
+/* ---------- install ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.step{border-radius:var(--r-md);padding:26px 24px}
+.step .num{
+  width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:16px;color:#fff;
+  background:linear-gradient(180deg,#ff8fc0,#f975b0);box-shadow:0 6px 16px rgba(249,117,176,.4);
+  margin-bottom:14px;
+}
+.step h4{font-size:18px;margin-bottom:8px}
+.step p{font-size:14.5px;color:#3a3a3e}
+.warn{
+  margin-top:18px;border-radius:var(--r-md);padding:18px 22px;font-size:14.5px;
+  background:rgba(255,244,230,.75);border:1px solid rgba(255,190,90,.5);color:#7a4a00;
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+}
+
+/* ---------- footer ---------- */
+footer{margin-top:80px;padding:44px 0 54px;border-top:1px solid var(--line);color:var(--ink2);font-size:13.5px}
+footer .f-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+footer h5{color:var(--ink);font-size:15px;margin-bottom:10px}
+footer p{margin-bottom:8px}
+footer .fine{margin-top:26px;font-size:12px;color:#9a9aa0;line-height:1.7}
+
+[data-reveal]{opacity:0;will-change:transform,opacity}
+@media (max-width:760px){
+  .game{grid-template-columns:1fr}
+  .game-cover{min-height:210px;position:relative}
+  .game-cover img{position:relative;height:210px}
+  .steps{grid-template-columns:1fr}
+  .nav-links{display:none}
+  .game-body{padding:26px 22px}
+  footer .f-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="nav-in">
+  <a class="nav-logo" href="#">美咕噜<b> · 游戏</b></a>
+  <div class="nav-links">
+    <a href="#games">游戏</a><a href="#install">安装方法</a><a href="#about">关于</a>
+  </div>
+</div></nav>
+
+<header class="hero">
+  <div class="hero-bg" aria-hidden="true">
+    <div class="orb orb-pink" data-drift="1"></div>
+    <div class="orb orb-blue" data-drift="2"></div>
+    <div class="orb orb-violet" data-drift="3"></div>
+  </div>
+  <div class="hero-in">
+    <div class="eyebrow" data-reveal>小米手环 · 手表 GALGAME 移植</div>
+    <h1 data-reveal>把喜欢的故事，<br><span class="grad">装进口袋。</span></h1>
+    <p data-reveal>全中文移植，免费下载。抬起手腕，就能继续读下去。</p>
+    <div class="hero-cta" data-reveal>
+      <a class="btn btn-pink" href="#games" data-spring>看看游戏 ↓</a>
+      <a class="btn btn-glass" href="#install" data-spring>安装方法</a>
+    </div>
+    <div class="chips" data-reveal>
+      <span class="chip">免费下载</span><span class="chip">全中文</span>
+      <span class="chip">手环 9 Pro</span><span class="chip">手表 S3 / S4 / S5</span>
+      <span class="chip">手环 8 / 9 / 10 / 11</span><span class="chip">红米 Watch 6</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+<section class="section" id="games">
+  <div class="section-head" data-reveal>
+    <h2>游戏</h2>
+    <p>点下载直接拿文件。干净版可以直接上架分享，完整版请私下传。</p>
+  </div>
+
+  <!-- 星光咖啡馆与死神之蝶 -->
+  <article class="game glass" data-reveal>
+    <div class="game-cover"><img src="covers/cafestella.jpg" alt="星光咖啡馆与死神之蝶 封面" loading="lazy"><div class="fade"></div></div>
+    <div class="game-body">
+      <h3>星光咖啡馆与死神之蝶</h3>
+      <div class="en">Café Stella and the Reaper's Butterflies · YuzuSoft</div>
+      <p class="desc">咖啡馆、死神、与五位女主的夏天。全中文，共通线 + 5 条女主路线及后日谈，支持存档、流程图与 CG 画廊。</p>
+      <div class="tags"><span class="tag hot">干净版</span><span class="tag">手环 9 Pro</span><span class="tag">圆表 466</span><span class="tag">胶囊 192</span></div>
+      <div class="dl-list">
+        <div class="dl-row"><div class="dl-info"><div class="dl-name">手环 9 Pro · 干净版 v1.1.6</div><div class="dl-meta" data-md5="36c29bd950de5062c0deee6007294724" title="点一下复制完整 MD5">14,834,041 字节 · MD5 36c29bd9…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.cafestella.release.1.1.6.clean.q50.rpk" download>下载</a></div>
+        <div class="dl-row"><div class="dl-info"><div class="dl-name">圆表 466 · 全 CG v1.1.6</div><div class="dl-meta" data-md5="93384353311e4f0c44064877596c9b0c" title="点一下复制完整 MD5">18,238,399 字节 · MD5 93384353…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.cafestella.release.1.1.6_round466.rpk" download>下载</a></div>
+        <div class="dl-row"><div class="dl-info"><div class="dl-name">圆表 466 · 少 HCG v1.1.6</div><div class="dl-meta" data-md5="b6c791a9a09bea5ff9e4c975f4f566a4" title="点一下复制完整 MD5">17,282,860 字节 · MD5 b6c791a9…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.cafestella.release.1.1.6_round466_lite.rpk" download>下载</a></div>
+        <div class="dl-row"><div class="dl-info"><div class="dl-name">胶囊 192 · 全 CG v1.1.6</div><div class="dl-meta" data-md5="ec087a425ad142bb43398aacba319750" title="点一下复制完整 MD5">12,406,667 字节 · MD5 ec087a42…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.cafestella.release.1.1.6_capsule192.rpk" download>下载</a></div>
+        <div class="dl-row"><div class="dl-info"><div class="dl-name">胶囊 192 · 少 HCG v1.1.6</div><div class="dl-meta" data-md5="83e93bdd81c7b47622876a58edfa0863" title="点一下复制完整 MD5">11,795,505 字节 · MD5 83e93bdd…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.cafestella.release.1.1.6_capsule192_lite.rpk" download>下载</a></div>
+      </div>
+      <p class="dl-note">干净版：成人内容已移除，老存档失效。圆表 / 胶囊版未在真机上装机实测。</p>
+    </div>
+  </article>
+
+  <!-- 片轮少女 -->
+  <article class="game glass" data-reveal>
+    <div class="game-cover"><img src="covers/katawa.jpg" alt="片轮少女 封面" loading="lazy"><div class="fade"></div></div>
+    <div class="game-body">
+      <h3>片轮少女</h3>
+      <div class="en">Katawa Shoujo · Four Leaf Studios</div>
+      <p class="desc">与五位少女的青春物语。全中文，共通线 + 5 条女主路线，支持存档、流程图与 CG 画廊。</p>
+      <div class="tags"><span class="tag hot">干净版</span><span class="tag">手环 9 Pro</span><span class="tag">红米 Watch 6</span><span class="tag">圆表 466</span><span class="tag">胶囊 192</span></div>
+      <div class="dl-list">
+        <div class="dl-row"><div class="dl-info"><div class="dl-name">手环 9 Pro · 干净版 v1.0.0</div><div class="dl-meta" data-md5="d77efdfaa093e98d786398c3f872ccc5" title="点一下复制完整 MD5">9,786,675 字节 · MD5 d77efdfa…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.katawa.release.1.0.0.clean.rpk" download>下载</a></div>
+        <div class="dl-row"><div class="dl-info"><div class="dl-name">红米 Watch 6 · 完整版 v1.0.0</div><div class="dl-meta" data-md5="9816f23da2e6701d397aa94eac01c997" title="点一下复制完整 MD5">13,654,194 字节 · MD5 9816f23d…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.katawa.rw6.debug.1.0.0.bin" download>下载</a></div>
+        <div class="dl-row"><div class="dl-info"><div class="dl-name">圆表 466 · 全 CG v1.0.0</div><div class="dl-meta" data-md5="f1c7772ba37cd151f217b868efe38565" title="点一下复制完整 MD5">11,030,074 字节 · MD5 f1c7772b…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.katawa.release.1.0.0_round466.rpk" download>下载</a></div>
+        <div class="dl-row"><div class="dl-info"><div class="dl-name">圆表 466 · 少 HCG v1.0.0</div><div class="dl-meta" data-md5="230584f3b471463ba3f5821e23edd230" title="点一下复制完整 MD5">10,716,460 字节 · MD5 230584f3…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.katawa.release.1.0.0_round466_lite.rpk" download>下载</a></div>
+        <div class="dl-row"><div class="dl-info"><div class="dl-name">胶囊 192 · 全 CG v1.0.0</div><div class="dl-meta" data-md5="e95fc9e617473776b36d7d2ad456dfdb" title="点一下复制完整 MD5">7,579,045 字节 · MD5 e95fc9e6…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.katawa.release.1.0.0_capsule192.rpk" download>下载</a></div>
+        <div class="dl-row"><div class="dl-info"><div class="dl-name">胶囊 192 · 少 HCG v1.0.0</div><div class="dl-meta" data-md5="b05a2daa1902e8c5eaf4425878991d4a" title="点一下复制完整 MD5">7,362,375 字节 · MD5 b05a2daa…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.katawa.release.1.0.0_capsule192_lite.rpk" download>下载</a></div>
+      </div>
+      <p class="dl-note">干净版：成人内容已移除。红米 Watch 6 版、圆表 / 胶囊版未在真机上装机实测。</p>
+    </div>
+  </article>
+
+  <!-- 水仙 -->
+  <article class="game glass" data-reveal>
+    <div class="game-cover"><img src="covers/narcissu.jpg" alt="水仙 标题图" loading="lazy"><div class="fade"></div></div>
+    <div class="game-body">
+      <h3>水仙</h3>
+      <div class="en">Narcissu · stage-nana</div>
+      <p class="desc">绝症少女与少年的最后一次旅行。短篇催泪，全年龄，没有成人内容。</p>
+      <div class="tags"><span class="tag">全年龄</span><span class="tag">圆表 466</span><span class="tag">胶囊 192</span></div>
+      <div class="dl-list">
+        <div class="dl-row"><div class="dl-info"><div class="dl-name">圆表 466 · v1.0.0</div><div class="dl-meta" data-md5="45a7d478f08bc2863541a8aae023857a" title="点一下复制完整 MD5">1,836,313 字节 · MD5 45a7d478…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.narcissu.release.1.0.0_round466.rpk" download>下载</a></div>
+        <div class="dl-row"><div class="dl-info"><div class="dl-name">胶囊 192 · v1.0.0</div><div class="dl-meta" data-md5="8c7f9ce26cad5ec47135bb16c08af5f6" title="点一下复制完整 MD5">1,190,833 字节 · MD5 8c7f9ce2…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.narcissu.release.1.0.0_capsule192.rpk" download>下载</a></div>
+      </div>
+      <p class="dl-note">圆表 / 胶囊版未在真机上装机实测。</p>
+    </div>
+  </article>
+
+  <!-- 心跳文学部 -->
+  <article class="game glass" data-reveal>
+    <div class="game-cover"><img src="covers/ddlc.png" alt="心跳文学部 标志" loading="lazy" style="object-fit:contain;background:#fff;padding:40px"><div class="fade"></div></div>
+    <div class="game-body">
+      <h3>心跳文学部</h3>
+      <div class="en">Doki Doki Literature Club! Phase 1 · Team Salvato</div>
+      <p class="desc">心跳文学部 Phase 1。占位图版，剧本先行，立绘与 CG 还是占位图。</p>
+      <div class="tags"><span class="tag">全年龄</span><span class="tag">占位图版</span><span class="tag">圆表 466</span><span class="tag">胶囊 192</span></div>
+      <div class="dl-list">
+        <div class="dl-row"><div class="dl-info"><div class="dl-name">圆表 466 · v1.0.0</div><div class="dl-meta" data-md5="91c99d5c0a2a4c4c580a7894f0edd840" title="点一下复制完整 MD5">670,147 字节 · MD5 91c99d5c…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.ddlc.release.1.0.0_round466.rpk" download>下载</a></div>
+        <div class="dl-row"><div class="dl-info"><div class="dl-name">胶囊 192 · v1.0.0</div><div class="dl-meta" data-md5="3ef0b07e90ccaa504ffcb2b08799cea4" title="点一下复制完整 MD5">628,640 字节 · MD5 3ef0b07e…</div></div><a class="dl-btn" data-spring href="downloads/com.migulu.ddlc.release.1.0.0_capsule192.rpk" download>下载</a></div>
+      </div>
+      <p class="dl-note">圆表 / 胶囊版未在真机上装机实测。</p>
+    </div>
+  </article>
+</section>
+
+<section class="section" id="install">
+  <div class="section-head" data-reveal>
+    <h2>安装方法</h2>
+    <p>三步装好。装之前先对一下字节数，下载很容易断。</p>
+  </div>
+  <div class="steps">
+    <div class="step glass" data-reveal><div class="num">1</div><h4>先停小米运动健康</h4><p>装机前先停掉小米运动健康，再打开 AstroBox，不然装不上。</p></div>
+    <div class="step glass" data-reveal><div class="num">2</div><h4>AstroBox 安装</h4><p>在 AstroBox 里选择下载好的 .rpk / .bin 文件，安装到手环 / 手表上。</p></div>
+    <div class="step glass" data-reveal><div class="num">3</div><h4>看版本号确认</h4><p>装好后看主界面左下角的版本号，对上就说明装的是这个版本。</p></div>
+  </div>
+  <div class="warn" data-reveal>⚠️ 下载经常在 10.3 MB 左右断掉，装之前务必核对文件大小（字节数）和 MD5，对不上就重新下。不要装一半的文件，装到 100% 黑屏过。</div>
+</section>
+
+<section class="section" id="about">
+  <div class="section-head" data-reveal>
+    <h2>关于</h2>
+    <p>免费移植，仅供个人学习交流。</p>
+  </div>
+  <footer>
+    <div class="f-grid">
+      <div>
+        <h5>联系</h5>
+        <p>QQ 群：590248751</p>
+        <p>作者：等我刷个美咕噜</p>
+        <p>引擎作者：hezdaaa</p>
+      </div>
+      <div>
+        <h5>原作</h5>
+        <p>星光咖啡馆与死神之蝶 © YuzuSoft</p>
+        <p>片轮少女 © Four Leaf Studios</p>
+        <p>水仙 © stage-nana</p>
+        <p>心跳文学部 © Team Salvato</p>
+      </div>
+    </div>
+    <p class="fine">本移植仅供个人学习交流，与 AstroBox、小米及其他设备厂商无关。原作版权归各自权利方所有。如有问题，加 QQ 群 590248751。谜语小丑不在这里。</p>
+  </footer>
+</section>
+</main>
+
+<script>
+/* ---- tiny spring engine: real spring physics, interruptible ---- */
+(function(){
+  "use strict";
+  var raf = window.requestAnimationFrame.bind(window);
+  var springs = [];
+  var running = false;
+  function tick(){
+    var alive = false;
+    for (var i = 0; i < springs.length; i++){
+      var s = springs[i];
+      if (!s.active) continue;
+      alive = true;
+      // semi-implicit Euler: v += (-k(x-t) - c*v) * dt ; x += v * dt
+      var dt = 1/60;
+      var a = -s.k * (s.x - s.t) - s.c * s.v;
+      s.v += a * dt;
+      s.x += s.v * dt;
+      if (Math.abs(s.x - s.t) < 0.001 && Math.abs(s.v) < 0.001){
+        s.x = s.t; s.v = 0; s.active = false;
+      }
+      s.apply(s.x);
+    }
+    if (alive){ raf(tick); } else { running = false; }
+  }
+  function Spring(apply, k, c){
+    this.apply = apply; this.k = k || 170; this.c = c || 22;
+    this.x = 0; this.v = 0; this.t = 0; this.active = false;
+    springs.push(this);
+  }
+  Spring.prototype.go = function(target, from){
+    if (from !== undefined){ this.x = from; this.v = 0; }
+    this.t = target; this.active = true;
+    if (!running){ running = true; raf(tick); }
+  };
+
+  /* per-element transform spring: {y, s} -> translateY + scale */
+  function makeTransform(el, k, c){
+    var st = { y: 0, s: 1 };
+    var sy = new Spring(function(v){ st.y = v; paint(); }, k, c);
+    var ss = new Spring(function(v){ st.s = v; paint(); }, k, c);
+    function paint(){
+      el.style.transform = "translateY(" + st.y.toFixed(2) + "px) scale(" + st.s.toFixed(4) + ")";
+    }
+    return {
+      setY: function(t, from){ sy.go(t, from); },
+      setS: function(t, from){ ss.go(t, from); }
+    };
+  }
+
+  /* ---- scroll reveal with spring ---- */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if (!en.isIntersecting) return;
+      var el = en.target;
+      io.unobserve(el);
+      var ctl = el._spring;
+      if (ctl){ ctl.setY(0); }
+      var op = new Spring(function(v){ el.style.opacity = v.toFixed(3); }, 120, 20);
+      op.go(1, 0);
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll("[data-reveal]").forEach(function(el){
+    var ctl = makeTransform(el, 150, 20);
+    el._spring = ctl;
+    ctl.setY(26, 26);
+    el.style.opacity = "0";
+    io.observe(el);
+  });
+
+  /* ---- press feedback: bouncy scale, interruptible ---- */
+  document.querySelectorAll("[data-spring]").forEach(function(el){
+    var ctl = makeTransform(el, 260, 18);
+    el.addEventListener("pointerdown", function(){ ctl.setS(0.93); });
+    ["pointerup","pointerleave","pointercancel"].forEach(function(ev){
+      el.addEventListener(ev, function(){ ctl.setS(1); });
+    });
+  });
+
+  /* ---- hero orbs: slow drift, pointer parallax with spring ---- */
+  var orbs = Array.prototype.slice.call(document.querySelectorAll("[data-drift]"));
+  var orbsCtl = orbs.map(function(o, i){
+    var ctl = makeTransform(o, 60, 14);
+    var base = (i - 1) * 14;
+    ctl.setY(base, base);
+    return { ctl: ctl, base: base, f: (i + 1) * 0.35 };
+  });
+  var hero = document.querySelector(".hero");
+  if (hero && window.matchMedia("(pointer:fine)").matches){
+    hero.addEventListener("pointermove", function(e){
+      var r = hero.getBoundingClientRect();
+      var dx = (e.clientX - r.left) / r.width - 0.5;
+      var dy = (e.clientY - r.top) / r.height - 0.5;
+      orbsCtl.forEach(function(o){
+        o.ctl.setY(o.base + dy * 26 * o.f);
+      });
+      orbs.forEach(function(o, i){
+        o.style.marginLeft = (dx * 18 * (i + 1) * 0.3).toFixed(1) + "px";
+      });
+    });
+  }
+
+  /* ---- click MD5 to copy full hash ---- */
+  document.querySelectorAll(".dl-meta[data-md5]").forEach(function(el){
+    el.addEventListener("click", function(){
+      var md5 = el.getAttribute("data-md5");
+      var done = function(){
+        var old = el.textContent;
+        el.textContent = "已复制完整 MD5 ✓";
+        setTimeout(function(){ el.textContent = old; }, 1400);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(md5).then(done, done);
+      } else { done(); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
