@@ -6,6 +6,10 @@
 <title>美咕噜的游戏 · 小米手环 / 手表 GALGAME 移植下载</title>
 <meta name="description" content="美咕噜移植的免费 GALGAME：星光咖啡馆与死神之蝶、片轮少女、水仙、心跳文学部。选择你的手表，再下载。适配手环 9 Pro / 10 Pro、手表 S3/S4/S5、手环 8/9/10/11、红米 Watch 6。">
 <style>
+/* ============ v21（3D 模表试玩：可旋转模型 + 表盘上能玩一小段） ============ */
+/* ============ v20（手表演示：可拖动旋转 + 四款表可切换） ============ */
+/* ============ v19（更苹果：比较机型/游戏表、Hero 手表实拍、展示区每款配色） ============ */
+/* ============ v18（加功能 + 美化：展示区下载按钮、Hero 数据行、DDLC 新封面、卡片不再裁切、最近更新、开发中、文件信息补文件名与完整 MD5、复制核对信息、哈希路由、分享、页脚贴底、安装页补 AstroBox 与排错） ============ */
 /* ============ v17（修逻辑：缺失提示分版本/机型、全部游戏页按版本过滤可装机型、死按钮改查看另一版本、补少 HCG 版链接） ============
 /* ============ Apple 化 v16（首页改苹果式大展示：一屏一款游戏，大标题 + 大图 + 文字链，灰白交替） ============
 /* ============ Apple 化 v15（修红米页横向溢出：分段器内滑 + 副标题分行 + 根级禁横向滚动） ============
@@ -33,7 +37,9 @@ html{scroll-behavior:smooth;overflow-x:hidden}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   background:var(--bg); color:var(--ink); line-height:1.5; overflow-x:hidden;
+  display:flex;flex-direction:column;min-height:100vh;
 }
+main{flex:1;display:flex;flex-direction:column}
 a{color:var(--blue);text-decoration:none}
 a:hover{text-decoration:underline}
 img{display:block;max-width:100%}
@@ -69,13 +75,123 @@ img{display:block;max-width:100%}
 .btn-link{background:transparent;color:var(--blue);font-size:15px;padding:11px 24px;border:1px solid var(--blue);border-radius:999px}
 .btn-link:hover{background:rgba(0,113,227,.06);text-decoration:none}
 /* ---------- 游戏大展示：苹果产品区，一屏一款 ---------- */
-.showcase{margin:0 -22px;padding:64px 22px 72px;text-align:center}
+.showcase{margin:0 -22px;padding:48px 22px 56px;text-align:center}
 .showcase.band{background:var(--card)}
 .showcase h2{font-size:clamp(32px,4.4vw,40px);font-weight:700;letter-spacing:-.025em}
 .showcase .show-sub{color:var(--ink2);font-size:clamp(17px,2.4vw,21px);max-width:580px;margin:12px auto 0}
-.show-links{display:flex;gap:28px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.show-links{display:flex;gap:28px;justify-content:center;align-items:center;margin-top:20px;flex-wrap:wrap}
 .show-links button{border:none;background:none;cursor:pointer;color:var(--blue);font-size:17px}
 .show-links button:hover{text-decoration:underline}
+.show-links .btn:hover{text-decoration:none}
+/* ---------- v18 新增 ---------- */
+.hero-stats{margin-top:18px;font-size:14px;color:var(--ink2)}
+.pop-badge{display:inline-block;font-size:13px;font-weight:600;color:#f56300;margin-bottom:10px}
+.games-current{font-size:14px;color:var(--ink2);margin-top:10px}
+.games-current button{border:none;background:none;cursor:pointer;color:var(--blue);font-size:14px;padding:0}
+.news-list,.dev-list{padding:6px 22px}
+.news-row{display:flex;gap:16px;padding:16px 0;border-top:1px solid var(--line)}
+.news-row:first-child{border-top:none}
+.news-date{flex:none;font-size:13px;font-weight:600;color:var(--blue);padding-top:2px}
+.news-row b{font-size:15px;font-weight:600}
+.news-row p{font-size:13.5px;color:var(--ink2);margin-top:2px}
+.dev-row{padding:14px 0;border-top:1px solid var(--line)}
+.dev-row:first-child{border-top:none}
+.dev-row b{display:block;font-size:15px;font-weight:600}
+.dev-row span{display:block;font-size:13.5px;color:var(--ink2);margin-top:2px}
+.install-more{margin-top:26px}
+.mini-head{font-size:17px;font-weight:600;margin:26px 0 4px}
+.fix-list{list-style:none}
+.fix-list li{padding:11px 0;border-top:1px solid var(--line);font-size:14.5px;color:var(--ink3)}
+.fix-list li:first-child{border-top:none}
+.dl-other .row-sub{color:var(--ink2);font-size:12px;word-break:break-all}
+.dl-other .row-actions{display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex:none}
+.copy-check{border:1px solid var(--line);background:transparent;cursor:pointer;color:var(--blue);font-size:12px;padding:4px 10px;border-radius:999px;white-space:nowrap}
+/* ---------- v19 新增：苹果式比较 + Hero 手表实拍 + 展示区配色 ---------- */
+.hero-shot{margin:38px auto 0}
+.watch-stage{perspective:1000px}
+.watch-frame{margin:0 auto;background:#1d1d1f;box-shadow:0 18px 44px rgba(0,0,0,.22);cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;will-change:transform;transition:width .55s cubic-bezier(.22,1,.36,1),height .55s cubic-bezier(.22,1,.36,1),border-radius .55s cubic-bezier(.22,1,.36,1),padding .55s cubic-bezier(.22,1,.36,1)}
+.watch-frame:active{cursor:grabbing}
+[data-theme="dark"] .watch-frame{background:#2c2c2e;box-shadow:0 18px 44px rgba(0,0,0,.6)}
+.watch-long{width:168px;height:240px;border-radius:30px;padding:8px}
+.watch-round{width:220px;height:220px;border-radius:50%;padding:10px}
+.watch-capsule{width:92px;height:235px;border-radius:999px;padding:7px}
+.watch-rw6{width:200px;height:238px;border-radius:44px;padding:10px}
+.watch-face{position:relative;width:100%;height:100%;overflow:hidden;transition:opacity .18s}
+.watch-long .watch-face{border-radius:22px}
+.watch-round .watch-face{border-radius:50%}
+.watch-capsule .watch-face{border-radius:999px}
+.watch-rw6 .watch-face{border-radius:34px}
+.watch-face img{width:100%;height:100%;object-fit:cover;display:block}
+.watch-mock{position:absolute;inset:0;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:12px 8px 14px}
+.watch-mock::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 42%,rgba(0,0,0,.6))}
+.watch-mock .wm-title{position:relative;color:#fff;font-weight:700;font-size:15px;line-height:1.35;text-align:center;text-shadow:0 1px 8px rgba(0,0,0,.55)}
+.watch-mock .wm-btn{position:relative;margin-top:8px;background:rgba(255,255,255,.94);color:#111;font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px}
+.watch-round .wm-title{font-size:13px}
+.watch-round .wm-btn{font-size:11px;padding:4px 10px}
+.watch-capsule .watch-mock{padding:10px 6px 12px}
+.watch-capsule .wm-title{font-size:11px}
+.watch-capsule .wm-btn{font-size:10px;padding:4px 9px;margin-top:6px}
+.watch-hint{margin-top:16px;font-size:12.5px;color:var(--ink2)}
+.watch-switch{display:flex;margin:14px auto 0;max-width:340px}
+.watch-switch button{flex:1}
+.hero-shot figcaption{margin-top:10px;font-size:13px;color:var(--ink2)}
+/* ---------- v21 新增：3D 模表试玩 ---------- */
+.demo-wrap{max-width:520px;margin:0 auto;text-align:center}
+.model-stage{position:relative;height:360px;display:flex;align-items:center;justify-content:center;perspective:1200px;background:radial-gradient(ellipse at center,rgba(0,113,227,.10),transparent 65%);border-radius:24px;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+[data-theme="dark"] .model-stage{background:radial-gradient(ellipse at center,rgba(0,113,227,.18),transparent 65%)}
+.model-watch{position:relative;width:150px;height:325px;transform-style:preserve-3d;will-change:transform}
+.model-strap{position:absolute;left:50%;width:72px;margin-left:-36px;height:55px;background:linear-gradient(180deg,#43484f,#26272b);border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+.model-strap-top{top:0;transform:rotateX(30deg);transform-origin:50% 100%}
+.model-strap-top::after{content:"";position:absolute;left:9px;right:9px;top:9px;height:7px;border:1.5px solid rgba(255,255,255,.4);border-radius:4px}
+.model-strap-bottom{bottom:0;transform:rotateX(-30deg);transform-origin:50% 0}
+.model-strap-bottom::after{content:"";position:absolute;left:50%;top:12px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:rgba(0,0,0,.55);box-shadow:0 14px 0 rgba(0,0,0,.55),0 28px 0 rgba(0,0,0,.55)}
+.model-case{position:absolute;left:0;top:55px;width:150px;height:215px;border-radius:32px;background:linear-gradient(160deg,#3c3f45,#17181b 60%);box-shadow:0 20px 44px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.18)}
+.model-screen{position:absolute;inset:8px;border-radius:24px;overflow:hidden;background:#000}
+.model-back{position:absolute;left:4px;top:59px;width:142px;height:207px;border-radius:28px;background:#101012;transform:translateZ(-12px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.model-back .model-sensor{width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#2c2f36,#0c0d0f 70%);box-shadow:inset 0 0 0 3px rgba(255,255,255,.06)}
+.model-back span{font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.45)}
+.mg-bg{position:absolute;inset:0;background-size:cover;background-position:center}
+.mg-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.5))}
+.mg-status{position:absolute;top:7px;left:0;right:0;text-align:center;font-size:10px;font-weight:600;color:rgba(255,255,255,.92);text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.mg-box{position:absolute;left:0;right:0;bottom:0;padding:10px 9px 12px;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.8) 32%)}
+.mg-name{display:inline-block;font-size:10px;font-weight:700;color:#ffd9a0;background:rgba(0,0,0,.5);padding:2px 7px;border-radius:999px;margin-bottom:5px}
+.mg-text{font-size:11.5px;line-height:1.55;color:#fff;text-align:left}
+.mg-next{position:absolute;right:8px;bottom:5px;font-size:10px;color:rgba(255,255,255,.9);animation:mgBlink 1.1s infinite}
+@keyframes mgBlink{0%,100%{opacity:.25}50%{opacity:1}}
+.mg-choice{position:absolute;left:0;right:0;bottom:0;padding:10px 9px 12px;display:flex;flex-direction:column;gap:7px}
+.mg-choice button{border:none;background:rgba(255,255,255,.94);color:#111;font-size:11.5px;font-weight:600;padding:8px 10px;border-radius:10px;cursor:pointer;text-align:left}
+.mg-end{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px;background:rgba(10,10,14,.85)}
+.mg-end b{font-size:14px;color:#fff}
+.mg-end p{font-size:11px;line-height:1.6;color:rgba(255,255,255,.78);margin:7px 0 12px}
+.mg-dl{border:none;background:#0071e3;color:#fff;font-size:12px;font-weight:600;padding:8px 16px;border-radius:999px;cursor:pointer}
+.mg-re{border:none;background:transparent;color:rgba(255,255,255,.85);font-size:11px;padding:7px;cursor:pointer}
+.demo-hint{margin-top:14px;font-size:12.5px;color:var(--ink2)}
+.demo-meta{margin-top:8px;font-size:13px;color:var(--ink2)}
+.demo-meta b{display:block;font-size:15px;color:var(--ink);margin-bottom:2px}
+.show-cafe{background:#fdf1ec}
+.show-mint{background:#e9f4ef}
+.show-pink{background:#fdeef3}
+[data-theme="dark"] .show-cafe{background:#241a15}
+[data-theme="dark"] .show-mint{background:#121f1a}
+[data-theme="dark"] .show-pink{background:#241419}
+.compare-card{overflow:hidden}
+.compare-scroll{overflow-x:auto;scrollbar-width:none}
+.compare-scroll::-webkit-scrollbar{display:none}
+.compare{width:100%;min-width:660px;border-collapse:separate;border-spacing:0;font-size:14.5px}
+.compare th,.compare td{padding:14px 14px;text-align:left;vertical-align:top;border-top:1px solid var(--line)}
+.compare tr:first-child th,.compare tr:first-child td{border-top:none}
+.compare th:first-child,.compare td:first-child{position:sticky;left:0;background:var(--card);color:var(--ink2);font-weight:500;white-space:nowrap;width:96px;z-index:1}
+.compare .cmp-head{text-align:center;vertical-align:top}
+.compare .cmp-head b{display:block;font-size:16px;margin-top:10px}
+.compare .cmp-head .cmp-sub{display:block;font-size:12.5px;color:var(--ink2);margin-top:2px}
+.compare .cmp-head button{display:inline-block;border:none;background:none;cursor:pointer;color:var(--blue);font-size:14px;padding:0;margin-top:8px}
+.cmp-shape{height:52px;display:flex;align-items:flex-end;justify-content:center}
+.cmp-shape .shape-long{width:30px;height:46px;border-radius:7px}
+.cmp-shape .shape-round{width:46px;height:46px}
+.cmp-shape .shape-capsule{width:24px;height:50px}
+.cmp-shape .shape-rw6{width:34px;height:42px;border-radius:8px}
+.cmp-thumb{height:64px;display:flex;align-items:center;justify-content:center}
+.cmp-thumb img{max-height:64px;max-width:96px;border-radius:8px}
 .show-img{margin:40px auto 0;border-radius:18px;overflow:hidden}
 .show-img img{width:100%;display:block}
 
@@ -128,8 +244,8 @@ img{display:block;max-width:100%}
 /* ---------- 游戏卡：一个游戏一张卡，一个主下载按钮 ---------- */
 .game-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
 .game{display:flex;flex-direction:column;will-change:transform}
-.game-cover{aspect-ratio:16/9;overflow:hidden;background:#111}
-.game-cover img{width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.game-cover{aspect-ratio:3/2;overflow:hidden;background:var(--bg)}
+.game-cover img{width:100%;height:100%;object-fit:contain;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
 .game:hover .game-cover img{transform:scale(1.05)}
 .game-body{padding:22px 22px 20px;display:flex;flex-direction:column;flex:1}
 .game-body h3{font-size:24px;font-weight:700;letter-spacing:-.01em}
@@ -232,7 +348,7 @@ img{display:block;max-width:100%}
 .menu-arrow{font-size:20px;color:var(--ink2)}
 
 /* ---------- 页脚：苹果式 ---------- */
-footer{margin-top:80px;padding:36px 0 48px;color:var(--ink2);font-size:12px;line-height:1.7}
+footer{margin-top:auto;padding:56px 0 48px;color:var(--ink2);font-size:12px;line-height:1.7}
 footer .f-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:20px}
 footer h5{color:var(--ink);font-size:13px;margin-bottom:8px}
 footer p{margin-bottom:4px}
@@ -277,8 +393,10 @@ footer .fine{color:#9a9aa0}
     <button data-go="capsule" data-nav="capsule">胶囊表</button>
     <button data-go="rw6" data-nav="rw6">红米 Watch 6</button>
     <button data-go="games" data-nav="games">全部游戏</button>
+    <button data-go="compare" data-nav="compare">比较</button>
   </div>
   <button class="theme-btn" id="themeBtn" data-spring>深色</button>
+  <button class="theme-btn" data-share data-spring>分享</button>
   <button class="nav-menu-btn" id="navMenuBtn" aria-label="菜单" data-spring>☰</button>
 </div></nav>
 
@@ -297,6 +415,23 @@ footer .fine{color:#9a9aa0}
         <button class="btn btn-link" data-go="games" data-spring>浏览全部游戏 &gt;</button>
       </div>
       <p class="byline" id="heroCurrent" data-reveal>请选择你的手表</p>
+      <p class="hero-stats" data-reveal>4 款游戏 · 4 种机型 · 17 个安装包</p>
+      <figure class="hero-shot" data-reveal>
+        <div class="watch-stage">
+          <div class="watch-frame watch-rw6" id="watchFrame">
+            <div class="watch-face" id="watchFace"><img src="shots/katawa-rw6-dialogue.png" alt="片轮少女在红米 Watch 6 上的运行画面" draggable="false"></div>
+          </div>
+        </div>
+        <p class="watch-hint">左右拖动旋转</p>
+        <div class="watch-switch seg" id="watchSeg">
+          <div class="seg-ind"></div>
+          <button data-watch="long" data-spring>长表</button>
+          <button data-watch="round" data-spring>圆表</button>
+          <button data-watch="capsule" data-spring>胶囊表</button>
+          <button data-watch="rw6" class="on" data-spring>红米</button>
+        </div>
+        <figcaption id="watchCaption">片轮少女 · 红米 Watch 6 效果预览</figcaption>
+      </figure>
     </div>
   </header>
   <div id="homeShowcases"></div>
@@ -335,8 +470,44 @@ footer .fine{color:#9a9aa0}
     <p class="home-note">免费 · 全中文 · 手环 9 Pro 与 10 Pro 共用同一安装包</p>
     <div class="home-links">
       <button data-go="install" data-spring>安装方法 &gt;</button>
+      <button data-go="compare" data-spring>比较机型 &gt;</button>
       <button data-go="faq" data-spring>常见问题 &gt;</button>
       <button data-go="about" data-spring>关于作者 &gt;</button>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head" data-reveal>
+      <h2>试玩</h2>
+      <p>在手表上玩一小段 · 原创小剧场，非游戏原文。</p>
+    </div>
+    <div class="demo-wrap" data-reveal>
+      <div class="model-stage" id="modelStage">
+        <div class="model-watch" id="modelWatch">
+          <div class="model-strap model-strap-top"></div>
+          <div class="model-strap model-strap-bottom"></div>
+          <div class="model-back"><div class="model-sensor"></div><span>美咕噜 · GALGAME</span></div>
+          <div class="model-case">
+            <div class="model-screen" id="modelScreen"></div>
+          </div>
+        </div>
+      </div>
+      <p class="demo-hint">拖动旋转模型 · 点表盘推进剧情</p>
+      <div class="demo-meta"><b>星光咖啡馆 · 长表试玩</b><span>一小段原创小剧场，完整版有 5 条路线。</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head" data-reveal>
+      <h2>最近更新</h2>
+      <p>新版本与新机型，第一时间在这里。</p>
+    </div>
+    <div class="news-list card" data-reveal>
+      <div class="news-row"><span class="news-date">11-23</span><div><b>片轮少女 · 红米 Watch 6 版上架</b><p>完整版 v1.0.0，432 × 514，红米 Watch 5 / 6 可用。</p></div></div>
+      <div class="news-row"><span class="news-date">11-21</span><div><b>圆表 / 胶囊表适配</b><p>小米手表 S3 / S4 / S5、手环 8 / 9 / 10 / 11，共 4 款游戏可装。</p></div></div>
+      <div class="news-row"><span class="news-date">11-19</span><div><b>片轮少女干净版</b><p>成人内容已移除，老存档失效。</p></div></div>
+      <div class="news-row"><span class="news-date">11-18</span><div><b>星光咖啡馆与死神之蝶干净版 v1.1.6</b><p>已上架米坛，成人内容已移除。</p></div></div>
+      <div class="news-row"><span class="news-date">11-15</span><div><b>星光咖啡馆与死神之蝶完整版 v1.1.7</b><p>压缩至 15 MB 以下，可直接下载。</p></div></div>
     </div>
   </section>
 </section>
@@ -386,10 +557,32 @@ footer .fine{color:#9a9aa0}
       <h2>全部游戏</h2>
       <p>共 4 款。选择你喜欢的故事。</p>
     </div>
+    <p class="games-current" id="gamesCurrent"></p>
     <div class="group-label">长篇恋爱</div>
     <div class="game-grid" id="gamesLong"></div>
     <div class="group-label">短篇</div>
     <div class="game-grid" id="gamesShort"></div>
+    <div class="group-label">开发中</div>
+    <div class="dev-list card" data-reveal>
+      <div class="dev-row"><b>谜语小丑</b><span>干净版已做好，等片轮少女提完再提。</span></div>
+      <div class="dev-row"><b>魔女的夜宴</b><span>完整版、圆表 / 胶囊版已有，待上架。</span></div>
+      <div class="dev-row"><b>GalGod</b><span>完整版已有，圆表 / 胶囊版待定。</span></div>
+      <div class="dev-row"><b>星空列车与白的旅行 · ATRI</b><span>候选中，等游戏文件。</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= COMPARE ================= -->
+<section class="view" id="view-compare">
+  <div class="section">
+    <div class="section-head">
+      <h2>比较</h2>
+      <p>选一块表，选一款游戏，一眼看清差别。</p>
+    </div>
+    <div class="group-label">机型</div>
+    <div class="card compare-card" data-reveal><div class="compare-scroll"><table class="compare" id="compareDevices"></table></div></div>
+    <div class="group-label">游戏</div>
+    <div class="card compare-card" data-reveal><div class="compare-scroll"><table class="compare" id="compareGames"></table></div></div>
   </div>
 </section>
 
@@ -403,6 +596,17 @@ footer .fine{color:#9a9aa0}
       <div class="step card" data-reveal><div class="num">3</div><h4>核对版本号</h4><p>安装完成后，查看主界面左下角的版本号。</p></div>
     </div>
     <div class="warn" data-reveal>下载可能在 10.3 MB 左右中断。安装前请核对文件大小与 MD5；如不一致，请重新下载。切勿安装未下载完整的文件。</div>
+    <div class="install-more" data-reveal>
+      <a class="btn btn-link" href="https://astrobox.online" target="_blank" rel="noopener" data-spring>下载 AstroBox &gt;</a>
+      <h3 class="mini-head">装不上？</h3>
+      <ul class="fix-list">
+        <li>先停用小米运动健康，再打开 AstroBox 重新安装。</li>
+        <li>核对文件大小（字节数）与页面标注是否一致；不一致就是下载中断了，请重新下载。</li>
+        <li>轻点文件信息里的 MD5 或「复制核对信息」，可复制完整值进行比对。</li>
+        <li>不要安装未下载完整的文件；装到 100% 失败或黑屏，多数是文件不完整。</li>
+        <li>请勿连续重复安装；仍失败请到 QQ 群 590248751 咨询。</li>
+      </ul>
+    </div>
   </div>
 </section>
 
@@ -416,7 +620,7 @@ footer .fine{color:#9a9aa0}
       <details class="faq-item card" data-reveal><summary>下载完成后如何核对？<span class="chev">▼</span></summary><div class="a">请核对文件大小（字节数）是否与页面标注一致；轻点 MD5 可复制完整值进行比对。如大小不符，说明下载已中断，请重新下载。</div></details>
       <details class="faq-item card" data-reveal><summary>装到 100% 失败 / 黑屏怎么办？<span class="chev">▼</span></summary><div class="a">请先核对文件大小与 MD5，多数情况下是文件未下载完整。确认文件完整后仍失败，请停用小米运动健康后重新安装；请勿连续重复安装。</div></details>
       <details class="faq-item card" data-reveal><summary>干净版可以使用旧存档吗？<span class="chev">▼</span></summary><div class="a">不能。干净版删除了部分剧情，旧存档将失效；安装干净版前，请删除旧存档并重新开始。</div></details>
-      <details class="faq-item card" data-reveal><summary>为什么没有谜语小丑？<span class="chev">▼</span></summary><div class="a">暂未上架本站。如需了解，请加入 QQ 群咨询作者。</div></details>
+      <details class="faq-item card" data-reveal><summary>为什么没有谜语小丑？<span class="chev">▼</span></summary><div class="a">干净版已做好，等片轮少女提完再提。开发中的游戏见「全部游戏」页底部。</div></details>
     </div>
   </div>
 </section>
@@ -454,6 +658,7 @@ footer .fine{color:#9a9aa0}
     <button class="menu-row" data-go="capsule" data-spring><span class="menu-text"><b>胶囊表</b><small>手环 8 / 9 / 10 / 11</small></span><span class="menu-arrow">›</span></button>
     <button class="menu-row" data-go="rw6" data-spring><span class="menu-text"><b>红米 Watch 6</b><small>红米 Watch 5 / 6</small></span><span class="menu-arrow">›</span></button>
     <button class="menu-row" data-go="games" data-spring><span class="menu-text"><b>全部游戏</b><small>长篇恋爱 · 短篇</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="compare" data-spring><span class="menu-text"><b>比较</b><small>机型 · 游戏，一眼看清</small></span><span class="menu-arrow">›</span></button>
     <button class="menu-row" data-go="install" data-spring><span class="menu-text"><b>安装方法</b><small>三步装好</small></span><span class="menu-arrow">›</span></button>
     <button class="menu-row" data-go="faq" data-spring><span class="menu-text"><b>常见问题</b><small>干净版 / 核对 / 黑屏</small></span><span class="menu-arrow">›</span></button>
     <button class="menu-row" data-go="about" data-spring><span class="menu-text"><b>关于作者</b><small>QQ 群 590248751</small></span><span class="menu-arrow">›</span></button>
@@ -515,7 +720,7 @@ var GAMES = [
     ]},
   { id: "ddlc", cat: "short", title: "心跳文学部", en: "Doki Doki Literature Club! Phase 1 · Team Salvato",
     desc: "心跳文学部 Phase 1。占位图版，剧本先行，立绘与 CG 还是占位图。", meta: "短篇 · Phase 1 · 占位图版",
-    cover: "covers/ddlc.png", note: "圆表 / 胶囊版未在真机上装机实测。",
+    cover: "covers/ddlc.jpg", note: "圆表 / 胶囊版未在真机上装机实测。",
     files: [
       { v: "all", d: "round",   label: "圆表 466 · v1.0.0", file: "downloads/com.migulu.ddlc.release.1.0.0_round466.rpk", bytes: 670147, md5: "91c99d5c0a2a4c4c580a7894f0edd840" },
       { v: "all", d: "capsule", label: "胶囊 192 · v1.0.0", file: "downloads/com.migulu.ddlc.release.1.0.0_capsule192.rpk", bytes: 628640, md5: "3ef0b07e90ccaa504ffcb2b08799cea4" }
@@ -662,8 +867,10 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     }
   }
 
-  var VIEWS = { home: "view-home", device: "view-device", games: "view-games", install: "view-install", faq: "view-faq", about: "view-about" };
+  var VIEWS = { home: "view-home", device: "view-device", games: "view-games", compare: "view-compare", install: "view-install", faq: "view-faq", about: "view-about" };
+  var curView = { key: "home", device: null };
   function showView(key, device){
+    curView = { key: key, device: device || null };
     Object.keys(VIEWS).forEach(function(k){
       document.getElementById(VIEWS[k]).classList.toggle("on", k === key);
     });
@@ -674,10 +881,13 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     if (key === "device" && device){ state.device = device; state.chosen = true; savePicker(); renderDevice(); }
     if (key === "home"){ updateHeroCurrent(); }
     if (key === "games"){ renderGames(); }
+    if (key === "compare"){ renderCompare(); }
     window.scrollTo({ top: 0 });
     armReveal(document.getElementById(VIEWS[key]));
     bindPress(document.getElementById(VIEWS[key]));
     animateIn(document.getElementById(VIEWS[key]));
+    var nh = key === "device" ? (device || state.device) : key;
+    if ((location.hash || "").replace(/^#/, "") !== nh){ location.hash = nh; }
   }
 
   var watchMenu = document.getElementById("watchMenu");
@@ -691,6 +901,35 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     if (e.target.closest("[data-close-nav]") || e.target === navMenu){ closeNav(); return; }
     if (e.target.closest("[data-menu='watch']")){ openMenu(); return; }
     if (e.target.closest("[data-close-menu]") || e.target === watchMenu){ closeMenu(); return; }
+    var wbtn = e.target.closest("[data-watch]");
+    if (wbtn){ switchWatch(wbtn.getAttribute("data-watch")); return; }
+    var dch = e.target.closest("[data-demo-choice]");
+    if (dch){ demoChoose(+dch.getAttribute("data-demo-choice")); return; }
+    var drp = e.target.closest("[data-demo-replay]");
+    if (drp){ demoReplay(); return; }
+    var sdl = e.target.closest("[data-show-dl]");
+    if (sdl){
+      if (state.chosen){ showView("device", state.device); }
+      else { openMenu(); }
+      return;
+    }
+    var sh = e.target.closest("[data-share]");
+    if (sh){
+      var old = sh.textContent;
+      var doneShare = function(){ sh.textContent = "已复制 ✓"; setTimeout(function(){ sh.textContent = old; }, 1400); };
+      if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(location.href).then(doneShare, doneShare); }
+      else { doneShare(); }
+      return;
+    }
+    var cf = e.target.closest("[data-copy-file]");
+    if (cf){
+      var txt = "文件名：" + cf.getAttribute("data-fname") + "\n大小：" + cf.getAttribute("data-bytes") + " 字节\nMD5：" + cf.getAttribute("data-md5");
+      var oldCf = cf.textContent;
+      var doneCf = function(){ cf.textContent = "已复制 ✓"; setTimeout(function(){ cf.textContent = oldCf; }, 1400); };
+      if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(doneCf, doneCf); }
+      else { doneCf(); }
+      return;
+    }
     var sv = e.target.closest("[data-switch-ver]");
     if (sv){
       state.version = sv.getAttribute("data-switch-ver");
@@ -707,6 +946,16 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     else { showView(go); }
   });
   document.addEventListener("keydown", function(e){ if (e.key === "Escape"){ closeMenu(); closeNav(); } });
+  /* 哈希路由：每个页面都有可分享的地址，浏览器前进/后退可用 */
+  window.addEventListener("hashchange", function(){
+    var h = (location.hash || "").replace(/^#/, "");
+    if (!h) h = "home";
+    if (DEVICES[h]){
+      if (!(curView.key === "device" && curView.device === h)) showView("device", h);
+    } else if (VIEWS[h]){
+      if (curView.key !== h) showView(h);
+    }
+  });
 
   function matchingFiles(game, device, version){
     return game.files.filter(function(f){
@@ -714,8 +963,8 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     });
   }
   function cardHTML(game, files, browse){
-    var coverStyle = game.id === "ddlc" ? ' style="object-fit:contain;background:#fff;padding:24px"' : "";
-    var html = '<article class="game card" data-tilt data-spring><div class="game-cover"><img src="' + game.cover + '" alt="' + esc(game.title) + ' 封面" loading="lazy"' + coverStyle + '></div><div class="game-body">';
+    var html = '<article class="game card" data-tilt data-spring><div class="game-cover"><img src="' + game.cover + '" alt="' + esc(game.title) + ' 封面" loading="lazy"></div><div class="game-body">';
+    if (game.id === "cafestella"){ html += '<div class="pop-badge">最受欢迎</div>'; }
     html += '<h3>' + esc(game.title) + '</h3><div class="en">' + esc(game.en) + '</div><p class="desc">' + esc(game.desc) + '</p><div class="meta">' + esc(game.meta) + '</div>';
     if (browse){
       var avail = [];
@@ -742,7 +991,7 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
             html += '<button class="dl-btn" data-switch-ver="' + otherVer + '" data-spring>查看' + otherName + '</button>';
             html += '<div style="text-align:center;margin-top:10px"><span style="font-size:13px;color:var(--ink2)">这个机型只有' + otherName + '</span></div></div>';
           } else {
-            html += '<button class="dl-btn" disabled>暂无' + DEVICE_LABEL[state.device] + '版</button>';
+            html += '<div style="text-align:center;color:var(--ink2);font-size:14px;padding:12px 0">暂无' + DEVICE_LABEL[state.device] + '版</div>';
             html += '<div style="text-align:center;margin-top:10px"><button style="border:none;background:none;cursor:pointer;color:var(--blue);font-size:14px" data-menu="watch" data-spring>选择其他机型 ›</button></div></div>';
           }
         }
@@ -755,10 +1004,13 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
       html += '<a class="dl-btn" data-spring href="' + main.file + '" download>下载</a></div>';
       html += '<details class="dl-other"><summary>文件信息' + (files.length > 1 ? ' · 还有 ' + (files.length - 1) + ' 个版本' : '') + ' ›</summary>';
       files.forEach(function(f){
-        html += '<div class="row"><span>' + esc(f.label) + '<br><span style="color:var(--ink2);font-size:12px">' + mb(f.bytes) + ' · ' + f.bytes.toLocaleString("en-US") + ' 字节</span></span><a href="' + f.file + '" download>下载</a></div>';
+        var fname = f.file.split("/").pop();
+        html += '<div class="row"><span>' + esc(f.label) + '<br><span class="row-sub">' + mb(f.bytes) + ' · ' + f.bytes.toLocaleString("en-US") + ' 字节</span><br><span class="row-sub">' + esc(fname) + '</span><br><span class="row-sub">MD5 ' + f.md5 + '</span></span><span class="row-actions"><a href="' + f.file + '" download>下载</a><button class="copy-check" data-copy-file data-fname="' + esc(fname) + '" data-bytes="' + f.bytes + '" data-md5="' + f.md5 + '" data-spring>复制核对信息</button></span></div>';
       });
-      html += '<div class="md5" data-md5="' + main.md5 + '" title="点一下复制完整 MD5">MD5 ' + main.md5.slice(0, 8) + '…（点一下复制完整 MD5）</div></details>';
-      html += '<p style="font-size:12.5px;color:var(--ink2);margin-top:12px">' + esc(game.note) + '</p>';
+      html += '</details>';
+      var noteText = game.note;
+      if (state.version === "full"){ noteText = noteText.replace(/^干净版：[^。]*。/, ""); }
+      if (noteText){ html += '<p style="font-size:12.5px;color:var(--ink2);margin-top:12px">' + esc(noteText) + '</p>'; }
     }
     html += '</div></article>';
     return html;
@@ -769,14 +1021,15 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     if (!box || box._done) return; box._done = true;
     var html = "";
     GAMES.forEach(function(g, i){
-      var band = (i % 2 === 0) ? " band" : "";
-      var w = (g.id === "cafestella" || g.id === "katawa") ? 900 : (g.id === "narcissu" ? 380 : 360);
-      var fit = (g.id === "ddlc") ? ' style="object-fit:contain;background:#fff;padding:24px"' : "";
-      html += '<section class="showcase' + band + '" data-reveal>'
+      var cls = { cafestella: " show-cafe", katawa: " band", narcissu: " show-mint", ddlc: " show-pink" }[g.id] || "";
+      var w = (g.id === "narcissu") ? 380 : 900;
+      var badge = (g.id === "cafestella") ? '<div class="pop-badge">最受欢迎</div>' : "";
+      html += '<section class="showcase' + cls + '" data-reveal>'
+        + badge
         + '<h2>' + esc(g.title) + '</h2>'
         + '<p class="show-sub">' + esc(g.desc) + '</p>'
-        + '<div class="show-links"><button data-go="games">了解更多 &gt;</button><button data-menu="watch">选择你的手表 ›</button></div>'
-        + '<div class="show-img" style="max-width:' + w + 'px"><img src="' + g.cover + '" alt="' + esc(g.title) + ' 封面" loading="lazy"' + fit + '></div>'
+        + '<div class="show-links"><button class="btn btn-blue" data-show-dl data-spring>下载</button><button data-go="games">了解更多 &gt;</button></div>'
+        + '<div class="show-img" style="max-width:' + w + 'px"><img src="' + g.cover + '" alt="' + esc(g.title) + ' 封面" loading="lazy"></div>'
         + '</section>';
     });
     box.innerHTML = html;
@@ -823,10 +1076,15 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
       }
       missEl.innerHTML = m;
     } else { missEl.style.display = "none"; }
-    bindPress(grid); bindPress(missEl); bindMD5(grid); animateIn(grid);
+    bindPress(grid); bindPress(missEl); animateIn(grid);
     savePicker();
   }
   function renderGames(){
+    var gc = document.getElementById("gamesCurrent");
+    if (gc){
+      if (state.chosen){ gc.innerHTML = "当前机型：" + esc(DEVICES[state.device].name) + " · " + esc(DEVICES[state.device].sub) + ' <button data-menu="watch" data-spring>更换机型 ›</button>'; }
+      else { gc.innerHTML = "未选择机型，下载时会让你选。 <button data-menu=\"watch\" data-spring>选择机型 ›</button>"; }
+    }
     var longHtml = "", shortHtml = "";
     GAMES.forEach(function(g){
       if (g.cat === "long-story"){ longHtml += cardHTML(g, [], true); }
@@ -836,6 +1094,80 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     document.getElementById("gamesShort").innerHTML = shortHtml;
     bindPress(document.getElementById("view-games"));
     animateIn(document.getElementById("view-games"));
+  }
+  /* 苹果式比较表：机型与游戏，全部从 DATA 现算，不写死数字 */
+  var ROUTES = { cafestella: "共通线 + 5 条路线及后日谈", katawa: "共通线 + 5 条路线", narcissu: "单线", ddlc: "Phase 1" };
+  function renderCompare(){
+    var order = ["long", "round", "capsule", "rw6"];
+    var dHtml = '<tr><th></th>';
+    order.forEach(function(d){
+      var dev = DEVICES[d];
+      var parts = dev.sub.split("·");
+      parts.pop();
+      var model = parts.join("·").trim();
+      dHtml += '<th class="cmp-head"><div class="cmp-shape"><div class="shape shape-' + d + '"></div></div><b>' + esc(dev.name) + '</b><span class="cmp-sub">' + esc(model) + '</span><button data-go="' + d + '" data-spring>查看 ›</button></th>';
+    });
+    dHtml += '</tr>';
+    function devRow(label, fn){
+      var r = '<tr><td>' + label + '</td>';
+      order.forEach(function(d){ r += '<td>' + fn(d) + '</td>'; });
+      return r + '</tr>';
+    }
+    dHtml += devRow("分辨率", function(d){
+      var parts = DEVICES[d].sub.split("·");
+      return esc(parts.pop().trim());
+    });
+    dHtml += devRow("型号", function(d){
+      var parts = DEVICES[d].sub.split("·");
+      parts.pop();
+      return esc(parts.join("·").trim());
+    });
+    dHtml += devRow("可玩游戏", function(d){
+      var n = 0;
+      GAMES.forEach(function(g){ if (g.files.some(function(f){ return f.d === d; })) n++; });
+      return n + " 款";
+    });
+    dHtml += devRow("版本", function(d){
+      var vs = [];
+      GAMES.forEach(function(g){ g.files.forEach(function(f){ if (f.d === d && vs.indexOf(f.v) === -1) vs.push(f.v); }); });
+      var names = { clean: "干净版", full: "完整版", all: "全年龄" };
+      return vs.map(function(v){ return names[v] || v; }).join(" · ");
+    });
+    dHtml += devRow("最大安装包", function(d){
+      var mx = 0;
+      GAMES.forEach(function(g){ g.files.forEach(function(f){ if (f.d === d && f.bytes > mx) mx = f.bytes; }); });
+      return mb(mx);
+    });
+    var dt = document.getElementById("compareDevices");
+    if (dt) dt.innerHTML = dHtml;
+    var gHtml = '<tr><th></th>';
+    GAMES.forEach(function(g){
+      gHtml += '<th class="cmp-head"><div class="cmp-thumb"><img src="' + g.cover + '" alt="' + esc(g.title) + ' 封面" loading="lazy"></div><b>' + esc(g.title) + '</b><button data-go="games" data-spring>查看 ›</button></th>';
+    });
+    gHtml += '</tr>';
+    function gameRow(label, fn){
+      var r = '<tr><td>' + label + '</td>';
+      GAMES.forEach(function(g){ r += '<td>' + fn(g) + '</td>'; });
+      return r + '</tr>';
+    }
+    gHtml += gameRow("类型", function(g){ return esc(g.meta); });
+    gHtml += gameRow("路线", function(g){ return esc(ROUTES[g.id] || "—"); });
+    gHtml += gameRow("年龄", function(g){
+      return g.files.some(function(f){ return f.v === "clean"; }) ? "含成人内容（有干净版）" : "全年龄";
+    });
+    gHtml += gameRow("可装机型", function(g){
+      var av = [];
+      g.files.forEach(function(f){ if (av.indexOf(DEVICE_LABEL[f.d]) === -1) av.push(DEVICE_LABEL[f.d]); });
+      return av.join(" · ");
+    });
+    gHtml += gameRow("大小", function(g){
+      var mn = Infinity, mx = 0;
+      g.files.forEach(function(f){ if (f.bytes < mn) mn = f.bytes; if (f.bytes > mx) mx = f.bytes; });
+      var a = mb(mn), b = mb(mx);
+      return a === b ? a : a.replace(" MB", "") + " – " + b;
+    });
+    var gt = document.getElementById("compareGames");
+    if (gt) gt.innerHTML = gHtml;
   }
   function moveIndicator(seg){
     var ind = seg.querySelector(".seg-ind");
@@ -869,23 +1201,7 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     state.version = state.version === "clean" ? "full" : "clean";
     renderDevice();
   });
-  window.addEventListener("resize", function(){ moveIndicator(document.getElementById("segVersion")); moveIndicator(document.getElementById("segDevice")); });
-
-  function bindMD5(root){
-    (root || document).querySelectorAll(".dl-other .md5[data-md5]").forEach(function(el){
-      if (el._bound) return; el._bound = true;
-      el.addEventListener("click", function(){
-        var md5 = el.getAttribute("data-md5");
-        var done = function(){
-          var old = el.textContent;
-          el.textContent = "已复制完整 MD5 ✓";
-          setTimeout(function(){ el.textContent = old; }, 1400);
-        };
-        if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(md5).then(done, done); }
-        else { done(); }
-      });
-    });
-  }
+  window.addEventListener("resize", function(){ moveIndicator(document.getElementById("segVersion")); moveIndicator(document.getElementById("segDevice")); moveIndicator(document.getElementById("watchSeg")); });
 
   /* Hero 渐进：滚动时轻轻收缩淡出（苹果产品页做法） */
   var heroIn = document.getElementById("heroIn");
@@ -932,12 +1248,184 @@ function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
     });
   }
 
+  /* ---------- v20：手表演示：可拖动旋转 + 四款表可切换 ---------- */
+  var WATCHES = {
+    long: { cls: "watch-long", caption: "星光咖啡馆 · 长表效果预览", face: "mock", cover: "covers/cafestella.jpg", title: "星光咖啡馆与死神之蝶" },
+    round: { cls: "watch-round", caption: "心跳文学部 · 圆表效果预览", face: "mock", cover: "covers/ddlc.jpg", title: "心跳文学部" },
+    capsule: { cls: "watch-capsule", caption: "水仙 · 胶囊表效果预览", face: "mock", cover: "covers/narcissu.jpg", title: "水仙" },
+    rw6: { cls: "watch-rw6", caption: "片轮少女 · 红米 Watch 6 效果预览", face: "img", src: "shots/katawa-rw6-dialogue.png", alt: "片轮少女在红米 Watch 6 上的运行画面" }
+  };
+  var curWatch = "rw6";
+  var watchRot = 0, watchDragging = false, watchTouched = false;
+  var watchSpring = new Spring(function(v){ setWatchRot(v); }, 170, 22);
+  function setWatchRot(deg){
+    watchRot = deg;
+    var frame = document.getElementById("watchFrame");
+    if (frame) frame.style.transform = "rotateY(" + deg.toFixed(2) + "deg)";
+  }
+  function watchFaceHTML(w){
+    if (w.face === "img") return '<img src="' + w.src + '" alt="' + esc(w.alt) + '" draggable="false">';
+    return '<div class="watch-mock" style="background-image:url(' + w.cover + ')"><div class="wm-title">' + esc(w.title) + '</div><div class="wm-btn">开始游戏</div></div>';
+  }
+  function switchWatch(d){
+    if (!WATCHES[d] || d === curWatch) return;
+    curWatch = d;
+    var frame = document.getElementById("watchFrame");
+    var face = document.getElementById("watchFace");
+    var cap = document.getElementById("watchCaption");
+    if (frame) frame.className = "watch-frame " + WATCHES[d].cls;
+    if (cap) cap.textContent = WATCHES[d].caption;
+    if (face){
+      face.style.opacity = 0;
+      setTimeout(function(){ face.innerHTML = watchFaceHTML(WATCHES[d]); face.style.opacity = 1; }, 180);
+    }
+    var seg = document.getElementById("watchSeg");
+    if (seg){
+      seg.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-watch") === d); });
+      moveIndicator(seg);
+    }
+  }
+  function bindWatchDrag(){
+    var frame = document.getElementById("watchFrame");
+    if (!frame) return;
+    var startX = 0, startRot = 0;
+    frame.addEventListener("pointerdown", function(e){
+      watchDragging = true; watchTouched = true;
+      startX = e.clientX; startRot = watchRot;
+      watchSpring.active = false;
+      if (frame.setPointerCapture){ try { frame.setPointerCapture(e.pointerId); } catch (err) {} }
+      e.preventDefault();
+    });
+    frame.addEventListener("pointermove", function(e){
+      if (!watchDragging) return;
+      var deg = startRot + (e.clientX - startX) * 0.28;
+      if (deg > 55) deg = 55;
+      if (deg < -55) deg = -55;
+      setWatchRot(deg);
+    });
+    function endDrag(){
+      if (!watchDragging) return;
+      watchDragging = false;
+      watchSpring.go(0, watchRot);
+    }
+    frame.addEventListener("pointerup", endDrag);
+    frame.addEventListener("pointercancel", endDrag);
+    /* 首次出现时轻轻晃一下，提示可以拖动 */
+    setTimeout(function(){
+      if (!watchTouched){ watchSpring.go(-16, watchRot); setTimeout(function(){ if (!watchTouched) watchSpring.go(0); }, 550); }
+    }, 1000);
+  }
+
+  /* ---------- v21：3D 模表试玩：可旋转模型 + 表盘上能玩一小段 ---------- */
+  var DEMO = {
+    lines: [
+      { sp: "", tx: "放学后，我推开了那家咖啡馆的门。风铃响了。" },
+      { sp: "她", tx: "欢迎光临……啊，是你。" },
+      { sp: "我", tx: "今天也是老位置吗？" },
+      { sp: "她", tx: "嗯。靠窗的那张桌子，一直给你留着。" },
+      { sp: "", tx: "她把一杯热可可放在我面前，热气慢慢升起来。" },
+      { sp: "她", tx: "呐，今天想喝点什么？还是老样子？" }
+    ],
+    choice: ["老样子。", "今天想试试新的。"],
+    ends: [
+      [ { sp: "她", tx: "好，一杯热可可，马上来。" }, { sp: "", tx: "她转身走向吧台，裙摆轻轻扬起来。" } ],
+      [ { sp: "她", tx: "那……试试我新学的拉花？可能会失败哦。" }, { sp: "", tx: "她有点不好意思地笑了。" } ]
+    ]
+  };
+  var demoIdx = 0, demoBranch = null, demoMode = "play";
+  function demoTime(){
+    var d = new Date();
+    return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+  }
+  function demoLine(){
+    if (demoBranch === null) return DEMO.lines[demoIdx];
+    return DEMO.ends[demoBranch][demoIdx - DEMO.lines.length];
+  }
+  function demoRender(){
+    var scr = document.getElementById("modelScreen");
+    if (!scr) return;
+    var html = '<div class="mg-bg" style="background-image:url(covers/cafestella.jpg)"></div><div class="mg-shade"></div><div class="mg-status">' + demoTime() + '</div>';
+    if (demoMode === "choice"){
+      html += '<div class="mg-choice"><button data-demo-choice="0" data-spring>' + esc(DEMO.choice[0]) + '</button><button data-demo-choice="1" data-spring>' + esc(DEMO.choice[1]) + '</button></div>';
+    } else if (demoMode === "end"){
+      html += '<div class="mg-end"><b>试玩结束</b><p>完整版有 5 条路线，等你来续写这个夏天。<br><span style="font-size:10px;opacity:.7">小剧场为原创试玩，非游戏原文</span></p><button class="mg-dl" data-show-dl data-spring>下载完整版 ›</button><button class="mg-re" data-demo-replay data-spring>再玩一次</button></div>';
+    } else {
+      var line = demoLine();
+      html += '<div class="mg-box">' + (line.sp ? '<span class="mg-name">' + esc(line.sp) + '</span>' : '') + '<div class="mg-text">' + esc(line.tx) + '</div><span class="mg-next">▼</span></div>';
+    }
+    scr.innerHTML = html;
+    bindPress(scr);
+  }
+  function demoAdvance(){
+    if (demoMode === "choice" || demoMode === "end") return;
+    demoIdx++;
+    if (demoBranch === null && demoIdx >= DEMO.lines.length){ demoMode = "choice"; }
+    else if (demoBranch !== null && demoIdx >= DEMO.lines.length + DEMO.ends[demoBranch].length){ demoMode = "end"; }
+    demoRender();
+  }
+  function demoChoose(i){
+    demoBranch = i; demoIdx = DEMO.lines.length; demoMode = "play"; demoRender();
+  }
+  function demoReplay(){ demoIdx = 0; demoBranch = null; demoMode = "play"; demoRender(); }
+  var modelRX = 0, modelRY = 0, modelDragging = false, modelTouched = false;
+  var modelSX = new Spring(function(v){ setModelRot(v, null); }, 170, 22);
+  var modelSY = new Spring(function(v){ setModelRot(null, v); }, 170, 22);
+  function setModelRot(rx, ry){
+    if (rx !== null && rx !== undefined) modelRX = rx;
+    if (ry !== null && ry !== undefined) modelRY = ry;
+    var m = document.getElementById("modelWatch");
+    if (m) m.style.transform = "rotateX(" + modelRX.toFixed(2) + "deg) rotateY(" + modelRY.toFixed(2) + "deg)";
+  }
+  function bindModelDrag(){
+    var stage = document.getElementById("modelStage");
+    if (!stage) return;
+    var sx = 0, sy = 0, srx = 0, sry = 0, moved = false, downT = 0, downOnScreen = false;
+    stage.addEventListener("pointerdown", function(e){
+      if (e.target.closest && e.target.closest("button")) return;
+      modelDragging = true; modelTouched = true; moved = false;
+      sx = e.clientX; sy = e.clientY; srx = modelRX; sry = modelRY; downT = Date.now();
+      downOnScreen = !!(e.target.closest && e.target.closest(".model-screen"));
+      modelSX.active = false; modelSY.active = false;
+      if (stage.setPointerCapture){ try { stage.setPointerCapture(e.pointerId); } catch (err) {} }
+    });
+    stage.addEventListener("pointermove", function(e){
+      if (!modelDragging) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) moved = true;
+      if (!moved) return;
+      var ry = sry + dx * 0.35, rx = srx - dy * 0.25;
+      if (ry > 65) ry = 65; if (ry < -65) ry = -65;
+      if (rx > 28) rx = 28; if (rx < -28) rx = -28;
+      setModelRot(rx, ry);
+    });
+    function endModelDrag(){
+      if (!modelDragging) return;
+      modelDragging = false;
+      if (moved){ modelSX.go(0, modelRX); modelSY.go(0, modelRY); }
+      else if (downOnScreen && Date.now() - downT < 600){ demoAdvance(); }
+    }
+    stage.addEventListener("pointerup", endModelDrag);
+    stage.addEventListener("pointercancel", function(){ modelDragging = false; });
+    /* 首次出现时轻轻晃一下，提示可以拖动 */
+    setTimeout(function(){
+      if (!modelTouched){ modelSY.go(-14, modelRY); setTimeout(function(){ if (!modelTouched) modelSY.go(0); }, 550); }
+    }, 1500);
+  }
+
   renderShowcases();
   armReveal(document);
   bindPress(document);
   renderGames();
+  renderCompare();
   updateHeroCurrent();
-  animateIn(document.getElementById("view-home"));
+  bindWatchDrag();
+  moveIndicator(document.getElementById("watchSeg"));
+  demoRender();
+  bindModelDrag();
+  var initHash = (location.hash || "").replace(/^#/, "");
+  if (initHash && DEVICES[initHash]){ showView("device", initHash); }
+  else if (initHash && VIEWS[initHash]){ showView(initHash); }
+  else { showView("home"); }
 })();
 </script>
 </body>
