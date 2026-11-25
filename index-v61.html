@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light dark"><meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>美咕噜的游戏 · 小米手环 / 手表 GALGAME 移植下载</title>
+<meta name="description" content="美咕噜移植的免费 GALGAME：星光咖啡馆与死神之蝶、片轮少女、水仙。选择你的手表，再下载。适配手环 9 Pro / 10 Pro、手表 S3/S4/S5、手环 8/9/10/11、红米 Watch 6。">
+<style>
+/* ============ v61（v60 的布局优化不变；咖啡馆干净版换成第二轮整改后的 v1.1.9，删了 4 张内衣/泳装 CG） ============ */
+/* ============ v59（新增测试页：谜语小丑干净版 + 甜蜜女友三 debug 测试版，仅供测试，未正式发布） ============ */
+/* ============ v60（布局收紧 + 修逻辑 bug：间距节奏统一、奇数展示卡占满一行、长标题不换行、切页瞬间回顶、Hero 收缩改 CSS 过渡、图片占位每次渲染都装、QQ 数字校验、版本切换存档、删死 Observer） ============ */
+/* ============ v21（3D 模表试玩：可旋转模型 + 表盘上能玩一小段） ============ */
+/* ============ v20（手表演示：可拖动旋转 + 四款表可切换） ============ */
+/* ============ v19（更苹果：比较机型/游戏表、Hero 手表实拍、展示区每款配色） ============ */
+/* ============ v18（加功能 + 美化：展示区下载按钮、Hero 数据行、DDLC 新封面、卡片不再裁切、最近更新、开发中、文件信息补文件名与完整 MD5、复制核对信息、哈希路由、分享、页脚贴底、安装页补 AstroBox 与排错） ============ */
+/* ============ v17（修逻辑：缺失提示分版本/机型、全部游戏页按版本过滤可装机型、死按钮改查看另一版本、补少 HCG 版链接） ============
+/* ============ Apple 化 v16（首页改苹果式大展示：一屏一款游戏，大标题 + 大图 + 文字链，灰白交替） ============
+/* ============ Apple 化 v15（修红米页横向溢出：分段器内滑 + 副标题分行 + 根级禁横向滚动） ============
+/* ============ Apple 化 v14（按 apple.com.cn 实测改）：浅色毛玻璃顶栏 44px / 整宽色块交替 / 扁平无阴影卡片 / 56px 半粗标题 / 描边药丸副按钮 / 平静淡入 ============ */
+:root{
+  --bg:#cfcfd6; --ink:#1d1d1f; --ink2:#6e6e73; --ink3:#3a3a3e;
+  --line:rgba(0,0,0,.1);
+  --blue:#0071e3; --blue-hover:#0077ed;
+  --card:#fff; --card2:#f1f1f3;
+  --seg-bg:#e8e8ed;
+  --r-lg:18px; --r-md:14px;
+  --shadow:0 4px 20px rgba(0,0,0,.06);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.1);
+}
+[data-theme="dark"]{
+  --bg:#000; --ink:#f5f5f7; --ink2:#a1a1a6; --ink3:#d7d7db;
+  --line:rgba(255,255,255,.14);
+  --card:#1d1d1f; --card2:#161617;
+  --seg-bg:rgba(255,255,255,.12);
+  --shadow:0 4px 20px rgba(0,0,0,.4);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.5);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;overflow-x:hidden}
+/* v44：整页加载圈（实色底 + 苹果 12 辐条转圈）；淡出后从文档里拿掉，不留遮挡。 */
+#pageLoader{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .3s ease}
+#pageLoader.hide{opacity:0;pointer-events:none}
+/* v55：每次切页都转圈——原来只有首次打开有加载圈，切页面（首页/机型/游戏/比较）是直接跳过去的；现在切页也盖一个同样的苹果转圈环，450 毫秒后淡出，每次加载都有。 */
+#viewLoader{position:fixed;inset:0;z-index:190;background:var(--bg);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease}
+#viewLoader.show{opacity:1;pointer-events:auto}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg); color:var(--ink); line-height:1.5; overflow-x:hidden;
+  display:flex;flex-direction:column;min-height:100vh;
+}
+main{flex:1;display:flex;flex-direction:column}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+img{display:block;max-width:100%}
+.wrap{max-width:1020px;margin:0 auto;padding:0 22px}
+.view{display:none}
+.view.on{display:block}
+/* v43：雾的根子之二——视图切换的淡入动画（fadein）和滚动驱动渐显（animation-timeline:view）在文件查看器里会卡住，整页停在半透明/半位移，看着就是雾蒙蒙。两个动画都拿掉，内容直接显示，不透明、不位移。 */
+.card{background:var(--card);border:0;border-radius:var(--r-lg);box-shadow:none;overflow:hidden}
+
+/* ---------- 顶栏：苹果黑底 ---------- */
+/* v42：雾的最后一处——导航那层磨砂模糊（backdrop-filter）是全页唯一常开的模糊，手机 WebView 会把它画到整页上，越看越雾。直接拿掉，导航改实色底（不再是磨砂玻璃，但再也不会起雾）。 */
+.nav{position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid var(--line)}
+[data-theme="dark"] .nav{background:var(--card)}
+.nav-in{max-width:1020px;margin:0 auto;padding:0 22px;height:44px;display:flex;align-items:center;gap:4px}
+.nav-logo{font-weight:600;font-size:15px;color:var(--ink);margin-right:18px;white-space:nowrap;cursor:pointer}
+.nav-links{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links button{border:none;background:transparent;cursor:pointer;font-size:12px;color:var(--ink);opacity:.85;padding:8px 10px;border-radius:8px;white-space:nowrap}
+.nav-links button:hover{opacity:1}
+.nav-links button.on{opacity:1;font-weight:600}
+.theme-btn,.nav-menu-btn{flex:none;cursor:pointer;border:0;border-radius:999px;background:transparent;color:var(--ink);font-size:12px;font-weight:500;padding:5px 11px;margin-left:8px}
+.nav-menu-btn{display:none;font-size:15px;padding:4px 11px}
+
+/* ---------- Hero：苹果产品页 ---------- */
+.hero{padding:72px 0 48px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(0,113,227,.18),transparent 62%),radial-gradient(ellipse at 85% 20%,rgba(255,149,0,.14),transparent 55%),var(--bg)}
+.hero .eyebrow{font-size:14px;font-weight:600;color:var(--ink2)}
+.hero h1{font-size:clamp(40px,7vw,56px);line-height:1.08;font-weight:600;letter-spacing:-.03em;margin:14px 0 16px;color:var(--ink)}
+.hero p{font-size:clamp(17px,2.4vw,21px);color:var(--ink2);max-width:580px;margin:0 auto}
+.hero .byline{margin-top:12px;font-size:13px;color:var(--ink2)}
+/* v60：Hero 随滚动收缩的过渡放 CSS 里（配合 JS 直接赋值，见 heroShrink） */
+#heroIn{transition:transform .35s ease,opacity .35s ease;will-change:transform,opacity}
+.hero-cta{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:26px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:none;font-size:15px;font-weight:500;padding:11px 24px;border-radius:999px;will-change:transform;user-select:none}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:var(--blue-hover);text-decoration:none}
+.btn-link{background:transparent;color:var(--blue);font-size:15px;padding:11px 24px;border:1px solid var(--blue);border-radius:999px}
+.btn-link:hover{background:rgba(0,113,227,.06);text-decoration:none}
+/* ---------- 游戏大展示：苹果产品区，一屏一款 ---------- */
+/* ============ v40：更像苹果官网 ============ */
+/* 顶部促销横条：苹果官网导航下那条细横幅（14px 居中 + 蓝色文字链） */
+.promo-banner{text-align:center;font-size:14px;line-height:1.4;color:var(--ink);background:var(--bg);padding:12px 22px}
+.promo-banner a{color:var(--blue);text-decoration:none;white-space:nowrap}
+.promo-banner a:hover{text-decoration:underline}
+/* 游戏区改成苹果官网的双列推广网格：12px 间距，卡片 18px 圆角，宽屏两列、窄屏一列 */
+#homeShowcases{display:grid;grid-template-columns:1fr;gap:12px;margin:12px 0}
+@media (min-width:768px){#homeShowcases{grid-template-columns:1fr 1fr}}
+/* v60：展示卡奇数个时，最后一张占满整行——原来 3 张卡两列排，第三张只占左半边、右边空一块，看着像没做完；现在最后一张（奇数位）自动跨两列，居中收尾。 */
+#homeShowcases .showcase:last-child:nth-child(odd){grid-column:1/-1}
+.showcase{margin:0;padding:48px 22px 56px;text-align:center;background:var(--card);border-radius:18px}
+.showcase.band{background:var(--card)}
+/* 页脚：苹果官网那条 1px 上边框 */
+footer{border-top:1px solid var(--line)}
+.showcase.band{background:var(--card)}
+.showcase h2{font-size:clamp(32px,4.4vw,40px);font-weight:700;letter-spacing:-.025em}
+.showcase .show-sub{color:var(--ink2);font-size:clamp(17px,2.4vw,21px);max-width:580px;margin:12px auto 0}
+.show-links{display:flex;gap:28px;justify-content:center;align-items:center;margin-top:20px;flex-wrap:wrap}
+.show-links button:not(.btn){border:none;background:none;cursor:pointer;color:var(--blue);font-size:17px}
+.show-links button:hover{text-decoration:underline}
+.show-links .btn:hover{text-decoration:none}
+/* ---------- v18 新增 ---------- */
+.hero-stats{margin-top:18px;font-size:14px;color:var(--ink2)}
+.pop-badge{display:inline-block;font-size:13px;font-weight:600;color:#f56300;margin-bottom:10px}
+.games-current{font-size:14px;color:var(--ink2);margin-top:10px}
+.games-current button{border:none;background:none;cursor:pointer;color:var(--blue);font-size:14px;padding:0}
+.news-list,.dev-list{padding:6px 22px}
+.news-row{display:flex;gap:16px;padding:16px 0;border-top:1px solid var(--line)}
+.news-row:first-child{border-top:none}
+.news-date{flex:none;font-size:13px;font-weight:600;color:var(--blue);padding-top:2px}
+.news-row b{font-size:15px;font-weight:600}
+.news-row p{font-size:13.5px;color:var(--ink2);margin-top:2px}
+.dev-row{padding:14px 0;border-top:1px solid var(--line)}
+.dev-row:first-child{border-top:none}
+.dev-row b{display:block;font-size:15px;font-weight:600}
+.dev-row span{display:block;font-size:13.5px;color:var(--ink2);margin-top:2px}
+.install-more{margin-top:26px}
+.mini-head{font-size:17px;font-weight:600;margin:26px 0 4px}
+.fix-list{list-style:none}
+.fix-list li{padding:11px 0;border-top:1px solid var(--line);font-size:14.5px;color:var(--ink3)}
+.fix-list li:first-child{border-top:none}
+.dl-other .row-sub{color:var(--ink2);font-size:12px;word-break:break-all}
+.dl-other .row-actions{display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex:none}
+.copy-check{border:1px solid var(--line);background:transparent;cursor:pointer;color:var(--blue);font-size:12px;padding:4px 10px;border-radius:999px;white-space:nowrap}
+/* ---------- v19 新增：苹果式比较 + Hero 手表实拍 + 展示区配色 ---------- */
+.hero-shot{margin:38px auto 0}
+.watch-stage{perspective:1000px}
+.watch-frame{margin:0 auto;background:#1d1d1f;box-shadow:0 18px 44px rgba(0,0,0,.22);cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;will-change:transform;transition:width .55s cubic-bezier(.22,1,.36,1),height .55s cubic-bezier(.22,1,.36,1),border-radius .55s cubic-bezier(.22,1,.36,1),padding .55s cubic-bezier(.22,1,.36,1)}
+.watch-frame:active{cursor:grabbing}
+[data-theme="dark"] .watch-frame{background:#2c2c2e;box-shadow:0 18px 44px rgba(0,0,0,.6)}
+.watch-long{width:168px;height:240px;border-radius:30px;padding:8px}
+.watch-round{width:220px;height:220px;border-radius:50%;padding:10px}
+.watch-capsule{width:92px;height:235px;border-radius:999px;padding:7px}
+.watch-rw6{width:200px;height:238px;border-radius:44px;padding:10px}
+.watch-face{position:relative;width:100%;height:100%;overflow:hidden;transition:opacity .18s}
+.watch-long .watch-face{border-radius:22px}
+.watch-round .watch-face{border-radius:50%}
+.watch-capsule .watch-face{border-radius:999px}
+.watch-rw6 .watch-face{border-radius:34px}
+.watch-face img{width:100%;height:100%;object-fit:cover;display:block}
+.watch-mock{position:absolute;inset:0;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:12px 8px 14px}
+.watch-mock::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 42%,rgba(0,0,0,.6))}
+.watch-mock .wm-title{position:relative;color:#fff;font-weight:700;font-size:15px;line-height:1.35;text-align:center;text-shadow:0 1px 8px rgba(0,0,0,.55)}
+.watch-mock .wm-btn{position:relative;margin-top:8px;border:none;background:rgba(255,255,255,.94);color:#111;font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;cursor:pointer}
+.watch-round .wm-title{font-size:13px}
+.watch-round .wm-btn{font-size:11px;padding:4px 10px}
+.watch-capsule .watch-mock{padding:10px 6px 12px}
+/* v24：Hero 手表迷你应用（标题 / 游戏 / 画廊 / 设置，四页可玩） */
+.hw-page{position:absolute;inset:0;overflow:hidden;background:#000;color:#fff}
+.hw-bg{position:absolute;inset:0;background-size:cover;background-position:center}
+.hw-sprite{position:absolute;left:50%;bottom:0;height:85%;width:auto;transform:translateX(-50%);z-index:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.45))}
+.hw-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.32) 45%,rgba(0,0,0,.68));z-index:2;pointer-events:none}
+.hw-box{position:absolute;left:0;right:0;bottom:0;padding:10px;z-index:3}
+.hw-name{display:block;font-size:12px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.7);margin-bottom:2px}
+.hw-text{font-size:12px;line-height:1.55;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.hw-next{position:absolute;right:8px;bottom:5px;font-size:10px;animation:mgBlink 1.1s infinite}
+.hw-end{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px;z-index:3;background:rgba(10,10,14,.72)}
+.hw-end b{font-size:14px}
+.hw-end p{font-size:11px;line-height:1.6;color:rgba(255,255,255,.8);margin:6px 0 10px}
+.hw-btn{border:none;background:#0071e3;color:#fff;font-size:12px;font-weight:600;padding:7px 14px;border-radius:999px;cursor:pointer}
+.hw-btn.ghost{background:rgba(255,255,255,.16);color:#fff;margin-top:8px}
+.hw-back{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);z-index:4;border:none;background:rgba(0,0,0,.45);color:#fff;font-size:11px;padding:5px 12px;border-radius:999px;cursor:pointer}
+.hw-cap{position:absolute;left:0;right:0;bottom:38px;text-align:center;font-size:10px;color:rgba(255,255,255,.92);text-shadow:0 1px 3px rgba(0,0,0,.7);z-index:3;pointer-events:none}
+.hw-poem{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px;background:linear-gradient(160deg,#f9d7e6,#fdeef3);color:#5b2a3a;font-size:13px;line-height:2}
+.hw-set{position:absolute;inset:0;background:#1c1c1e;display:flex;flex-direction:column;align-items:stretch;justify-content:center;padding:14px;gap:8px}
+.hw-set-title{font-size:13px;font-weight:700;text-align:center;margin-bottom:4px}
+.hw-set-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;padding:8px 10px;background:rgba(255,255,255,.08);border-radius:10px;cursor:pointer}
+.hw-toggle{width:34px;height:20px;border-radius:999px;background:rgba(255,255,255,.25);position:relative;flex:none;transition:background .25s}
+.hw-toggle::after{content:"";position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .25s}
+.hw-toggle.on{background:#34c759}
+.hw-toggle.on::after{transform:translateX(14px)}
+.hw-title-row{display:flex;gap:14px;margin-top:8px;justify-content:center;position:relative}
+.hw-link{border:none;background:transparent;color:rgba(255,255,255,.92);font-size:11px;padding:4px 6px;cursor:pointer;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.watch-face.hw-dark{filter:brightness(.68)}
+.watch-capsule .wm-title{font-size:11px}
+.watch-capsule .wm-btn{font-size:10px;padding:4px 9px;margin-top:6px}
+.watch-capsule .hw-title-row{gap:6px;margin-top:6px}
+.watch-capsule .hw-link{font-size:10px;padding:3px 4px}
+.watch-capsule .hw-box{padding:8px}
+.watch-capsule .hw-text{font-size:11px}
+.watch-capsule .hw-name{font-size:11px}
+.watch-round .watch-mock{padding:12px 20px 16px}
+.watch-round .wm-title{font-size:14px}
+.watch-round .hw-box{padding:10px 22px}
+.watch-round .hw-text{font-size:11px}
+.watch-round .hw-name{font-size:11px}
+.watch-hint{margin-top:16px;font-size:12.5px;color:var(--ink2)}
+.watch-switch{display:flex;margin:14px auto 0;max-width:340px}
+.watch-switch button{flex:1}
+.hero-shot figcaption{margin-top:10px;font-size:13px;color:var(--ink2)}
+/* ---------- v21 新增：3D 模表试玩 ---------- */
+.demo-wrap{max-width:520px;margin:0 auto;text-align:center}
+.model-stage{position:relative;height:440px;margin-bottom:16px;display:flex;align-items:center;justify-content:center;perspective:900px;background:radial-gradient(ellipse at center,rgba(0,113,227,.10),transparent 65%);border-radius:24px;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+[data-theme="dark"] .model-stage{background:radial-gradient(ellipse at center,rgba(0,113,227,.18),transparent 65%)}
+.model-shadow{position:absolute;left:50%;bottom:10px;width:170px;height:26px;margin-left:-85px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.30),transparent 70%);filter:blur(2px);pointer-events:none}
+.model-watch{--mw-w:150px;--mw-h:325px;--mw-case-h:215px;--mw-r:32px;--mw-screen-r:24px;--mw-strap-w:72px;--mw-crown-top:128px;position:relative;width:var(--mw-w);height:var(--mw-h);will-change:transform;transition:width .45s cubic-bezier(.2,.8,.2,1),height .45s cubic-bezier(.2,.8,.2,1)}
+/* v33：去掉 preserve-3d——表带、表壳、表层不再是分开的 3D 平面，而是压平成一张卡，整张卡一起转（拖动旋转还在），表带和表壳印在同一张卡上，想偏都偏不了。代价：表壳那几层侧壁厚度没了，立体感改由表壳阴影 + 整卡旋转来撑。 */
+.model-watch.mshape-round{--mw-w:200px;--mw-h:310px;--mw-case-h:200px;--mw-r:50%;--mw-screen-r:50%;--mw-strap-w:84px;--mw-crown-top:120px}
+.model-watch.mshape-capsule{--mw-w:100px;--mw-h:325px;--mw-case-h:215px;--mw-r:50px;--mw-screen-r:999px;--mw-strap-w:56px;--mw-crown-top:128px}
+.model-watch.mshape-rw6{--mw-w:170px;--mw-h:325px;--mw-case-h:215px;--mw-r:36px;--mw-screen-r:28px;--mw-strap-w:80px;--mw-crown-top:128px}
+.model-strap{position:absolute;left:39px;width:var(--mw-strap-w);height:55px;background:linear-gradient(180deg,#43484f,#26272b);border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+/* 表带居中改成每种表型写死 left（表宽-带宽）/2，不靠 calc / 位移 / 自动边距——前面三种在手机文件查看器里都没生效 */
+.model-watch.mshape-round .model-strap{left:58px}
+.model-watch.mshape-capsule .model-strap{left:22px}
+.model-watch.mshape-rw6 .model-strap{left:45px}
+.model-strap-top{top:-55px}
+/* v32：表带搬进表壳里面（表壳的孩子），挂在表壳上下沿 top:-55px / bottom:-55px——表壳是满宽（left:0，跟表同宽），从不错位；表带以表壳为基准居中，跟着表壳一起转，不再单独漂。表带仍是平的（无旋转），left 按表型写死：长 39 / 圆 58 / 胶囊 22 / 红米 45。 */
+.model-strap-top::after{content:"";position:absolute;left:9px;right:9px;top:9px;height:7px;border:1.5px solid rgba(255,255,255,.4);border-radius:4px}
+.model-strap-bottom{bottom:-55px}
+.model-strap-bottom::after{content:"";position:absolute;left:50%;top:12px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:rgba(0,0,0,.55);box-shadow:0 14px 0 rgba(0,0,0,.55),0 28px 0 rgba(0,0,0,.55)}
+.model-case{position:absolute;left:0;top:55px;width:var(--mw-w);height:var(--mw-case-h);border-radius:var(--mw-r);background:linear-gradient(160deg,#3c3f45,#17181b 60%);box-shadow:0 20px 44px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.18);transition:width .45s cubic-bezier(.2,.8,.2,1),height .45s cubic-bezier(.2,.8,.2,1),border-radius .45s cubic-bezier(.2,.8,.2,1)}
+.model-case-layer{position:absolute;left:0;top:55px;width:var(--mw-w);height:var(--mw-case-h);border-radius:var(--mw-r);transition:width .45s cubic-bezier(.2,.8,.2,1),height .45s cubic-bezier(.2,.8,.2,1),border-radius .45s cubic-bezier(.2,.8,.2,1)}
+.model-screen{position:absolute;inset:8px;border-radius:var(--mw-screen-r);overflow:hidden;background:#000;transition:border-radius .45s cubic-bezier(.2,.8,.2,1)}
+.model-back{position:absolute;left:4px;top:59px;width:calc(var(--mw-w) - 8px);height:calc(var(--mw-case-h) - 8px);border-radius:calc(var(--mw-r) - 4px);background:#101012;transform:translateZ(-12px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;transition:width .45s cubic-bezier(.2,.8,.2,1),height .45s cubic-bezier(.2,.8,.2,1),border-radius .45s cubic-bezier(.2,.8,.2,1)}
+.model-back .model-sensor{width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#2c2f36,#0c0d0f 70%);box-shadow:inset 0 0 0 3px rgba(255,255,255,.06)}
+.model-back span{font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.45)}
+.mg-demo{position:absolute;inset:0}
+.mg-gloss{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:9;background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.08) 44%,rgba(255,255,255,.03) 52%,transparent 64%);transform:translateX(var(--gloss-x,0px))}
+.mg-bg{position:absolute;inset:0;background-size:cover;background-position:center}
+.mg-sprite{position:absolute;left:50%;top:12%;height:95%;width:auto;transform:translateX(-50%);z-index:1;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35))}
+/* 立体表换形：窄屏 / 圆屏里的对话字号与边距 */
+.model-watch.mshape-capsule .mg-text{font-size:10px}
+.model-watch.mshape-capsule .mg-name{font-size:10px}
+.model-watch.mshape-capsule .mg-box{padding:8px 8px 10px}
+.model-watch.mshape-capsule .mg-choice button{font-size:10px;padding:7px 8px}
+.model-watch.mshape-round .mg-box{padding:10px 24px 12px}
+.model-watch.mshape-round .mg-text{font-size:11px}
+.model-watch.mshape-round .mg-choice{padding:10px 24px 12px}
+.mg-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.28) 55%,rgba(0,0,0,.55));z-index:2;pointer-events:none}
+.mg-box{position:absolute;left:0;right:0;bottom:0;padding:10px 10px 12px;z-index:3}
+.mg-name{display:inline-block;font-size:11px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7);margin-bottom:3px}
+.mg-text{font-size:11.5px;line-height:1.55;color:#fff;text-align:left;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.mg-next{position:absolute;right:8px;bottom:5px;font-size:10px;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.7);animation:mgBlink 1.1s infinite}
+@keyframes mgBlink{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(2px)}}
+.mg-choice{position:absolute;left:0;right:0;bottom:0;padding:10px 9px 12px;display:flex;flex-direction:column;gap:7px;z-index:4}
+.mg-choice button{border:none;background:rgba(255,255,255,.94);color:#111;font-size:11.5px;font-weight:600;padding:8px 10px;border-radius:10px;cursor:pointer;text-align:left}
+.mg-end{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px;background:rgba(10,10,14,.82);z-index:4}
+.mg-end b{font-size:14px;color:#fff}
+.mg-end p{font-size:11px;line-height:1.6;color:rgba(255,255,255,.78);margin:7px 0 12px}
+.mg-dl{border:none;background:#0071e3;color:#fff;font-size:12px;font-weight:600;padding:8px 16px;border-radius:999px;cursor:pointer}
+.mg-re{border:none;background:transparent;color:rgba(255,255,255,.85);font-size:11px;padding:7px;cursor:pointer}
+.mg-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#0e0e11;z-index:5}
+.mg-loading span{font-size:10px;color:rgba(255,255,255,.6);letter-spacing:1px}
+.mg-spinner{width:26px;height:26px;border-radius:50%;border:2.5px solid rgba(255,255,255,.25);border-top-color:#fff;animation:mgSpin .8s linear infinite}
+@keyframes mgSpin{to{transform:rotate(360deg)}}
+/* 图片加载占位：网慢时先显示灰底 + 苹果转圈，图到了再淡入 */
+.img-ph{background-color:#dfe0e4;overflow:hidden}
+.img-ph img{opacity:0;transition:opacity .45s ease}
+.img-ph img.loaded{opacity:1}
+.bg-ph{background-color:#dfe0e4}
+.img-spin{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:2}
+.mg-spinner-d{width:26px;height:26px;border-radius:50%;border:2.5px solid rgba(0,0,0,.14);border-top-color:#6e6e73;animation:mgSpin .8s linear infinite}
+.img-err{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#8e8e93;font-size:12px;pointer-events:none;z-index:2}
+.demo-game-switch{margin-top:16px;position:relative;z-index:2}
+.model-shape-switch{margin-top:16px;position:relative;z-index:2}
+.demo-hint{margin-top:14px;font-size:12.5px;color:var(--ink2)}
+.demo-meta{margin-top:8px;font-size:13px;color:var(--ink2)}
+.demo-meta b{display:block;font-size:15px;color:var(--ink);margin-bottom:2px}
+.show-cafe{background:#f6cfb0}
+.show-katawa{background:#d3ddf6}
+.show-mint{background:#c2dfcb}
+.show-pink{background:#f4c3d4}
+[data-theme="dark"] .show-cafe{background:#241a15}
+[data-theme="dark"] .show-mint{background:#121f1a}
+[data-theme="dark"] .show-pink{background:#241419}
+/* v49：比较表适配——原来表最小宽 660px，手机屏只有约 316px，右边的列全被截掉，只能横向滑；现在表跟屏一样宽、列平分，不再横向滑，首列收窄、格子收紧，4 列机型、3 列游戏全露出来。 */
+.compare-card{overflow:hidden}
+.compare-scroll{overflow:hidden;scrollbar-width:none}
+.compare-scroll::-webkit-scrollbar{display:none}
+.compare{width:100%;border-collapse:separate;border-spacing:0;font-size:14.5px;table-layout:fixed}
+.compare th,.compare td{padding:12px 8px;text-align:left;vertical-align:top;border-top:1px solid var(--line);overflow-wrap:break-word}
+.compare tr:first-child th,.compare tr:first-child td{border-top:none}
+.compare th:first-child,.compare td:first-child{position:sticky;left:0;background:var(--card);color:var(--ink2);font-weight:500;white-space:nowrap;width:64px;z-index:1}
+/* v54：比较表头对齐——原来各列的型号小字换行行数不一样（“小米手环 9 Pro · 10 Pro” 2 行、“小米手表 S3 / S4 / S5” 3 行），下面的“查看 ›”高低不齐，看着错位；现在表头改成纵向 flex，按钮用 margin-top:auto 顶到底，所有列的按钮都落在同一条线上。 */
+.compare .cmp-head{display:flex;flex-direction:column;align-items:center;text-align:center;vertical-align:top}
+.compare .cmp-head .cmp-shape,.compare .cmp-head .cmp-thumb{flex:none}
+.compare .cmp-head b{display:block;font-size:16px;margin-top:10px}
+.compare .cmp-head .cmp-sub{display:block;font-size:12.5px;color:var(--ink2);margin-top:2px}
+.compare .cmp-head button{display:inline-block;border:none;background:none;cursor:pointer;color:var(--blue);font-size:14px;padding:8px 0 0;margin-top:auto}
+.cmp-shape{height:52px;display:flex;align-items:flex-end;justify-content:center}
+.cmp-shape .shape-long{width:30px;height:46px;border-radius:7px}
+.cmp-shape .shape-round{width:46px;height:46px}
+.cmp-shape .shape-capsule{width:24px;height:50px}
+.cmp-shape .shape-rw6{width:34px;height:42px;border-radius:8px}
+.cmp-thumb{height:64px;display:flex;align-items:center;justify-content:center}
+.cmp-thumb img{max-height:64px;max-width:96px;border-radius:8px}
+/* v49：比较表手机适配——字和图再收一收，4 列机型在窄屏上也塞得下。 */
+@media (max-width:760px){
+  .compare{font-size:13px}
+  .compare th:first-child,.compare td:first-child{width:48px}
+  .compare th,.compare td{padding:10px 6px}
+  .compare .cmp-head b{font-size:14px}
+  .compare .cmp-head .cmp-sub{font-size:11.5px}
+  .compare .cmp-head button{font-size:13px}
+  .cmp-shape{height:40px}
+  .cmp-shape .shape-long{width:24px;height:36px;border-radius:6px}
+  .cmp-shape .shape-round{width:36px;height:36px}
+  .cmp-shape .shape-capsule{width:19px;height:40px}
+  .cmp-shape .shape-rw6{width:27px;height:34px;border-radius:7px}
+  .cmp-thumb{height:48px}
+  .cmp-thumb img{max-height:48px;max-width:64px}
+}
+.show-img{margin:40px auto 0;border-radius:18px;overflow:hidden}
+.show-img img{width:100%;display:block}
+
+/* ---------- 区块标题 ---------- */
+.section{padding:48px 0 8px}
+/* 苹果式整宽色块：白色带 + 灰卡，分隔靠背景色，不靠阴影 */
+.band{margin:0 -22px;padding:48px 22px 40px;background:var(--card)}
+.section-head{margin-bottom:24px}
+.section-head h2{font-size:clamp(32px,4.4vw,40px);font-weight:700;letter-spacing:-.025em}
+.section-head p{color:var(--ink2);font-size:17px;margin-top:8px}
+.group-label{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:600;color:var(--ink2);margin:28px 0 16px}
+.group-label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* ---------- 机型卡：苹果产品行 ---------- */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cat{cursor:pointer;text-align:left;border-radius:var(--r-lg);padding:28px 26px 24px;display:flex;flex-direction:column;min-height:220px;will-change:transform;background:var(--bg);border:0;box-shadow:none}
+.cat:hover{box-shadow:none}
+.cat-shape{height:92px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:18px}
+.shape{border-radius:16px;background:#1d1d1f}
+.shape-long{width:54px;height:82px;border-radius:12px}
+.shape-round{width:82px;height:82px;border-radius:50%;background:var(--blue)}
+.shape-capsule{width:42px;height:90px;border-radius:999px;background:#6e6e73}
+.shape-rw6{width:62px;height:76px;border-radius:14px;background:#f5a623}
+.shape{border:1px solid rgba(0,0,0,.14)}
+[data-theme="dark"] .shape{border-color:rgba(255,255,255,.22)}
+[data-theme="dark"] .shape-long{background:#f5f5f7}
+[data-theme="dark"] .shape-capsule{background:#a1a1a6}
+.cat h3{font-size:24px;font-weight:700;letter-spacing:-.01em}
+.cat p{color:var(--ink2);font-size:14px;margin-top:4px;line-height:1.55}
+.cat .go{margin-top:auto;padding-top:16px;font-size:15px;color:var(--blue)}
+.home-note{text-align:center;color:var(--ink2);font-size:14px;margin:32px 0 10px}
+.home-links{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.home-links button{border:none;background:none;cursor:pointer;color:var(--blue);font-size:15px}
+
+/* ---------- 机型页 ---------- */
+.back{border:none;background:none;cursor:pointer;color:var(--blue);font-size:15px;padding:0;margin-bottom:12px}
+.device-head{padding:28px 0 4px}
+.device-head h2{font-size:clamp(32px,5vw,44px);font-weight:700;letter-spacing:-.025em}
+.device-head p{color:var(--ink2);font-size:16px;margin-top:6px}
+.device-hint{display:block;font-size:13px;color:var(--ink2);margin-top:4px}
+.picker{margin:22px 0 6px;padding:12px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:transparent;border:0}
+.picker-label{font-size:13px;font-weight:600;color:var(--ink2)}
+/* v45：所有切换条都不横向滑——根上改：.seg 本身不再 overflow-x:auto，改成整宽 flex，按钮平分宽度，全部露出来。 */
+.seg{position:relative;display:flex;width:100%;background:var(--seg-bg);border-radius:999px;padding:3px;overflow:hidden;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg-ind{position:absolute;top:3px;bottom:3px;border-radius:999px;z-index:0;background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.14);will-change:transform,width}
+.seg button{position:relative;z-index:1;flex:1;min-width:0;border:none;background:transparent;cursor:pointer;font-size:13.5px;font-weight:500;color:var(--ink2);padding:7px 8px;border-radius:999px;white-space:nowrap;text-align:center}
+.seg button.on{color:var(--ink);font-weight:600}
+.picker-hint{margin-left:auto;font-size:13px;color:var(--ink2)}
+
+/* ---------- 游戏卡：一个游戏一张卡，一个主下载按钮 ---------- */
+.game-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.game{display:flex;flex-direction:column;will-change:transform}
+.game-cover{aspect-ratio:3/2;overflow:hidden;background:var(--bg)}
+.game-cover img{width:100%;height:100%;object-fit:contain;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.game:hover .game-cover img{transform:scale(1.05)}
+.game-body{padding:22px 22px 20px;display:flex;flex-direction:column;flex:1}
+.game-body h3{font-size:24px;font-weight:700;letter-spacing:-.01em}
+.game-body .en{color:var(--ink2);font-size:12px;margin-top:3px}
+.game-body .desc{color:var(--ink3);font-size:14.5px;margin:10px 0 14px}
+.meta{font-size:13px;color:var(--ink2);margin-bottom:16px}
+.dl-main{margin-top:auto}
+.dl-label{font-size:14px;font-weight:600}
+.dl-size{font-size:13px;color:var(--ink2);margin-top:2px}
+.dl-btn{display:block;width:100%;text-align:center;cursor:pointer;border:none;margin-top:12px;font-size:15px;font-weight:500;color:#fff;padding:11px 18px;border-radius:999px;background:var(--blue);will-change:transform}
+.dl-btn:hover{background:var(--blue-hover);text-decoration:none}
+.dl-btn:disabled{background:#c7c7cc;cursor:default}
+/* 文件列表里的“下载”也做成蓝色椭圆小按钮，和展示区 / 卡片一致 */
+.dl-btn-sm{display:inline-block;cursor:pointer;border:none;font-size:13px;font-weight:600;color:#fff;padding:7px 16px;border-radius:999px;background:var(--blue);white-space:nowrap}
+.dl-btn-sm:hover{background:var(--blue-hover);text-decoration:none}
+.dl-other{margin-top:12px}
+.dl-other summary{cursor:pointer;font-size:13.5px;color:var(--blue);list-style:none}
+/* v60：文件信息展开后标题变灰，标明已展开 */
+.dl-other[open] summary{color:var(--ink2)}
+.dl-other summary::-webkit-details-marker{display:none}
+.dl-other .row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:13.5px}
+.dl-other .row:first-of-type{margin-top:8px}
+.dl-other .md5{font-size:12px;color:var(--ink2);cursor:pointer;margin-top:8px}
+.dl-other .md5:hover{color:var(--blue)}
+.missing{margin-top:20px;border-radius:var(--r-md);padding:18px 20px;font-size:14.5px;color:var(--ink2);background:rgba(127,127,127,.08)}
+.missing button{border:none;background:none;cursor:pointer;color:var(--blue);font-size:14.5px;padding:0}
+.empty{border-radius:var(--r-lg);padding:44px 24px;text-align:center;color:var(--ink2);margin-top:20px}
+.empty h3{color:var(--ink);font-size:20px;margin-bottom:8px}
+
+/* ---------- 安装 / 常见问题 / 关于 ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.step{border-radius:var(--r-md);padding:26px 24px}
+.step .num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;color:#fff;background:var(--blue);margin-bottom:14px}
+.step h4{font-size:18px;margin-bottom:8px}
+.step p{font-size:14.5px;color:var(--ink3)}
+.warn{margin-top:18px;border-radius:var(--r-md);padding:18px 22px;font-size:14.5px;background:#fff4e6;border:1px solid rgba(255,190,90,.5);color:#7a4a00}
+[data-theme="dark"] .warn{background:rgba(80,55,0,.5);border-color:rgba(255,190,90,.3);color:#ffcf87}
+/* v59：测试页徽章——debug / 超限用琥珀色，干净版用蓝色 */
+.test-badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;margin:0 6px 8px 0}
+.test-badge.amber{background:#fff4e6;color:#7a4a00;border:1px solid rgba(255,190,90,.5)}
+.test-badge.blue{background:rgba(0,113,227,.1);color:var(--blue)}
+[data-theme="dark"] .test-badge.amber{background:rgba(80,55,0,.5);color:#ffcf87;border-color:rgba(255,190,90,.3)}
+.faq{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+.faq-item{border-radius:var(--r-md);overflow:hidden}
+.faq-item summary{list-style:none;cursor:pointer;padding:18px 22px;font-size:16px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary .chev{flex:none;font-size:12px;color:var(--ink2);transition:transform .25s ease}
+/* v60：FAQ 展开时箭头翻上去，收起时翻回来，一眼看出开合状态 */
+.faq-item[open] summary .chev{transform:rotate(180deg)}
+.faq-item .a{padding:0 22px 18px;font-size:14.5px;color:var(--ink3)}
+.contact{border-radius:var(--r-lg);padding:38px 28px;text-align:center;margin-top:20px}
+.contact h3{font-size:26px;font-weight:700}
+.contact p{color:var(--ink2);margin-top:8px;font-size:15px}
+.contact .qq{display:inline-flex;align-items:center;gap:10px;margin-top:22px;cursor:pointer;font-size:21px;font-weight:700;color:var(--ink);padding:14px 28px;border-radius:999px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+.contact .qq small{font-size:13px;font-weight:500;color:var(--ink2)}
+.contact .author{margin-top:18px;font-size:14px;color:var(--ink2)}
+.contact .author b{color:var(--ink)}
+
+/* ---------- 菜单：白底薄片 ---------- */
+/* v46：菜单改实底——原来卡片是半透明玻璃（rgba 白 .68），底下的大标题会透出来，整张菜单看着又大又乱；现在卡片实色不透（跟页面卡片一个色），遮罩加深，卡片限高可滚，行浮现动画拿掉（会卡住，留半透明）。 */
+.menu-overlay{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-end;justify-content:center;padding:18px;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .25s ease}
+.menu-overlay.open{opacity:1;pointer-events:auto}
+.menu-card{
+  --mx:50%; --my:0%;
+  width:100%;max-width:440px;max-height:600px;overflow-y:auto;border-radius:26px;padding:22px 20px 14px;
+  background:var(--card);
+  border:1px solid var(--line);
+  box-shadow:0 24px 60px rgba(0,0,0,.28);
+  transform:translateY(12px) scale(.985);transition:transform .3s cubic-bezier(.2,.8,.2,1);
+}
+[data-theme="dark"] .menu-card{
+  background:var(--card);
+  border-color:var(--line);
+  box-shadow:0 24px 60px rgba(0,0,0,.55);
+}
+.menu-overlay.open .menu-card{transform:none}
+/* v52：导航下拉重做——原来卡片用 max-height:calc(100vh - 36px)，查看器里 100vh 算出来很小，卡片被压到只剩 110px、内容全截掉；现在导航不用 flex、不用 vh，直接绝对定位贴在顶栏下，高度由内容撑开，上限改成固定 600px，行再也不会被压没。 */
+#navMenu{display:block;padding:0}
+#navMenu .menu-card{position:absolute;top:52px;right:12px;left:12px;width:auto;max-width:340px;margin-left:auto;max-height:600px;transform:translateY(-8px)}
+#navMenu.open .menu-card{transform:none}
+/* v53：选表菜单也改到中间——原来它是底部抽屉，点“选择你的手表”得低头到底下去找，跟导航之前一个毛病；现在它居中弹出来，像个对话框，点哪它就在眼前。 */
+#watchMenu{align-items:center;justify-content:center;padding:18px}
+#watchMenu .menu-card{max-width:400px;transform:translateY(8px) scale(.985)}
+#watchMenu.open .menu-card{transform:none}
+/* v57：一键安装指引弹层（复用 menu-overlay/menu-card + 苹果转圈） */
+#installGuide{align-items:center;justify-content:center;padding:18px}
+#installGuide .menu-card{max-width:400px;transform:translateY(8px) scale(.985)}
+#installGuide.open .menu-card{transform:none}
+/* v59：申请加入测试弹层（复用 menu-overlay/menu-card） */
+#applyGuide{align-items:center;justify-content:center;padding:18px}
+#applyGuide .menu-card{max-width:400px;transform:translateY(8px) scale(.985)}
+#applyGuide.open .menu-card{transform:none}
+.apply-field{margin-top:12px}
+.apply-field label{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:6px}
+.apply-field input{width:100%;box-sizing:border-box;font-size:16px;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);outline:none}
+.apply-field input:focus{border-color:var(--blue)}
+.apply-err{display:none;margin-top:10px;font-size:13.5px;color:#c81e1e}
+.apply-err.show{display:block}
+[data-theme="dark"] .apply-err{color:#ff8f8f}
+.ig-spin{display:flex;justify-content:center;padding:16px 0 4px}
+.ig-steps{margin:8px 0 0;padding:0;list-style:none}
+.ig-steps li{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.55}
+.ig-steps li:first-child{border-top:none}
+.ig-num{flex:none;width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
+/* v46：行浮现动画已删——逐行淡入在查看器里会卡住，菜单看着半透明、显不全；现在行直接显示。 */
+.menu-row{transition:background .25s ease, transform .25s ease}
+.menu-row:hover{background:rgba(255,255,255,.45)}
+[data-theme="dark"] .menu-row:hover{background:rgba(255,255,255,.09)}
+.menu-head{display:flex;align-items:center;justify-content:space-between}
+.menu-head h3{font-size:21px;font-weight:700}
+.menu-close{border:none;background:rgba(127,127,127,.14);cursor:pointer;width:30px;height:30px;border-radius:50%;font-size:14px;color:var(--ink)}
+.menu-sub{color:var(--ink2);font-size:14px;margin:6px 0 12px}
+.menu-row{display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:none;background:transparent;cursor:pointer;padding:12px 10px;border-radius:14px;color:var(--ink)}
+.menu-row:hover{background:rgba(127,127,127,.08)}
+.menu-shape{flex:none;width:26px;height:38px;border-radius:8px}
+.menu-shape.shape-round{width:38px;height:38px;border-radius:50%}
+.menu-shape.shape-capsule{width:20px;height:38px;border-radius:999px}
+.menu-shape.shape-rw6{width:30px;height:36px}
+.menu-text{flex:1;display:flex;flex-direction:column}
+.menu-text b{font-size:16px;font-weight:600}
+.menu-text small{font-size:13px;color:var(--ink2);margin-top:1px}
+.menu-arrow{font-size:20px;color:var(--ink2)}
+
+/* ---------- 页脚：苹果式 ---------- */
+footer{margin-top:auto;padding:56px 0 48px;color:var(--ink2);font-size:12px;line-height:1.7}
+footer .f-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:20px}
+footer h5{color:var(--ink);font-size:13px;margin-bottom:8px}
+footer p{margin-bottom:4px}
+footer .fine{color:#9a9aa0}
+.fab{position:fixed;right:20px;bottom:24px;z-index:60;width:48px;height:48px;border-radius:50%;border:1px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--ink);opacity:0;pointer-events:none;transition:opacity .3s ease;background:var(--card);box-shadow:var(--shadow-lg)}
+.fab.show{opacity:1;pointer-events:auto}
+/* v49：从上往下渐进——内容进场从上往下依次淡入上浮（CSS 过渡，合成器跑，不会卡住）；.rv-hide 只由 JS 加，没 JS 就直接显示，永不黑屏。 */
+[data-reveal]{opacity:1;transform:none;transition:opacity .55s ease,transform .55s ease}
+[data-reveal].rv-hide{opacity:0;transform:translateY(14px)}
+
+.picker-group{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+.seg-shape{display:inline-block;vertical-align:-2px;margin-right:5px;width:9px;height:14px;border-radius:3px;background:#1d1d1f}
+.seg-shape.shape-round{width:14px;height:14px;border-radius:50%;background:var(--blue)}
+.seg-shape.shape-capsule{width:7px;height:14px;border-radius:999px;background:#6e6e73}
+.seg-shape.shape-rw6{width:11px;height:14px;background:#f5a623}
+[data-theme="dark"] .seg-shape.shape-long{background:#f5f5f7}
+[data-theme="dark"] .seg-shape.shape-capsule{background:#a1a1a6}
+/* v60：400px 以下窄屏，机型切换条里的小形状图标藏掉，四个按钮的文字才不会被挤掉 */
+@media (max-width:400px){.seg-shape{display:none}}
+
+@media (max-width:760px){
+
+
+
+
+  .nav-links{display:none}
+  .nav-menu-btn{display:flex;align-items:center;justify-content:center}
+  .cat-grid,.game-grid{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  /* v50：首页收紧——原来标题区太高，表被顶到首屏外、只剩一条表带；上边距、标题、按钮间距、选表条间距全收一圈，表整个回到首屏里。 */
+  .hero{padding:28px 0 32px}
+  .hero h1{font-size:34px;margin:10px 0 12px}
+  /* v60：展示区长标题（星光咖啡馆与死神之蝶 10 个字）手机上 32px 会换行，改 28px 一行放得下 */
+  .showcase h2{font-size:28px}
+  .hero p{font-size:16.5px}
+  .hero .byline{margin-top:10px}
+  .hero-cta{margin-top:16px}
+  .hero-cta .btn,.hero-cta a.btn{padding:10px 18px;font-size:15px}
+  #heroCurrent{margin-top:12px}
+  .hero-stats{margin-top:10px}
+  .hero-shot{margin-top:16px}
+  .model-stage{padding:10px 0 12px;margin-bottom:8px}
+  .picker-hint{display:none}
+  .seg button{padding:7px 11px;font-size:13px}
+  .contact .qq{flex-wrap:wrap;justify-content:center}
+  footer .f-grid{grid-template-columns:1fr}
+}
+
+/* ============ v36 ============ */
+/* 苹果式小菊花：12 条辐条，纯 CSS 动画 */
+.apl-spin{position:relative;width:var(--s,18px);height:var(--s,18px);color:#86868b;flex:none}
+[data-theme="dark"] .apl-spin{color:#f5f5f7}
+.apl-spin.dark{color:#86868b}
+[data-theme="dark"] .apl-spin.dark{color:#f5f5f7}
+.apl-spin i{position:absolute;left:46.5%;top:3%;width:7%;height:26%;border-radius:999px;background:currentColor;opacity:.15;transform-origin:50% 177%;transform:rotate(calc(var(--n)*30deg));animation:aplFade 1.1s linear infinite;animation-delay:calc(var(--n)*.09167s - 1.1s)}
+/* v46：小菊花渐变更平滑——原来 1 秒从亮到暗、到头猛地跳回亮，看着一顿一顿的；现在亮的时间拉长、暗得更渐进，转起来是匀速的“线性”渐变。 */
+@keyframes aplFade{0%{opacity:1}55%{opacity:.45}100%{opacity:.15}}
+.mg-loading{gap:8px}
+.mg-loading span{font-size:9px;letter-spacing:.5px}
+/* 页面不许横向撑宽（手机文件查看器会因此把整页放大，造成“偏右、发暗”） */
+html,body{max-width:100%;overflow-x:hidden}
+.hero-shot,.demo-wrap{width:100%;max-width:100%;min-width:0}
+.hero-shot{margin-left:auto;margin-right:auto}
+/* 手表舞台：改成普通文档流，高度由表自己撑开，下面的切换条不可能再被压住 */
+/* v47：演示区收紧——原来上下留白 36+44px，表又高，选表那条被顶到首屏外、只剩一条底边；上下留白收成 16+20px，选表条回到首屏里。 */
+.model-stage{display:block;height:auto;perspective:none;padding:16px 0 20px;margin-bottom:12px;overflow:visible;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,.05),transparent 68%)}
+[data-theme="dark"] .model-stage{background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.07),transparent 68%)}
+.model-watch{margin:0 auto}
+.model-back{display:none}
+.model-shadow{bottom:20px}
+/* 苹果风表身：不锈钢高光 + 编织表带 */
+.model-case{background:linear-gradient(145deg,#4a4d54,#1a1b1e 62%);box-shadow:0 18px 40px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.28)}
+.model-strap{background:repeating-linear-gradient(180deg,rgba(255,255,255,.05) 0 2px,transparent 2px 4px),linear-gradient(180deg,#3b3e44,#222327)}
+/* 切换条：不横向滑了——四个按钮平分整宽，全部露出来，点哪个切哪个。 */
+.model-shape-switch,.demo-game-switch{max-width:100%;overflow:hidden;display:flex;width:100%}
+.model-shape-switch::-webkit-scrollbar,.demo-game-switch::-webkit-scrollbar{display:none}
+.model-shape-switch button,.demo-game-switch button{flex:1;min-width:0;padding:7px 6px;text-align:center}
+
+/* ============ v38：更像苹果 ============ */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+:root{color-scheme:light}
+[data-theme="dark"]{color-scheme:dark}
+/* 苹果官网浅灰底 #f5f5f7；去掉英雄区的蓝/橙彩色光斑，改纯平色 */
+:root:not([data-theme="dark"]){--bg:#f5f5f7;--seg-bg:#e8e8ed}
+.hero{background:var(--bg)}
+.model-stage,[data-theme="dark"] .model-stage{background:none}
+/* 标题：更紧的行高与字距，半粗体 */
+.hero h1,.showcase h2,.section-head h2{font-weight:600;line-height:1.08;letter-spacing:-.022em}
+.hero .eyebrow{letter-spacing:-.01em}
+/* 按钮：苹果药丸，17px，按下变深 */
+.btn{font-size:17px;padding:12px 22px;letter-spacing:-.01em}
+.btn-link{font-size:17px;padding:11px 21px}
+.btn-blue:active{background:#006edb}
+a,.btn,button{transition:background-color .2s ease,color .2s ease,opacity .2s ease}
+/* 键盘聚焦：苹果蓝描边环 */
+:focus{outline:none}
+:focus-visible{outline:4px solid rgba(0,125,250,.6);outline-offset:1px;border-radius:12px}
+::selection{background:rgba(0,113,227,.28)}
+/* 卡片：更大圆角 + 柔和的悬浮感，不用描边 */
+.card{border-radius:20px}
+/* 手表模型：更像 Apple Watch——黑色玻璃屏、拉丝钛金属壳、数码表冠 */
+.model-case{background:linear-gradient(150deg,#5a5d63 0%,#2b2c30 38%,#1b1c1f 100%);box-shadow:0 30px 50px -18px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.14),inset 0 2px 1px rgba(255,255,255,.3),inset 0 -2px 2px rgba(0,0,0,.5)}
+.model-screen{inset:7px;box-shadow:0 0 0 2px #000,inset 0 0 0 1px rgba(255,255,255,.06)}
+.model-strap{border-radius:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 6px rgba(0,0,0,.25)}
+.model-shadow{background:radial-gradient(ellipse at center,rgba(0,0,0,.28),transparent 70%)}
+/* v43：滚动驱动渐显已删——文件查看器里它会卡住，元素停在位移 22px 的半显状态，看着发雾；现在内容直接显示。 */
+@media (prefers-reduced-motion:reduce){[data-reveal]{animation:none!important}*{scroll-behavior:auto!important}}
+
+/* ============ v39：修“手表演示区雾蒙蒙” ============ */
+/* 原因：两个全屏菜单遮罩平时 opacity:0，但仍带着 backdrop-filter 模糊；手机 WebView 遇到 3D 旋转的手表层时，会把这层隐形模糊画出来，整页就发灰发雾。
+   现在：关着的时候用 visibility:hidden 并取消模糊，彻底不参与渲染；打开时才启用。 */
+.menu-overlay{visibility:hidden;background:transparent;transition:opacity .25s ease,visibility 0s linear .25s}
+.menu-overlay.open{visibility:visible;background:rgba(0,0,0,.4);transition:opacity .25s ease,visibility 0s}
+/* 手表不再常驻独立合成层，滚动渐显只做位移、不碰透明度，手表区不参与 */
+.model-watch{will-change:auto}
+.hero-shot[data-reveal]{animation:none}
+</style>
+</head>
+<body>
+<!-- v46：整页加载圈——服务器慢，打开先转圈再出内容；苹果转圈环（线性匀速旋转，真正的“线性”），实色底（不用磨砂，不起雾），内容就绪后淡出。 -->
+<div id="pageLoader"><div class="apl-spin" style="--s:28px;"><i style="--n:0"></i><i style="--n:1"></i><i style="--n:2"></i><i style="--n:3"></i><i style="--n:4"></i><i style="--n:5"></i><i style="--n:6"></i><i style="--n:7"></i><i style="--n:8"></i><i style="--n:9"></i><i style="--n:10"></i><i style="--n:11"></i></div></div>
+<div id="viewLoader" aria-hidden="true"><div class="apl-spin" style="--s:28px;"><i style="--n:0"></i><i style="--n:1"></i><i style="--n:2"></i><i style="--n:3"></i><i style="--n:4"></i><i style="--n:5"></i><i style="--n:6"></i><i style="--n:7"></i><i style="--n:8"></i><i style="--n:9"></i><i style="--n:10"></i><i style="--n:11"></i></div></div>
+<nav class="nav"><div class="nav-in">
+  <span class="nav-logo" data-go="home" data-spring>美咕噜 · 游戏</span>
+  <div class="nav-links" id="navLinks">
+    <button data-go="home" data-nav="home">首页</button>
+    <button data-go="long" data-nav="long">长表</button>
+    <button data-go="round" data-nav="round">圆表</button>
+    <button data-go="capsule" data-nav="capsule">胶囊表</button>
+    <button data-go="rw6" data-nav="rw6">红米 Watch 6</button>
+    <button data-go="games" data-nav="games">全部游戏</button>
+    <button data-go="test" data-nav="test">测试</button>
+    <button data-go="compare" data-nav="compare">比较</button>
+  </div>
+  <button class="theme-btn" id="themeBtn" data-spring>深色</button>
+  <button class="theme-btn" data-share data-spring>分享</button>
+  <button class="nav-menu-btn" id="navMenuBtn" aria-label="菜单" data-spring>☰</button>
+</div></nav>
+
+<div class="promo-banner">三款游戏已上架 · 全部免费下载 <a href="#" data-go="games">了解更多 &gt;</a></div>
+<main class="wrap">
+
+<!-- ================= HOME ================= -->
+<section class="view on" id="view-home">
+  <header class="hero" id="heroEl">
+    <div class="hero-in" id="heroIn">
+      <div class="eyebrow" data-reveal>小米手环 · 手表 GALGAME 移植</div>
+      <h1 data-reveal>把喜欢的故事，<br>装进口袋。</h1>
+      <p data-reveal>全中文移植，免费下载。选择你的手表，获取适配版本。</p>
+      <p class="byline" data-reveal>by 等我刷个美咕噜</p>
+      <div class="hero-cta" data-reveal>
+        <button class="btn btn-blue" data-menu="watch" data-spring id="heroPickBtn">选择你的手表</button>
+        <button class="btn btn-link" data-go="games" data-spring>浏览全部游戏 ›</button>
+      </div>
+      <p class="byline" id="heroCurrent" data-reveal>请选择你的手表</p>
+      <p class="hero-stats" data-reveal>3 款游戏 · 4 种机型 · 15 个安装包</p>
+      <figure class="hero-shot" data-reveal>
+        <div class="demo-wrap">
+          <div class="model-stage" id="modelStage">
+            <div class="model-shadow" id="modelShadow"></div>
+            <div class="model-watch mshape-long" id="modelWatch">
+              <div class="model-back"><div class="model-sensor"></div><span>美咕噜 · GALGAME</span></div>
+              <div class="model-case">
+                <div class="model-strap model-strap-top"></div>
+                <div class="model-strap model-strap-bottom"></div>
+                <div class="model-screen" id="modelScreen"><div class="mg-demo" id="mgDemo"></div><div class="mg-gloss" id="mgGloss"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="seg model-shape-switch" id="modelShapeSeg"><span class="seg-ind"></span><button class="on" data-model-shape="long" data-spring>长表</button><button data-model-shape="round" data-spring>圆表</button><button data-model-shape="capsule" data-spring>胶囊表</button><button data-model-shape="rw6" data-spring>红米</button></div>
+          <div class="seg demo-game-switch" id="demoGameSeg"><span class="seg-ind"></span><button class="on" data-demo-game="cafe" data-spring>咖啡馆</button><button data-demo-game="katawa" data-spring>片轮</button><button data-demo-game="narcissu" data-spring>水仙</button></div>
+          <p class="demo-hint">拖动旋转模型 · 点表盘推进剧情 · 原创小剧场，非游戏原文</p>
+          <div class="demo-meta"><b id="demoMetaTitle">星光咖啡馆 · 长表试玩</b><span id="demoMetaNote">一小段原创小剧场，完整版有 5 条路线。</span></div>
+        </div>
+      </figure>
+    </div>
+  </header>
+  <div id="homeShowcases"></div>
+
+  <section class="section band">
+    <div class="section-head" data-reveal>
+      <h2>选择你的手表</h2>
+      <p>选择一款手表，仅查看适配的游戏。</p>
+    </div>
+    <div class="cat-grid">
+      <article class="cat" data-go="long" data-reveal data-spring data-tilt>
+        <div class="cat-shape"><div class="shape shape-long"></div></div>
+        <h3>长表</h3>
+        <p>手环 9 Pro · 10 Pro<br>336 × 480</p>
+        <span class="go">2 款游戏 &gt;</span>
+      </article>
+      <article class="cat" data-go="round" data-reveal data-spring data-tilt>
+        <div class="cat-shape"><div class="shape shape-round"></div></div>
+        <h3>圆表</h3>
+        <p>小米手表 S3 / S4 / S5<br>466 × 466</p>
+        <span class="go">3 款游戏 &gt;</span>
+      </article>
+      <article class="cat" data-go="capsule" data-reveal data-spring data-tilt>
+        <div class="cat-shape"><div class="shape shape-capsule"></div></div>
+        <h3>胶囊表</h3>
+        <p>手环 8 / 9 / 10 / 11<br>192 × 490</p>
+        <span class="go">3 款游戏 &gt;</span>
+      </article>
+      <article class="cat" data-go="rw6" data-reveal data-spring data-tilt>
+        <div class="cat-shape"><div class="shape shape-rw6"></div></div>
+        <h3>红米 Watch 6</h3>
+        <p>红米 Watch 5 / 6<br>432 × 514</p>
+        <span class="go">1 款游戏 &gt;</span>
+      </article>
+    </div>
+    <p class="home-note">免费 · 全中文 · 手环 9 Pro 与 10 Pro 共用同一安装包</p>
+    <div class="home-links">
+      <button data-go="install" data-spring>安装方法 &gt;</button>
+      <button data-go="compare" data-spring>比较机型 &gt;</button>
+      <button data-go="faq" data-spring>常见问题 &gt;</button>
+      <button data-go="about" data-spring>关于作者 &gt;</button>
+      <button data-go="test" data-spring>测试版 &gt;</button>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head" data-reveal>
+      <h2>最近更新</h2>
+      <p>新版本与新机型，第一时间在这里。</p>
+    </div>
+    <div class="news-list card" data-reveal>
+      <div class="news-row"><span class="news-date">11-25</span><div><b>星光咖啡馆与死神之蝶干净版 v1.1.9</b><p>第二轮整改：4 张内衣/泳装 CG 已清除；裸体图片已全部清除；圆表 / 胶囊干净版改为真干净剧本，老存档失效。</p></div></div>
+      <div class="news-row"><span class="news-date">11-23</span><div><b>片轮少女 · 红米 Watch 6 版上架</b><p>完整版 v1.0.0，432 × 514，红米 Watch 5 / 6 可用。</p></div></div>
+      <div class="news-row"><span class="news-date">11-21</span><div><b>圆表 / 胶囊表适配</b><p>小米手表 S3 / S4 / S5、手环 8 / 9 / 10 / 11，共 3 款游戏可装。</p></div></div>
+      <div class="news-row"><span class="news-date">11-19</span><div><b>片轮少女干净版</b><p>成人内容已移除，老存档失效。</p></div></div>
+      <div class="news-row"><span class="news-date">11-18</span><div><b>星光咖啡馆与死神之蝶干净版 v1.1.6</b><p>已上架米坛，成人内容已移除。</p></div></div>
+      <div class="news-row"><span class="news-date">11-15</span><div><b>星光咖啡馆与死神之蝶完整版 v1.1.7</b><p>压缩至 15 MB 以下，可直接下载。</p></div></div>
+    </div>
+  </section>
+</section>
+
+<!-- ================= DEVICE ================= -->
+<section class="view" id="view-device">
+  <div class="section">
+    <button class="back" data-go="home" data-spring>‹ 全部机型</button>
+    <div class="device-head">
+      <h2 id="deviceTitle">长表</h2>
+      <p id="deviceSub"></p>
+    </div>
+    <div class="picker">
+      <span class="picker-label">版本</span>
+      <div class="seg" id="segVersion">
+        <div class="seg-ind"></div>
+        <button data-v="clean" class="on">干净版</button>
+        <button data-v="full">完整版</button>
+      </div>
+      <div class="picker-group">
+        <span class="picker-label">机型</span>
+        <div class="seg" id="segDevice">
+          <div class="seg-ind"></div>
+          <button data-d="long"><span class="seg-shape shape-long"></span>长表</button>
+          <button data-d="round"><span class="seg-shape shape-round"></span>圆表</button>
+          <button data-d="capsule"><span class="seg-shape shape-capsule"></span>胶囊表</button>
+          <button data-d="rw6"><span class="seg-shape shape-rw6"></span>红米</button>
+        </div>
+      </div>
+      <span class="picker-hint" id="pickerHint"></span>
+    </div>
+    <div class="game-grid" id="deviceGrid"></div>
+    <div class="missing" id="deviceMissing" style="display:none"></div>
+    <div class="empty card" id="deviceEmpty" style="display:none">
+      <h3>这个版本暂无</h3>
+      <p id="deviceEmptyText"></p>
+      <button class="btn btn-blue" id="deviceEmptyBtn" data-spring>查看完整版</button>
+      <button class="btn btn-link" data-menu="watch" data-spring style="margin-top:8px">更换机型 &gt;</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ALL GAMES ================= -->
+<section class="view" id="view-games">
+  <div class="section">
+    <div class="section-head">
+      <h2>全部游戏</h2>
+      <p>共 3 款。选择你喜欢的故事。</p>
+    </div>
+    <p class="games-current" id="gamesCurrent"></p>
+    <div class="group-label">长篇恋爱</div>
+    <div class="game-grid" id="gamesLong"></div>
+    <div class="group-label">短篇</div>
+    <div class="game-grid" id="gamesShort"></div>
+    <div class="group-label">开发中</div>
+    <div class="dev-list card" data-reveal>
+      <div class="dev-row"><b>谜语小丑</b><span>干净版已做好，放在测试页，未正式发布。</span></div>
+      <div class="dev-row"><b>魔女的夜宴</b><span>完整版、圆表 / 胶囊版已有，待上架。</span></div>
+      <div class="dev-row"><b>GalGod</b><span>完整版已有，圆表 / 胶囊版待定。</span></div>
+      <div class="dev-row"><b>星空列车与白的旅行 · ATRI</b><span>候选中，等游戏文件。</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TEST ================= -->
+<section class="view" id="view-test">
+  <div class="section">
+    <div class="section-head">
+      <h2>测试</h2>
+      <p>未正式发布的测试版，仅供测试。</p>
+    </div>
+    <div class="warn" data-reveal>测试版，未正式发布，仅供测试。下载的是加密文件，需要密码解密，密码找群主拿；解密后得到 .rpk 再安装。安装包可能不稳定、装不上；下载前请核对文件大小与 MD5，安装前请先停用小米运动健康。</div>
+    <div class="game-grid" id="testGrid"></div>
+  </div>
+</section>
+
+<!-- ================= COMPARE ================= -->
+<section class="view" id="view-compare">
+  <div class="section">
+    <div class="section-head">
+      <h2>比较</h2>
+      <p>选一块表，选一款游戏，一眼看清差别。</p>
+    </div>
+    <div class="group-label">机型</div>
+    <div class="card compare-card" data-reveal><div class="compare-scroll"><table class="compare" id="compareDevices"></table></div></div>
+    <div class="group-label">游戏</div>
+    <div class="card compare-card" data-reveal><div class="compare-scroll"><table class="compare" id="compareGames"></table></div></div>
+  </div>
+</section>
+
+<!-- ================= INSTALL ================= -->
+<section class="view" id="view-install">
+  <div class="section">
+    <div class="section-head"><h2>安装方法</h2><p>三步完成安装。开始之前，请核对文件大小。</p></div>
+    <div class="steps">
+      <div class="step card" data-reveal><div class="num">1</div><h4>停用小米运动健康</h4><p>安装前，请停用小米运动健康，然后打开 AstroBox。</p></div>
+      <div class="step card" data-reveal><div class="num">2</div><h4>使用 AstroBox 安装</h4><p>在 AstroBox 中选择已下载的 .rpk / .bin 文件，安装至手环或手表。</p></div>
+      <div class="step card" data-reveal><div class="num">3</div><h4>核对版本号</h4><p>安装完成后，查看主界面左下角的版本号。</p></div>
+    </div>
+    <div class="warn" data-reveal>下载可能在 10.3 MB 左右中断。安装前请核对文件大小与 MD5；如不一致，请重新下载。切勿安装未下载完整的文件。</div>
+    <div class="install-more" data-reveal>
+      <a class="btn btn-link" href="https://astrobox.online" target="_blank" rel="noopener" data-spring>下载 AstroBox &gt;</a>
+      <h3 class="mini-head">装不上？</h3>
+      <ul class="fix-list">
+        <li>先停用小米运动健康，再打开 AstroBox 重新安装。</li>
+        <li>核对文件大小（字节数）与页面标注是否一致；不一致就是下载中断了，请重新下载。</li>
+        <li>轻点文件信息里的 MD5 或「复制核对信息」，可复制完整值进行比对。</li>
+        <li>不要安装未下载完整的文件；装到 100% 失败或黑屏，多数是文件不完整。</li>
+        <li>请勿连续重复安装；仍失败请到 QQ 群 590248751 咨询。</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="view" id="view-faq">
+  <div class="section">
+    <div class="section-head"><h2>常见问题</h2><p>点一下展开。</p></div>
+    <div class="faq">
+      <details class="faq-item card" data-reveal><summary>干净版和完整版有什么区别？<span class="chev">▼</span></summary><div class="a">干净版已移除成人剧情与成人 CG，仅保留全年龄内容；完整版包含全部内容。少 HCG 版仅移除成人图片，文字内容保持不变。</div></details>
+      <details class="faq-item card" data-reveal><summary>我的手表应该下载哪个版本？<span class="chev">▼</span></summary><div class="a">按形状选择：长表为手环 9 Pro（336×480）与手环 10 Pro（480×336）；圆表为小米手表 S3 / S4 / S5（466×466）；胶囊表为小米手环 8 / 9 / 10 / 11（192×490）；红米 Watch 5 / 6（432×514）单独选择。9 Pro 与 10 Pro 屏幕相同，共用同一安装包。</div></details>
+      <details class="faq-item card" data-reveal><summary>下载完成后如何核对？<span class="chev">▼</span></summary><div class="a">请核对文件大小（字节数）是否与页面标注一致；轻点 MD5 可复制完整值进行比对。如大小不符，说明下载已中断，请重新下载。</div></details>
+      <details class="faq-item card" data-reveal><summary>装到 100% 失败 / 黑屏怎么办？<span class="chev">▼</span></summary><div class="a">请先核对文件大小与 MD5，多数情况下是文件未下载完整。确认文件完整后仍失败，请停用小米运动健康后重新安装；请勿连续重复安装。</div></details>
+      <details class="faq-item card" data-reveal><summary>干净版可以使用旧存档吗？<span class="chev">▼</span></summary><div class="a">不能。干净版删除了部分剧情，旧存档将失效；安装干净版前，请删除旧存档并重新开始。</div></details>
+      <details class="faq-item card" data-reveal><summary>为什么没有谜语小丑？<span class="chev">▼</span></summary><div class="a">干净版已做好，放在测试页，未正式发布。开发中的游戏见「全部游戏」页底部。</div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section class="view" id="view-about">
+  <div class="section">
+    <div class="section-head"><h2>关于</h2><p>免费移植，仅供个人学习交流。</p></div>
+    <div class="contact card" data-reveal>
+      <h3>联系作者</h3>
+      <p>如有问题、更新建议，或希望移植其他游戏，欢迎加入 QQ 群。</p>
+      <div class="qq" id="qqCopy" data-spring title="点一下复制群号">QQ 群 590248751 <small>点一下复制</small></div>
+      <p class="author">作者：<b>等我刷个美咕噜</b> · 引擎作者：<b>hezdaaa</b></p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="f-grid">
+    <div><h5>联系</h5><p>QQ 群：590248751</p><p>作者：等我刷个美咕噜</p><p>引擎作者：hezdaaa</p></div>
+    <div><h5>原作</h5><p>星光咖啡馆与死神之蝶 © YuzuSoft</p><p>片轮少女 © Four Leaf Studios</p><p>水仙 © stage-nana</p></div>
+    <div><h5>更多</h5><p><a href="#" data-go="install">安装方法</a></p><p><a href="#" data-go="faq">常见问题</a></p><p><a href="#" data-go="about">关于作者</a></p></div>
+  </div>
+  <p class="fine">本移植仅供个人学习交流，与 AstroBox、小米及其他设备厂商无关。原作版权归各自权利方所有。如有问题，加 QQ 群 590248751。</p>
+</footer>
+
+<!-- 导航菜单（手机） -->
+<div class="menu-overlay" id="navMenu" aria-hidden="true">
+  <div class="menu-card" role="dialog" aria-label="导航">
+    <div class="menu-head"><h3>导航</h3><button class="menu-close" data-close-nav aria-label="关闭">✕</button></div>
+    <p class="menu-sub">所有页面，尽在此处。</p>
+    <button class="menu-row" data-go="home" data-spring><span class="menu-text"><b>首页</b><small>按你的表选</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="long" data-spring><span class="menu-text"><b>长表</b><small>手环 9 Pro · 10 Pro</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="round" data-spring><span class="menu-text"><b>圆表</b><small>小米手表 S3 / S4 / S5</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="capsule" data-spring><span class="menu-text"><b>胶囊表</b><small>手环 8 / 9 / 10 / 11</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="rw6" data-spring><span class="menu-text"><b>红米 Watch 6</b><small>红米 Watch 5 / 6</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="games" data-spring><span class="menu-text"><b>全部游戏</b><small>长篇恋爱 · 短篇</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="test" data-spring><span class="menu-text"><b>测试</b><small>测试版游戏 · 未正式发布</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="compare" data-spring><span class="menu-text"><b>比较</b><small>机型 · 游戏，一眼看清</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="install" data-spring><span class="menu-text"><b>安装方法</b><small>三步装好</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="faq" data-spring><span class="menu-text"><b>常见问题</b><small>干净版 / 核对 / 黑屏</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="about" data-spring><span class="menu-text"><b>关于作者</b><small>QQ 群 590248751</small></span><span class="menu-arrow">›</span></button>
+  </div>
+</div>
+<!-- 选表菜单 -->
+<div class="menu-overlay" id="watchMenu" aria-hidden="true">
+  <div class="menu-card" role="dialog" aria-label="选择你的手表">
+    <div class="menu-head"><h3>选择你的手表</h3><button class="menu-close" data-close-menu aria-label="关闭">✕</button></div>
+    <p class="menu-sub">选择一款手表，仅查看适配的游戏。</p>
+    <button class="menu-row" data-go="long" data-spring><span class="menu-shape shape-long"></span><span class="menu-text"><b>长表</b><small>手环 9 Pro · 10 Pro · 336 × 480</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="round" data-spring><span class="menu-shape shape-round"></span><span class="menu-text"><b>圆表</b><small>小米手表 S3 / S4 / S5 · 466 × 466</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="capsule" data-spring><span class="menu-shape shape-capsule"></span><span class="menu-text"><b>胶囊表</b><small>手环 8 / 9 / 10 / 11 · 192 × 490</small></span><span class="menu-arrow">›</span></button>
+    <button class="menu-row" data-go="rw6" data-spring><span class="menu-shape shape-rw6"></span><span class="menu-text"><b>红米 Watch 6</b><small>红米 Watch 5 / 6 · 432 × 514</small></span><span class="menu-arrow">›</span></button>
+  </div>
+</div>
+<!-- 一键安装指引 -->
+<div class="menu-overlay" id="installGuide" aria-hidden="true">
+  <div class="menu-card" role="dialog" aria-label="安装指引">
+    <div class="menu-head"><h3>一键安装</h3><button class="menu-close" data-close-install aria-label="关闭">✕</button></div>
+    <p class="menu-sub" id="igFile"></p>
+    <div class="ig-spin"><div class="apl-spin" style="--s:28px;" role="status" aria-label="下载中"><i style="--n:0"></i><i style="--n:1"></i><i style="--n:2"></i><i style="--n:3"></i><i style="--n:4"></i><i style="--n:5"></i><i style="--n:6"></i><i style="--n:7"></i><i style="--n:8"></i><i style="--n:9"></i><i style="--n:10"></i><i style="--n:11"></i></div></div>
+    <p id="igStatus" style="text-align:center;font-size:14px;color:var(--ink2)">正在下载…</p>
+    <ol class="ig-steps">
+      <li><span class="ig-num">1</span><span>下载完成后，在通知栏点“打开”，系统会用 AstroBox 打开这个文件。</span></li>
+      <li><span class="ig-num">2</span><span>在 AstroBox 里点“安装”，装到手环 / 手表上。</span></li>
+      <li><span class="ig-num">3</span><span>安装前先停用小米运动健康；装好后核对文件大小与页面标注是否一致。</span></li>
+    </ol>
+    <p style="font-size:12.5px;color:var(--ink2);margin-top:10px">如果点通知栏没反应，就打开 AstroBox → 底部“设备”→“安装应用”，手动选这个文件。AstroBox 没有对外的一键直装入口，所以最后这一下仍要在 AstroBox 里手动点安装——上面三步就是全部了。</p>
+    <button class="dl-btn" data-close-install data-spring style="width:100%;margin-top:6px">知道了</button>
+  </div>
+</div>
+<!-- 申请加入测试 -->
+<div class="menu-overlay" id="applyGuide" aria-hidden="true">
+  <div class="menu-card" role="dialog" aria-label="申请加入测试">
+    <div class="menu-head"><h3>申请加入测试</h3><button class="menu-close" data-close-apply aria-label="关闭">✕</button></div>
+    <div id="applyForm">
+      <p class="menu-sub">申请测试：<b id="applyGame"></b></p>
+      <p style="font-size:13.5px;color:var(--ink2);line-height:1.6">测试版未正式发布，可能装不上。审核通过后，会在 QQ 群里发你测试包。</p>
+      <div class="apply-field"><label for="applyQq">QQ 号</label><input id="applyQq" type="text" inputmode="numeric" autocomplete="off" placeholder="填你的 QQ 号"></div>
+      <div class="apply-field"><label for="applyModel">手表 / 手环型号</label><input id="applyModel" type="text" autocomplete="off" placeholder="例：手环 9 Pro"></div>
+      <p class="apply-err" id="applyErr">请把 QQ 号和型号都填完整。</p>
+      <button class="dl-btn" data-apply-submit data-spring style="width:100%;margin-top:14px">提交申请</button>
+    </div>
+    <div id="applyDone" style="display:none">
+      <p style="font-size:15px;line-height:1.7;margin-top:6px">申请已提交。请加入 QQ 群 <b>590248751</b>，并在群里发一下你的 QQ 号，群主审核通过后发你测试包。通过后群主会把密码和解密页发你。</p>
+      <a class="dl-btn" href="mqqapi://card/show_pslcard?src_type=internal&amp;version=1&amp;uin=590248751&amp;card_type=group&amp;source=qrcode" data-spring style="width:100%;margin-top:14px;text-decoration:none">加入 QQ 群</a>
+      <button class="dl-btn" data-close-apply data-spring style="width:100%;margin-top:8px;background:var(--card);color:var(--ink);border:1px solid var(--line)">知道了</button>
+    </div>
+  </div>
+</div>
+</main>
+<button class="fab" id="fabBtn" aria-label="回到顶部" data-spring>↑</button>
+
+<script>
+/* ---- data: all 17 files, one source of truth ---- */
+var DEVICES = {
+  long:    { name: "长表",        sub: "手环 9 Pro · 10 Pro · 336 × 480", hint: "9 Pro 和 10 Pro 用同一个包" },
+  round:   { name: "圆表",        sub: "小米手表 S3 / S4 / S5 · 466 × 466", hint: "" },
+  capsule: { name: "胶囊表",      sub: "手环 8 / 9 / 10 / 11 · 192 × 490", hint: "" },
+  rw6:     { name: "红米 Watch 6", sub: "红米 Watch 5 / 6 · 432 × 514", hint: "未在真机上装机实测" }
+};
+var DEVICE_LABEL = { long: "长表", round: "圆表", capsule: "胶囊表", rw6: "红米 Watch 6" };
+var GAMES = [
+  { id: "cafestella", cat: "long-story", title: "星光咖啡馆与死神之蝶", en: "Café Stella and the Reaper's Butterflies · YuzuSoft",
+    desc: "咖啡馆、死神、与五位女主的夏天。全中文，共通线 + 5 条女主路线及后日谈。", meta: "长篇恋爱 · 5 条路线 · 全中文",
+    cover: "covers/cafestella.jpg", note: "干净版：成人内容已移除，老存档失效。圆表 / 胶囊版未在真机上装机实测。",
+    files: [
+      { v: "clean", d: "long",    label: "手环 9 Pro / 10 Pro · 干净版 v1.1.9", file: "downloads/com.migulu.cafestella.release.1.1.9.rpk", bytes: 15206841, md5: "1a7eb1edac0616ea89533dc8fc30e540" },
+      { v: "full",  d: "long",    label: "手环 9 Pro / 10 Pro · 完整版 v1.1.7", file: "downloads/com.migulu.cafestella.release.1.1.7.rpk", bytes: 14849589, md5: "da420c0a5153e98e1be64d323a202b82" },
+      { v: "clean", d: "round",   label: "圆表 466 · 干净版 v1.1.9", file: "downloads/com.migulu.cafestella.release.1.1.9_round466.rpk", bytes: 17413549, md5: "58d639932d6e2986269ab81d60862d65" },
+      { v: "full",  d: "round",   label: "圆表 466 · 少 HCG v1.1.9", file: "downloads/com.migulu.cafestella.release.1.1.9_round466_lite.rpk", bytes: 16874514, md5: "50393788808c21dfff8d4fd949d77331" },
+      { v: "clean", d: "capsule", label: "胶囊 192 · 干净版 v1.1.9", file: "downloads/com.migulu.cafestella.release.1.1.9_capsule192.rpk", bytes: 11582564, md5: "62f25ecdb4bb39640e57e27ed0541c34" },
+      { v: "full",  d: "capsule", label: "胶囊 192 · 少 HCG v1.1.9", file: "downloads/com.migulu.cafestella.release.1.1.9_capsule192_lite.rpk", bytes: 11536821, md5: "b49709c7335d34834a0681719571d950" }
+    ]},
+  { id: "katawa", cat: "long-story", title: "片轮少女", en: "Katawa Shoujo · Four Leaf Studios",
+    desc: "与五位少女的青春物语。全中文，共通线 + 5 条女主路线。", meta: "长篇恋爱 · 5 条路线 · 全中文",
+    cover: "covers/katawa.jpg", note: "干净版：成人内容已移除。红米 Watch 6 版、圆表 / 胶囊版未在真机上装机实测。",
+    files: [
+      { v: "clean", d: "long",    label: "手环 9 Pro / 10 Pro · 干净版 v1.0.0", file: "downloads/com.migulu.katawa.release.1.0.0.clean.rpk", bytes: 9786675, md5: "d77efdfaa093e98d786398c3f872ccc5" },
+      { v: "full",  d: "long",    label: "手环 9 Pro / 10 Pro · 完整版 v1.0.0", file: "downloads/com.migulu.katawa.release.1.0.0.rpk", bytes: 10188674, md5: "3b5d75d765b30362bb265268dbd4cde2" },
+      { v: "full",  d: "rw6",     label: "红米 Watch 6 · 完整版 v1.0.0", file: "downloads/com.migulu.katawa.rw6.debug.1.0.0.bin", bytes: 13654194, md5: "9816f23da2e6701d397aa94eac01c997" },
+      { v: "full",  d: "round",   label: "圆表 466 · 全 CG v1.0.0", file: "downloads/com.migulu.katawa.release.1.0.0_round466.rpk", bytes: 11030074, md5: "f1c7772ba37cd151f217b868efe38565" },
+      { v: "full",  d: "round",   label: "圆表 466 · 少 HCG v1.0.0", file: "downloads/com.migulu.katawa.release.1.0.0_round466_lite.rpk", bytes: 10716460, md5: "230584f3b471463ba3f5821e23edd230" },
+      { v: "full",  d: "capsule", label: "胶囊 192 · 全 CG v1.0.0", file: "downloads/com.migulu.katawa.release.1.0.0_capsule192.rpk", bytes: 7579045, md5: "e95fc9e617473776b36d7d2ad456dfdb" },
+      { v: "full",  d: "capsule", label: "胶囊 192 · 少 HCG v1.0.0", file: "downloads/com.migulu.katawa.release.1.0.0_capsule192_lite.rpk", bytes: 7362375, md5: "b05a2daa1902e8c5eaf4425878991d4a" }
+    ]},
+  { id: "narcissu", cat: "short", title: "水仙", en: "Narcissu · stage-nana",
+    desc: "绝症少女与少年的最后一次旅行。短篇催泪，全年龄，没有成人内容。", meta: "短篇催泪 · 全年龄",
+    cover: "covers/narcissu.jpg", note: "圆表 / 胶囊版未在真机上装机实测。",
+    files: [
+      { v: "all", d: "round",   label: "圆表 466 · v1.0.0", file: "downloads/com.migulu.narcissu.release.1.0.0_round466.rpk", bytes: 1836313, md5: "45a7d478f08bc2863541a8aae023857a" },
+      { v: "all", d: "capsule", label: "胶囊 192 · v1.0.0", file: "downloads/com.migulu.narcissu.release.1.0.0_capsule192.rpk", bytes: 1190833, md5: "8c7f9ce26cad5ec47135bb16c08af5f6" }
+    ]},
+];
+/* v59：测试页游戏——不进主站 GAMES，只在测试页出现 */
+var TEST_GAMES = [
+  { id: "riddlejoker", title: "谜语小丑", en: "Riddle Joker · YuzuSoft",
+    desc: "柚子社校园恋爱喜剧，全中文。干净版，成人内容已移除。", meta: "长篇恋爱 · 全中文 · 干净版",
+    cover: "covers/riddlejoker_cover_3x2.jpg",
+    badges: [ { t: "干净版", cls: "blue" }, { t: "测试版", cls: "amber" } ],
+    note: "干净版：成人内容已移除。测试版，未正式发布；未在真机上装机实测。这是加密文件，需要密码解密，密码找群主拿。",
+    files: [
+      { v: "clean", d: "long", label: "手环 9 Pro / 10 Pro · 干净版 v1.0.6", file: "downloads/com.migulu.riddlejoker.release.1.0.6.rpk.enc", bytes: 10348871, md5: "f7455949b3be6e2c8c2f4918a7e61ffa" }
+    ]},
+  { id: "amakano3", title: "甜蜜女友三", en: "アマカノ3 · Azarashi Soft",
+    desc: "甜蜜女友系列第三作，全中文。完整版，含成人内容。", meta: "长篇恋爱 · 全中文 · 完整版",
+    cover: "covers/amakano3-title.jpg",
+    badges: [ { t: "debug 测试版", cls: "amber" }, { t: "超 20 MB 上限 · 可能装不上", cls: "amber" } ],
+    note: "debug 测试版；加密文件 20,601,414 字节，解密后 20,601,370 字节，已超 20 MB 上限，可能装不上，仅供测试。需要密码解密，密码找群主拿。未在真机上装机实测。",
+    files: [
+      { v: "full", d: "long", label: "手环 9 Pro / 10 Pro · 完整版 v1.0.4 debug", file: "downloads/com.migulu.amakano3.debug.1.0.4_0_iowl.rpk.enc", bytes: 20601414, md5: "d70b987eb23f084e226719b4935ed84a" }
+    ]}
+];
+function mb(bytes){ return (bytes / 1048576).toFixed(1) + " MB"; }
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+/* ---- spring engine (reduced, no big bounce; scale spring starts at 1) ---- */
+(function(){
+  "use strict";
+  var raf = window.requestAnimationFrame.bind(window);
+  var springs = [], running = false;
+  function tick(){
+    var alive = false;
+    for (var i = 0; i < springs.length; i++){
+      var s = springs[i];
+      if (!s.active) continue;
+      alive = true;
+      var dt = 1/60;
+      var a = -s.k * (s.x - s.t) - s.c * s.v;
+      s.v += a * dt; s.x += s.v * dt;
+      if (Math.abs(s.x - s.t) < 0.001 && Math.abs(s.v) < 0.001){ s.x = s.t; s.v = 0; s.active = false; }
+      s.apply(s.x);
+    }
+    if (alive){ raf(tick); } else { running = false; }
+  }
+  function Spring(apply, k, c){
+    this.apply = apply; this.k = k || 170; this.c = c || 22;
+    this.x = 0; this.v = 0; this.t = 0; this.active = false; springs.push(this);
+  }
+  Spring.prototype.go = function(target, from){
+    if (from !== undefined){ this.x = from; this.v = 0; }
+    this.t = target; this.active = true;
+    if (!running){ running = true; raf(tick); }
+  };
+  function makeTransform(el, k, c){
+    if (el._ctl) return el._ctl;
+    var st = { y: 0, s: 1, rx: 0, ry: 0 };
+    var sy = new Spring(function(v){ st.y = v; paint(); }, k, c);
+    var ss = new Spring(function(v){ st.s = v; paint(); }, k, c);
+    ss.x = 1; ss.t = 1;
+    var srx = new Spring(function(v){ st.rx = v; paint(); }, 200, 28);
+    var sry = new Spring(function(v){ st.ry = v; paint(); }, 200, 28);
+    function paint(){ el.style.transform = "translateY(" + st.y.toFixed(2) + "px) scale(" + st.s.toFixed(4) + ") rotateX(" + st.rx.toFixed(2) + "deg) rotateY(" + st.ry.toFixed(2) + "deg)"; }
+    var ctl = { setY: function(t, from){ sy.go(t, from); }, setS: function(t, from){ ss.go(t, from); },
+      setRX: function(t){ srx.go(t); }, setRY: function(t){ sry.go(t); } };
+    el._ctl = ctl;
+    return ctl;
+  }
+  /* 跟手高光：只给真正半透明的菜单卡用（卡片已按苹果做法改扁平，不再需要） */
+  document.addEventListener("pointermove", function(e){
+    var t = e.target.closest ? e.target.closest(".menu-card") : null;
+    if (!t) return;
+    var r = t.getBoundingClientRect();
+    t.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100).toFixed(1) + "%");
+    t.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100).toFixed(1) + "%");
+  }, { passive: true });
+  function bindTilt(root){
+    if (!window.matchMedia("(pointer:fine)").matches) return;
+    (root || document).querySelectorAll("[data-tilt], .game, .step, .faq-item").forEach(function(el){
+      if (el._tilt) return; el._tilt = true;
+      var ctl = makeTransform(el, 200, 28);
+      el.addEventListener("pointermove", function(e){
+        var r = el.getBoundingClientRect();
+        var dx = (e.clientX - r.left) / r.width - 0.5;
+        var dy = (e.clientY - r.top) / r.height - 0.5;
+        ctl.setRY(dx * 3); ctl.setRX(-dy * 3);
+      });
+      ["pointerleave","pointercancel"].forEach(function(ev){
+        el.addEventListener(ev, function(){ ctl.setRX(0); ctl.setRY(0); });
+      });
+    });
+  }
+  /* v60：删掉顶层没人用的旧 Observer——armReveal 里有自己的，顶层这个从没 observe 过任何元素。 */
+  /* v49：从上往下渐进——用 IntersectionObserver + CSS 过渡（不用弹簧 rAF，不会卡住）；进场按离屏顶的距离排延迟，上面先显、下面后显；没 Observer 就直接全显。 */
+  function armReveal(root){
+    (root || document).querySelectorAll(".section-head, footer p").forEach(function(el){
+      if (!el.hasAttribute("data-reveal")) el.setAttribute("data-reveal", "");
+    });
+    var list = (root || document).querySelectorAll("[data-reveal]");
+    if (!("IntersectionObserver" in window)){
+      list.forEach(function(el){ el.classList.remove("rv-hide"); });
+      return;
+    }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (!en.isIntersecting) return;
+        var el = en.target;
+        io.unobserve(el);
+        var top = el.getBoundingClientRect().top;
+        var delay = Math.max(0, Math.min(top, 600)) * 0.4;
+        el.style.transitionDelay = delay + "ms";
+        el.classList.remove("rv-hide");
+        setTimeout(function(){ el.style.transitionDelay = ""; }, 800);
+      });
+    }, { threshold: 0.06, rootMargin: "0px 0px -30px 0px" });
+    list.forEach(function(el){
+      if (el._rvArmed) return; el._rvArmed = true;
+      el.classList.add("rv-hide");
+      io.observe(el);
+    });
+  }
+  /* v60：兜底函数——把视口内的渐显元素直接置为可见（不依赖 Observer 回调）。初始化和每次切页后都调一次，防止节流环境里内容一直藏着。 */
+  function forceRevealInView(root){
+    (root || document).querySelectorAll("[data-reveal]").forEach(function(el){
+      var r = el.getBoundingClientRect();
+      if (r.top < innerHeight && r.bottom > 0){ el.classList.remove("rv-hide"); el.style.opacity = "1"; el.style.transform = "none"; }
+    });
+  }
+  function bindPress(root){
+    (root || document).querySelectorAll("button, a.dl-btn, a.btn, summary, .nav-logo, .qq, .game, .step, .faq-item, .contact, .menu-row, .cat").forEach(function(el){
+      if (!el.hasAttribute("data-spring")) el.setAttribute("data-spring", "");
+    });
+    (root || document).querySelectorAll("[data-spring]").forEach(function(el){
+      if (el._press) return; el._press = true;
+      var ctl = makeTransform(el, 220, 28);
+      el.addEventListener("pointerdown", function(e){ if (e.target.closest && e.target.closest("[data-spring]") !== el) return; ctl.setS(0.97); });
+      ["pointerup","pointerleave","pointercancel"].forEach(function(ev){
+        el.addEventListener(ev, function(){ ctl.setS(1); });
+      });
+    });
+    bindTilt(root);
+  }
+  function animateIn(root){
+    var cards = (root || document).querySelectorAll(".game,.cat,.step,.faq-item,.section-head,.device-head,.picker,.group-label,.contact,.home-note,.missing,.empty,.menu-row,.menu-head,.menu-sub");
+    cards.forEach(function(el, i){
+      var ctl = makeTransform(el, 120, 26);
+      el.style.opacity = "0";
+      setTimeout(function(){
+        ctl.setY(0, 12);
+        /* v34：同上，不透明度用 CSS 过渡，不用弹簧 */
+        el.style.transition = "opacity .5s ease";
+        el.style.opacity = "1";
+      }, i * 70);
+    });
+  }
+
+  /* 逻辑：机型一旦选好就记下来，不再反复问。默认 long 只是占位，未选之前不算已选。 */
+  var state = { version: "clean", device: "long", chosen: false };
+  try {
+    var saved = JSON.parse(localStorage.getItem("migulu-picker") || "{}");
+    if (saved.version === "clean" || saved.version === "full") state.version = saved.version;
+    if (saved.device && DEVICES[saved.device]){ state.device = saved.device; state.chosen = true; }
+  } catch(e){}
+  function savePicker(){ try { localStorage.setItem("migulu-picker", JSON.stringify({ version: state.version, device: state.device })); } catch(e){} }
+  function updateHeroCurrent(){
+    var el = document.getElementById("heroCurrent");
+    var btn = document.getElementById("heroPickBtn");
+    if (!el) return;
+    if (state.chosen){
+      el.textContent = "已选：" + DEVICES[state.device].name + " · " + DEVICES[state.device].sub;
+      if (btn) btn.textContent = "更换手表";
+    } else {
+      el.textContent = "请选择你的手表";
+      if (btn) btn.textContent = "选择你的手表";
+    }
+  }
+
+  var VIEWS = { home: "view-home", device: "view-device", games: "view-games", test: "view-test", compare: "view-compare", install: "view-install", faq: "view-faq", about: "view-about" };
+  var curView = { key: "home", device: null };
+  /* v55：切页转圈——每次切到不同页面，都盖 450 毫秒苹果转圈环再露出新页面；首次打开不闪（整页加载圈已经盖着了）。 */
+  var viewLoaderTimer = null;
+  function flashViewLoader(){
+    var vl = document.getElementById("viewLoader");
+    if (!vl) return;
+    vl.classList.add("show");
+    if (viewLoaderTimer) clearTimeout(viewLoaderTimer);
+    viewLoaderTimer = setTimeout(function(){ vl.classList.remove("show"); }, 450);
+  }
+  function showView(key, device){
+    var isNav = curView && (curView.key !== key || (key === "device" && curView.device !== device));
+    curView = { key: key, device: device || null };
+    Object.keys(VIEWS).forEach(function(k){
+      document.getElementById(VIEWS[k]).classList.toggle("on", k === key);
+    });
+    document.querySelectorAll("#navLinks button").forEach(function(b){
+      var nav = b.getAttribute("data-nav");
+      b.classList.toggle("on", nav === key || (key === "device" && nav === device) || (key === "home" && nav === "home"));
+    });
+    if (key === "device" && device){ state.device = device; state.chosen = true; savePicker(); renderDevice(); }
+    if (key === "home"){ updateHeroCurrent(); }
+    if (key === "games"){ renderGames(); }
+    if (key === "test"){ renderTest(); }
+    if (key === "compare"){ renderCompare(); }
+    /* v60：切页直接回到顶部——原来走 CSS 平滑滚动，新页面先在旧位置闪一下再慢慢滑上去，看着拖沓；现在先关平滑、瞬间到顶、再恢复。 */
+    var _sb = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = "auto";
+    window.scrollTo(0, 0);
+    document.documentElement.style.scrollBehavior = _sb;
+    armReveal(document.getElementById(VIEWS[key]));
+    bindPress(document.getElementById(VIEWS[key]));
+    animateIn(document.getElementById(VIEWS[key]));
+    setTimeout(function(){ forceRevealInView(document.getElementById(VIEWS[key])); }, 900);
+    if (isNav) flashViewLoader();
+    var nh = key === "device" ? (device || state.device) : key;
+    if ((location.hash || "").replace(/^#/, "") !== nh){ location.hash = nh; }
+  }
+
+  var watchMenu = document.getElementById("watchMenu");
+  var navMenu = document.getElementById("navMenu");
+  var installGuide = document.getElementById("installGuide");
+  /* v51：菜单打开不再逐行淡入——原来 animateIn 把每行透明度先置 0 再错开显现，节流环境里会卡住，导航行直接看不见；现在菜单一开行就全在，只留卡片自己的 CSS 位移动画。 */
+  function openMenu(){ if (watchMenu){ watchMenu.classList.add("open"); watchMenu.setAttribute("aria-hidden", "false"); bindPress(watchMenu); } }
+  function closeMenu(){ if (watchMenu){ watchMenu.classList.remove("open"); watchMenu.setAttribute("aria-hidden", "true"); } }
+  function openNav(){ if (navMenu){ navMenu.classList.add("open"); navMenu.setAttribute("aria-hidden", "false"); bindPress(navMenu); } }
+  function closeNav(){ if (navMenu){ navMenu.classList.remove("open"); navMenu.setAttribute("aria-hidden", "true"); } }
+  var igStatusTimer = null;
+  function openInstall(fname, bytes){ var f = document.getElementById("igFile"); if (f){ f.textContent = fname + " · " + mb(bytes) + " · " + bytes.toLocaleString("en-US") + " 字节"; } if (installGuide){ installGuide.classList.add("open"); installGuide.setAttribute("aria-hidden", "false"); } var st = document.getElementById("igStatus"); if (st){ st.textContent = "正在下载…"; if (igStatusTimer) clearTimeout(igStatusTimer); igStatusTimer = setTimeout(function(){ st.textContent = "已开始下载，请到通知栏查看进度。"; }, 3000); } }
+  function closeInstall(){ if (installGuide){ installGuide.classList.remove("open"); installGuide.setAttribute("aria-hidden", "true"); } if (igStatusTimer){ clearTimeout(igStatusTimer); igStatusTimer = null; } }
+  /* v59：申请加入测试——静态站不存服务器，提交只做本地校验 + 提示进群，不伪造入库 */
+  var applyGuide = document.getElementById("applyGuide");
+  function openApply(gid, gtitle){
+    var t = document.getElementById("applyGame"); if (t){ t.textContent = gtitle || ""; }
+    var q = document.getElementById("applyQq"); if (q){ q.value = ""; }
+    var m = document.getElementById("applyModel"); if (m){ m.value = ""; }
+    var e = document.getElementById("applyErr"); if (e){ e.classList.remove("show"); e.textContent = "请把 QQ 号和型号都填完整。"; }
+    var f = document.getElementById("applyForm"); if (f){ f.style.display = ""; }
+    var d = document.getElementById("applyDone"); if (d){ d.style.display = "none"; }
+    if (applyGuide){ applyGuide.classList.add("open"); applyGuide.setAttribute("aria-hidden", "false"); }
+  }
+  function closeApply(){ if (applyGuide){ applyGuide.classList.remove("open"); applyGuide.setAttribute("aria-hidden", "true"); } }
+  function submitApply(){
+    var q = document.getElementById("applyQq");
+    var m = document.getElementById("applyModel");
+    var e = document.getElementById("applyErr");
+    var qq = q ? q.value.trim() : "";
+    var mo = m ? m.value.trim() : "";
+    var errMsg = "";
+    if (!qq || !mo){ errMsg = "请把 QQ 号和型号都填完整。"; }
+    else if (!/^\d{5,12}$/.test(qq)){ errMsg = "QQ 号填数字就行（5–12 位）。"; }
+    if (errMsg){ if (e){ e.textContent = errMsg; e.classList.add("show"); } return; }
+    if (e){ e.classList.remove("show"); }
+    var f = document.getElementById("applyForm"); if (f){ f.style.display = "none"; }
+    var d = document.getElementById("applyDone"); if (d){ d.style.display = ""; }
+  }
+  document.addEventListener("click", function(e){
+    if (e.target.closest("#navMenuBtn")){ openNav(); return; }
+    if (e.target.closest("[data-close-nav]") || e.target === navMenu){ closeNav(); return; }
+    if (e.target.closest("[data-menu='watch']")){ openMenu(); return; }
+    if (e.target.closest("[data-close-menu]") || e.target === watchMenu){ closeMenu(); return; }
+    if (e.target.closest("[data-close-install]") || e.target === installGuide){ closeInstall(); return; }
+    if (e.target.closest("[data-close-apply]") || e.target === applyGuide){ closeApply(); return; }
+    var ap = e.target.closest("[data-apply]");
+    if (ap){ openApply(ap.getAttribute("data-gid"), ap.getAttribute("data-gtitle")); return; }
+    var asb = e.target.closest("[data-apply-submit]");
+    if (asb){ submitApply(); return; }
+    var oc = e.target.closest("[data-oneclick]");
+    if (oc){ var a = document.createElement("a"); a.href = oc.getAttribute("data-file"); a.setAttribute("download", oc.getAttribute("data-fname") || ""); document.body.appendChild(a); a.click(); setTimeout(function(){ if (a.parentNode){ a.parentNode.removeChild(a); } }, 100); openInstall(oc.getAttribute("data-fname"), +oc.getAttribute("data-bytes")); return; }
+    var wbtn = e.target.closest("[data-watch]");
+    if (wbtn){ switchWatch(wbtn.getAttribute("data-watch")); return; }
+    var msh = e.target.closest("[data-model-shape]");
+    if (msh){ setModelShape(msh.getAttribute("data-model-shape")); return; }
+    var dch = e.target.closest("[data-demo-choice]");
+    if (dch){ demoChoose(+dch.getAttribute("data-demo-choice")); return; }
+    var drp = e.target.closest("[data-demo-replay]");
+    if (drp){ demoReplay(); return; }
+    var hgo = e.target.closest("[data-hero-go]");
+    if (hgo){ heroGo(hgo.getAttribute("data-hero-go")); return; }
+    var hrp = e.target.closest("[data-hero-replay]");
+    if (hrp){ heroGo("game"); return; }
+    var hst = e.target.closest("[data-hero-set]");
+    if (hst){ heroToggleSetting(hst.getAttribute("data-hero-set")); return; }
+    var sdl = e.target.closest("[data-show-dl]");
+    if (sdl){
+      if (state.chosen){ showView("device", state.device); }
+      else { openMenu(); }
+      return;
+    }
+    var sh = e.target.closest("[data-share]");
+    if (sh){
+      var old = sh.textContent;
+      var doneShare = function(){ sh.textContent = "已复制 ✓"; setTimeout(function(){ sh.textContent = old; }, 1400); };
+      if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(location.href).then(doneShare, doneShare); }
+      else { doneShare(); }
+      return;
+    }
+    var cf = e.target.closest("[data-copy-file]");
+    if (cf){
+      var txt = "文件名：" + cf.getAttribute("data-fname") + "\n大小：" + cf.getAttribute("data-bytes") + " 字节\nMD5：" + cf.getAttribute("data-md5");
+      var oldCf = cf.textContent;
+      var doneCf = function(){ cf.textContent = "已复制 ✓"; setTimeout(function(){ cf.textContent = oldCf; }, 1400); };
+      if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(doneCf, doneCf); }
+      else { doneCf(); }
+      return;
+    }
+    var sv = e.target.closest("[data-switch-ver]");
+    if (sv){
+      state.version = sv.getAttribute("data-switch-ver");
+      savePicker(); /* v60：从全部游戏页切换版本也要存下来，不然刷新就丢了（之前只有机型页的 renderDevice 会存） */
+      if (document.getElementById("view-device").classList.contains("on")) renderDevice();
+      if (document.getElementById("view-games").classList.contains("on")) renderGames();
+      return;
+    }
+    var t = e.target.closest("[data-go]");
+    if (!t) return;
+    if (t.tagName === "A") e.preventDefault();
+    closeMenu(); closeNav();
+    var go = t.getAttribute("data-go");
+    if (DEVICES[go]){ showView("device", go); }
+    else { showView(go); }
+  });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape"){ closeMenu(); closeNav(); closeApply(); } });
+  /* 哈希路由：每个页面都有可分享的地址，浏览器前进/后退可用 */
+  window.addEventListener("hashchange", function(){
+    var h = (location.hash || "").replace(/^#/, "");
+    if (!h) h = "home";
+    if (DEVICES[h]){
+      if (!(curView.key === "device" && curView.device === h)) showView("device", h);
+    } else if (VIEWS[h]){
+      if (curView.key !== h) showView(h);
+    }
+  });
+
+  function matchingFiles(game, device, version){
+    return game.files.filter(function(f){
+      return f.d === device && (f.v === "all" || f.v === version);
+    });
+  }
+  function cardHTML(game, files, browse){
+    var html = '<article class="game card" data-tilt data-spring><div class="game-cover"><img src="' + game.cover + '" alt="' + esc(game.title) + ' 封面" loading="lazy"></div><div class="game-body">';
+    if (game.id === "cafestella"){ html += '<div class="pop-badge">最受欢迎</div>'; }
+    html += '<h3>' + esc(game.title) + '</h3><div class="en">' + esc(game.en) + '</div><p class="desc">' + esc(game.desc) + '</p><div class="meta">' + esc(game.meta) + '</div>';
+    if (browse){
+      var avail = [];
+      game.files.forEach(function(f){ if ((f.v === "all" || f.v === state.version) && avail.indexOf(DEVICE_LABEL[f.d]) === -1) avail.push(DEVICE_LABEL[f.d]); });
+      html += '<div class="dl-main"><div class="dl-label">可装机型</div><div class="dl-size">' + avail.join(" · ") + '</div>';
+      if (!state.chosen){
+        html += '<button class="dl-btn" data-menu="watch" data-spring>选择机型下载</button></div>';
+      } else {
+        var cur = matchingFiles(game, state.device, state.version);
+        if (cur.length){
+          var cm = cur[0];
+          html += '<div class="dl-label" style="margin-top:10px">' + esc(cm.label) + '</div><div class="dl-size">' + mb(cm.bytes) + ' · ' + cm.bytes.toLocaleString("en-US") + ' 字节</div>';
+          html += '<button class="dl-btn" data-spring data-oneclick data-file="' + cm.file + '" data-fname="' + cm.file.split("/").pop() + '" data-bytes="' + cm.bytes + '">一键安装</button>';
+          if (cur.length > 1){
+            var cm2 = cur[1];
+            var liteName = (cm2.label.split("·")[1] || cm2.label).trim();
+            html += '<div style="text-align:center;margin-top:10px"><a style="color:var(--blue);font-size:14px" href="' + cm2.file + '" download>' + esc(liteName) + ' · ' + mb(cm2.bytes) + ' ›</a></div>';
+          }
+          html += '<div style="text-align:center;margin-top:10px"><button style="border:none;background:none;cursor:pointer;color:var(--blue);font-size:14px" data-menu="watch" data-spring>更换机型 ›</button></div></div>';
+        } else {
+          var otherVer = state.version === "clean" ? "full" : "clean";
+          var otherName = state.version === "clean" ? "完整版" : "干净版";
+          if (matchingFiles(game, state.device, otherVer).length){
+            html += '<button class="dl-btn" data-switch-ver="' + otherVer + '" data-spring>查看' + otherName + '</button>';
+            html += '<div style="text-align:center;margin-top:10px"><span style="font-size:13px;color:var(--ink2)">这个机型只有' + otherName + '</span></div></div>';
+          } else {
+            html += '<div style="text-align:center;color:var(--ink2);font-size:14px;padding:12px 0">暂无' + DEVICE_LABEL[state.device] + '版</div>';
+            html += '<div style="text-align:center;margin-top:10px"><button style="border:none;background:none;cursor:pointer;color:var(--blue);font-size:14px" data-menu="watch" data-spring>选择其他机型 ›</button></div></div>';
+          }
+        }
+      }
+    } else if (files.length === 0){
+      html += '<div class="dl-main"><button class="dl-btn" disabled>暂无此版本</button></div>';
+    } else {
+      var main = files[0];
+      html += '<div class="dl-main"><div class="dl-label">' + esc(main.label) + '</div><div class="dl-size">' + mb(main.bytes) + ' · ' + main.bytes.toLocaleString("en-US") + ' 字节</div>';
+      html += '<button class="dl-btn" data-spring data-oneclick data-file="' + main.file + '" data-fname="' + main.file.split("/").pop() + '" data-bytes="' + main.bytes + '">一键安装</button></div>';
+      html += '<details class="dl-other"><summary>文件信息' + (files.length > 1 ? ' · 还有 ' + (files.length - 1) + ' 个版本' : '') + ' ›</summary>';
+      files.forEach(function(f){
+        var fname = f.file.split("/").pop();
+        html += '<div class="row"><span>' + esc(f.label) + '<br><span class="row-sub">' + mb(f.bytes) + ' · ' + f.bytes.toLocaleString("en-US") + ' 字节</span><br><span class="row-sub">' + esc(fname) + '</span><br><span class="row-sub">MD5 ' + f.md5 + '</span></span><span class="row-actions"><a class="dl-btn-sm" href="' + f.file + '" download>下载</a><button class="copy-check" data-copy-file data-fname="' + esc(fname) + '" data-bytes="' + f.bytes + '" data-md5="' + f.md5 + '" data-spring>复制核对信息</button></span></div>';
+      });
+      html += '</details>';
+      var noteText = game.note;
+      if (state.version === "full"){ noteText = noteText.replace(/^干净版：[^。]*。/, ""); }
+      if (noteText){ html += '<p style="font-size:12.5px;color:var(--ink2);margin-top:12px">' + esc(noteText) + '</p>'; }
+    }
+    html += '</div></article>';
+    return html;
+  }
+  /* 首页大展示：每款游戏一个苹果式产品区（标题 + 副标题 + 文字链 + 大图） */
+  function renderShowcases(){
+    var box = document.getElementById("homeShowcases");
+    if (!box || box._done) return; box._done = true;
+    var html = "";
+    GAMES.forEach(function(g, i){
+      var cls = { cafestella: " show-cafe", katawa: " show-katawa", narcissu: " show-mint" }[g.id] || "";
+      var w = (g.id === "narcissu") ? 380 : 900;
+      var badge = (g.id === "cafestella") ? '<div class="pop-badge">最受欢迎</div>' : "";
+      html += '<section class="showcase' + cls + '" data-reveal>'
+        + badge
+        + '<h2>' + esc(g.title) + '</h2>'
+        + '<p class="show-sub">' + esc(g.desc) + '</p>'
+        + '<div class="show-links"><button class="btn btn-blue" data-show-dl data-spring>下载</button><button data-go="games">了解更多 &gt;</button></div>'
+        + '<div class="show-img" style="max-width:' + w + 'px"><img src="' + g.cover + '" alt="' + esc(g.title) + ' 封面" loading="lazy"></div>'
+        + '</section>';
+    });
+    box.innerHTML = html;
+  }
+  function renderDevice(){
+    var d = DEVICES[state.device];
+    document.getElementById("deviceTitle").textContent = d.name;
+    document.getElementById("deviceSub").innerHTML = esc(d.sub) + (d.hint ? '<span class="device-hint">' + esc(d.hint) + '</span>' : "");
+    document.getElementById("pickerHint").textContent = state.version === "clean" ? "干净版：成人内容已移除" : "完整版：全内容";
+    var seg = document.getElementById("segVersion");
+    seg.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-v") === state.version); });
+    moveIndicator(seg);
+    var segD = document.getElementById("segDevice");
+    segD.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-d") === state.device); });
+    moveIndicator(segD);
+    var grid = document.getElementById("deviceGrid");
+    var html = "", missVer = [], missDev = [];
+    var otherVer = state.version === "clean" ? "full" : "clean";
+    var otherName = state.version === "clean" ? "完整版" : "干净版";
+    GAMES.forEach(function(g){
+      var files = matchingFiles(g, state.device, state.version);
+      if (files.length){ html += cardHTML(g, files, false); }
+      else if (matchingFiles(g, state.device, otherVer).length){ missVer.push(g); }
+      else { missDev.push(g); }
+    });
+    grid.innerHTML = html;
+    var empty = document.getElementById("deviceEmpty");
+    var missEl = document.getElementById("deviceMissing");
+    if (!html){
+      empty.style.display = "block";
+      document.getElementById("deviceEmptyText").textContent = d.name + "暂无" + (state.version === "clean" ? "干净版" : "完整版") + "，换个版本试试。";
+      document.getElementById("deviceEmptyBtn").textContent = state.version === "clean" ? "查看完整版" : "查看干净版";
+    } else { empty.style.display = "none"; }
+    if ((missVer.length || missDev.length) && html){
+      missEl.style.display = "block";
+      var m = "";
+      if (missVer.length){
+        m += "换" + otherName + "就有：<b>" + missVer.map(function(g){ return esc(g.title); }).join("、") + "</b> <button data-switch-ver=\"" + otherVer + "\">查看" + otherName + "</button>。";
+      }
+      if (missDev.length){
+        if (m) m += "<br>";
+        m += "这个机型暂时没有：<b>" + missDev.map(function(g){ return esc(g.title); }).join("、") + "</b>，去" +
+          (state.device === "long" ? '<button data-go="round">圆表 ›</button> 或 <button data-go="capsule">胶囊表 ›</button>' : '<button data-go="home">看看其他机型 ›</button>') + "下载。";
+      }
+      missEl.innerHTML = m;
+    } else { missEl.style.display = "none"; }
+    bindPress(grid); bindPress(missEl); animateIn(grid); armImgLoading(grid); /* v60：每次渲染完都装图片占位——原来只在初始化装一次，切版本/切机型后新图没有转圈和淡入 */
+    savePicker();
+  }
+  function renderGames(){
+    var gc = document.getElementById("gamesCurrent");
+    if (gc){
+      if (state.chosen){ gc.innerHTML = "当前机型：" + esc(DEVICES[state.device].name) + " · " + esc(DEVICES[state.device].sub) + ' <button data-menu="watch" data-spring>更换机型 ›</button>'; }
+      else { gc.innerHTML = "未选择机型，下载时会让你选。 <button data-menu=\"watch\" data-spring>选择机型 ›</button>"; }
+    }
+    var longHtml = "", shortHtml = "";
+    GAMES.forEach(function(g){
+      if (g.cat === "long-story"){ longHtml += cardHTML(g, [], true); }
+      else { shortHtml += cardHTML(g, [], true); }
+    });
+    document.getElementById("gamesLong").innerHTML = longHtml;
+    document.getElementById("gamesShort").innerHTML = shortHtml;
+    bindPress(document.getElementById("view-games"));
+    animateIn(document.getElementById("view-games"));
+    armImgLoading(document.getElementById("view-games"));
+  }
+  /* v59：测试页卡片——和主站卡片一个样子，但徽章与说明常驻，不随版本切换被裁掉 */
+  function testCardHTML(g){
+    var html = '<article class="game card" data-tilt data-spring><div class="game-cover"><img src="' + g.cover + '" alt="' + esc(g.title) + ' 封面" loading="lazy"></div><div class="game-body">';
+    if (g.badges){
+      g.badges.forEach(function(b){ html += '<span class="test-badge ' + b.cls + '">' + esc(b.t) + '</span>'; });
+    }
+    html += '<h3>' + esc(g.title) + '</h3><div class="en">' + esc(g.en) + '</div><p class="desc">' + esc(g.desc) + '</p><div class="meta">' + esc(g.meta) + '</div>';
+    var main = g.files[0];
+    html += '<div class="dl-main"><div class="dl-label">' + esc(main.label) + '</div><div class="dl-size">' + mb(main.bytes) + ' · ' + main.bytes.toLocaleString("en-US") + ' 字节</div>';
+    html += '<button class="dl-btn" data-spring data-apply data-gid="' + g.id + '" data-gtitle="' + esc(g.title) + '">申请</button></div>';
+    html += '<details class="dl-other"><summary>文件信息 ›</summary>';
+    g.files.forEach(function(f){
+      var fname = f.file.split("/").pop();
+      html += '<div class="row"><span>' + esc(f.label) + '<br><span class="row-sub">' + mb(f.bytes) + ' · ' + f.bytes.toLocaleString("en-US") + ' 字节</span><br><span class="row-sub">' + esc(fname) + '</span><br><span class="row-sub">MD5 ' + f.md5 + '</span></span><span class="row-actions"><a class="dl-btn-sm" href="' + f.file + '" download>下载</a><button class="copy-check" data-copy-file data-fname="' + esc(fname) + '" data-bytes="' + f.bytes + '" data-md5="' + f.md5 + '" data-spring>复制核对信息</button></span></div>';
+    });
+    html += '</details>';
+    if (g.note){ html += '<p style="font-size:12.5px;color:var(--ink2);margin-top:12px">' + esc(g.note) + '</p>'; }
+    html += '</div></article>';
+    return html;
+  }
+  function renderTest(){
+    var grid = document.getElementById("testGrid");
+    if (!grid) return;
+    var html = "";
+    TEST_GAMES.forEach(function(g){ html += testCardHTML(g); });
+    grid.innerHTML = html;
+    bindPress(document.getElementById("view-test"));
+    animateIn(document.getElementById("view-test"));
+    armImgLoading(document.getElementById("view-test"));
+  }
+  /* 苹果式比较表：机型与游戏，全部从 DATA 现算，不写死数字 */
+  var ROUTES = { cafestella: "共通线 + 5 条路线及后日谈", katawa: "共通线 + 5 条路线", narcissu: "单线" };
+  function renderCompare(){
+    var order = ["long", "round", "capsule", "rw6"];
+    var dHtml = '<tr><th></th>';
+    order.forEach(function(d){
+      var dev = DEVICES[d];
+      var parts = dev.sub.split("·");
+      parts.pop();
+      var model = parts.join("·").trim();
+      dHtml += '<th class="cmp-head"><div class="cmp-shape"><div class="shape shape-' + d + '"></div></div><b>' + esc(dev.name) + '</b><span class="cmp-sub">' + esc(model) + '</span><button data-go="' + d + '" data-spring>查看 ›</button></th>';
+    });
+    dHtml += '</tr>';
+    function devRow(label, fn){
+      var r = '<tr><td>' + label + '</td>';
+      order.forEach(function(d){ r += '<td>' + fn(d) + '</td>'; });
+      return r + '</tr>';
+    }
+    dHtml += devRow("分辨率", function(d){
+      var parts = DEVICES[d].sub.split("·");
+      return esc(parts.pop().trim());
+    });
+    dHtml += devRow("型号", function(d){
+      var parts = DEVICES[d].sub.split("·");
+      parts.pop();
+      return esc(parts.join("·").trim());
+    });
+    dHtml += devRow("可玩游戏", function(d){
+      var n = 0;
+      GAMES.forEach(function(g){ if (g.files.some(function(f){ return f.d === d; })) n++; });
+      return n + " 款";
+    });
+    dHtml += devRow("版本", function(d){
+      var vs = [];
+      GAMES.forEach(function(g){ g.files.forEach(function(f){ if (f.d === d && vs.indexOf(f.v) === -1) vs.push(f.v); }); });
+      var names = { clean: "干净版", full: "完整版", all: "全年龄" };
+      return vs.map(function(v){ return names[v] || v; }).join(" · ");
+    });
+    dHtml += devRow("最大安装包", function(d){
+      var mx = 0;
+      GAMES.forEach(function(g){ g.files.forEach(function(f){ if (f.d === d && f.bytes > mx) mx = f.bytes; }); });
+      return mb(mx);
+    });
+    var dt = document.getElementById("compareDevices");
+    if (dt) dt.innerHTML = dHtml;
+    var gHtml = '<tr><th></th>';
+    GAMES.forEach(function(g){
+      gHtml += '<th class="cmp-head"><div class="cmp-thumb"><img src="' + g.cover + '" alt="' + esc(g.title) + ' 封面" loading="lazy"></div><b>' + esc(g.title) + '</b><button data-go="games" data-spring>查看 ›</button></th>';
+    });
+    gHtml += '</tr>';
+    function gameRow(label, fn){
+      var r = '<tr><td>' + label + '</td>';
+      GAMES.forEach(function(g){ r += '<td>' + fn(g) + '</td>'; });
+      return r + '</tr>';
+    }
+    gHtml += gameRow("类型", function(g){ return esc(g.meta); });
+    gHtml += gameRow("路线", function(g){ return esc(ROUTES[g.id] || "—"); });
+    gHtml += gameRow("年龄", function(g){
+      return g.files.some(function(f){ return f.v === "clean"; }) ? "含成人内容（有干净版）" : "全年龄";
+    });
+    gHtml += gameRow("可装机型", function(g){
+      var av = [];
+      g.files.forEach(function(f){ if (av.indexOf(DEVICE_LABEL[f.d]) === -1) av.push(DEVICE_LABEL[f.d]); });
+      return av.join(" · ");
+    });
+    gHtml += gameRow("大小", function(g){
+      var mn = Infinity, mx = 0;
+      g.files.forEach(function(f){ if (f.bytes < mn) mn = f.bytes; if (f.bytes > mx) mx = f.bytes; });
+      var a = mb(mn), b = mb(mx);
+      return a === b ? a : a.replace(" MB", "") + " – " + b;
+    });
+    var gt = document.getElementById("compareGames");
+    if (gt) gt.innerHTML = gHtml;
+    armImgLoading(document.getElementById("view-compare")); /* v60：比较表重绘后也装图片占位 */
+  }
+  function moveIndicator(seg){
+    if (!seg) return;
+    var ind = seg.querySelector(".seg-ind");
+    var on = seg.querySelector("button.on");
+    if (!ind || !on) return;
+    if (!on.offsetWidth) return; /* v60：按钮在隐藏视图里宽是 0，这时不算位置，免得指示条被压成 0 宽（切回来时 renderDevice 会重新算） */
+    var tx = on.offsetLeft - 3, tw = on.offsetWidth;
+    if (!seg._sx){
+      seg._sx = new Spring(function(v){ ind.style.transform = "translateX(" + v.toFixed(2) + "px)"; }, 220, 30);
+      seg._sw = new Spring(function(v){ ind.style.width = v.toFixed(2) + "px"; }, 220, 30);
+      seg._sx.go(tx, tx); seg._sw.go(tw, tw);
+      return;
+    }
+    seg._sx.go(tx); seg._sw.go(tw);
+  }
+  document.getElementById("segDevice").querySelectorAll("button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var d = btn.getAttribute("data-d");
+      if (d && d !== state.device){ showView("device", d); }
+    });
+  });
+  document.getElementById("segVersion").querySelectorAll("button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      document.getElementById("segVersion").querySelectorAll("button").forEach(function(b){ b.classList.remove("on"); });
+      btn.classList.add("on");
+      state.version = btn.getAttribute("data-v");
+      moveIndicator(document.getElementById("segVersion"));
+      renderDevice();
+    });
+  });
+  document.getElementById("deviceEmptyBtn").addEventListener("click", function(){
+    state.version = state.version === "clean" ? "full" : "clean";
+    renderDevice();
+  });
+  window.addEventListener("resize", function(){ moveIndicator(document.getElementById("segVersion")); moveIndicator(document.getElementById("segDevice")); moveIndicator(document.getElementById("modelShapeSeg")); moveIndicator(document.getElementById("demoGameSeg")); });
+
+  /* Hero 渐进：滚动时轻轻收缩淡出（苹果产品页做法） */
+  var heroIn = document.getElementById("heroIn");
+  /* v60：Hero 随滚动收缩改用 CSS 过渡直接赋值——原来 rAF 插值在文件查看器里 0-2 帧，滚一下 Hero 要 20 秒才回得来、半天发暗；现在直接给目标值，CSS 过渡（合成器跑）负责平滑，又顺又不卡。 */
+  function heroShrink(p){
+    if (!heroIn) return;
+    heroIn.style.transform = "scale(" + (1 - p * 0.06).toFixed(4) + ")";
+    heroIn.style.opacity = (1 - p * 0.4).toFixed(3);
+  }
+  var fab = document.getElementById("fabBtn");
+  fab.addEventListener("click", function(){ window.scrollTo({ top: 0, behavior: "smooth" }); });
+  window.addEventListener("scroll", function(){
+    var y = window.scrollY || 0;
+    fab.classList.toggle("show", y > 600);
+    if (document.getElementById("view-home").classList.contains("on")){
+      heroShrink(Math.min(y / 420, 1));
+    }
+  }, { passive: true });
+
+  var themeBtn = document.getElementById("themeBtn");
+  var savedTheme = null;
+  try { savedTheme = localStorage.getItem("migulu-theme"); } catch(e){}
+  if (savedTheme === "dark"){ document.documentElement.setAttribute("data-theme", "dark"); themeBtn.textContent = "浅色"; }
+  themeBtn.addEventListener("click", function(){
+    var dark = document.documentElement.getAttribute("data-theme") === "dark";
+    if (dark){ document.documentElement.removeAttribute("data-theme"); themeBtn.textContent = "深色"; try { localStorage.setItem("migulu-theme", "light"); } catch(e){} }
+    else { document.documentElement.setAttribute("data-theme", "dark"); themeBtn.textContent = "浅色"; try { localStorage.setItem("migulu-theme", "dark"); } catch(e){} }
+  });
+
+  var qq = document.getElementById("qqCopy");
+  if (qq){
+    qq.addEventListener("click", function(){
+      var done = function(){
+        var old = qq.innerHTML;
+        qq.innerHTML = "已复制群号 ✓";
+        setTimeout(function(){ qq.innerHTML = old; }, 1400);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText("590248751").then(done, done); }
+      else { done(); }
+    });
+  }
+
+  /* 图片加载：网慢时先显示灰底 + 苹果转圈，图到了再淡入；失败显示提示 */
+  function armImgLoading(root){
+    var scope = root || document;
+    scope.querySelectorAll("img").forEach(function(im){
+      if (im._imgArmed) return; im._imgArmed = true;
+      if (im.closest && im.closest(".model-screen")) return;
+      if (im.classList && im.classList.contains("hw-sprite")) return;
+      var ph = im.parentElement;
+      if (!ph) return;
+      ph.classList.add("img-ph");
+      if (window.getComputedStyle && window.getComputedStyle(ph).position === "static"){
+        ph.style.position = "relative";
+      }
+      var spin = document.createElement("div");
+      spin.className = "img-spin";
+      spin.innerHTML = '<div class="apl-spin" style="--s:18px;"><i style="--n:0"></i><i style="--n:1"></i><i style="--n:2"></i><i style="--n:3"></i><i style="--n:4"></i><i style="--n:5"></i><i style="--n:6"></i><i style="--n:7"></i><i style="--n:8"></i><i style="--n:9"></i><i style="--n:10"></i><i style="--n:11"></i></div>';
+      ph.appendChild(spin);
+      var done = function(ok){
+        im.classList.add("loaded");
+        if (spin.parentNode) spin.parentNode.removeChild(spin);
+        if (!ok){
+          var e = document.createElement("div");
+          e.className = "img-err"; e.textContent = "图片加载失败";
+          ph.appendChild(e);
+        }
+      };
+      if (im.complete){ done(im.naturalWidth > 0); } /* v60：图已加载完（哪怕是坏的）就直接收尾——原来坏图 complete 但 naturalWidth 为 0，load/error 再也不会触发，转圈一直转 */
+      else {
+        im.addEventListener("load", function(){ done(true); });
+        im.addEventListener("error", function(){ done(false); });
+      }
+    });
+    scope.querySelectorAll("[data-bg]").forEach(function(el){
+      if (el._bgArmed) return; el._bgArmed = true;
+      var url = el.getAttribute("data-bg");
+      if (!url) return;
+      el.classList.add("bg-ph");
+      var spin = document.createElement("div");
+      spin.className = "img-spin";
+      spin.innerHTML = '<div class="apl-spin" style="--s:18px;"><i style="--n:0"></i><i style="--n:1"></i><i style="--n:2"></i><i style="--n:3"></i><i style="--n:4"></i><i style="--n:5"></i><i style="--n:6"></i><i style="--n:7"></i><i style="--n:8"></i><i style="--n:9"></i><i style="--n:10"></i><i style="--n:11"></i></div>';
+      el.appendChild(spin);
+      var im = new Image();
+      im.onload = function(){
+        el.style.backgroundImage = "url(" + url + ")";
+        if (spin.parentNode) spin.parentNode.removeChild(spin);
+      };
+      im.onerror = function(){
+        if (spin.parentNode) spin.parentNode.removeChild(spin);
+        var e = document.createElement("div");
+        e.className = "img-err"; e.textContent = "图片加载失败";
+        el.appendChild(e);
+      };
+      im.src = url;
+    });
+  }
+
+  /* ---------- v20：手表演示：可拖动旋转 + 四款表可切换 ---------- */
+  var WATCHES = {
+    long: { cls: "watch-long", caption: "星光咖啡馆 · 长表效果预览", face: "mock", cover: "covers/cafestella.jpg", title: "星光咖啡馆与死神之蝶" },
+    round: { cls: "watch-round", caption: "心跳文学部 · 圆表效果预览", face: "mock", cover: "covers/ddlc.jpg", title: "心跳文学部" },
+    capsule: { cls: "watch-capsule", caption: "水仙 · 胶囊表效果预览", face: "mock", cover: "covers/narcissu.jpg", title: "水仙" },
+    rw6: { cls: "watch-rw6", caption: "片轮少女 · 红米 Watch 6 效果预览", face: "img", src: "shots/katawa-rw6-dialogue.png", alt: "片轮少女在红米 Watch 6 上的运行画面", cover: "covers/katawa.jpg", title: "片轮少女" }
+  };
+  var curWatch = "rw6";
+  var watchRot = 0, watchDragging = false, watchTouched = false;
+  var watchSpring = new Spring(function(v){ setWatchRot(v); }, 170, 22);
+  function setWatchRot(deg){
+    watchRot = deg;
+    var frame = document.getElementById("watchFrame");
+    if (frame) frame.style.transform = "rotateY(" + deg.toFixed(2) + "deg)";
+  }
+  function watchFaceHTML(w){
+    if (w.face === "img") return '<img src="' + w.src + '" alt="' + esc(w.alt) + '" draggable="false">';
+    return '<div class="watch-mock" data-bg="' + w.cover + '"><div class="wm-title">' + esc(w.title) + '</div><div class="wm-btn">开始游戏</div></div>';
+  }
+  function switchWatch(d){
+    if (!WATCHES[d] || d === curWatch) return;
+    curWatch = d;
+    heroPage = "title"; heroGameIdx = 0; heroGalIdx = 0; heroStopAuto();
+    var frame = document.getElementById("watchFrame");
+    var face = document.getElementById("watchFace");
+    var cap = document.getElementById("watchCaption");
+    if (frame) frame.className = "watch-frame " + WATCHES[d].cls;
+    if (cap) cap.textContent = WATCHES[d].caption;
+    if (face){
+      face.style.opacity = 0;
+      setTimeout(function(){ renderHeroFace(); face.style.opacity = 1; }, 180);
+    }
+    var seg = document.getElementById("watchSeg");
+    if (seg){
+      seg.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-watch") === d); });
+      moveIndicator(seg);
+    }
+  }
+  function bindWatchDrag(){
+    var frame = document.getElementById("watchFrame");
+    if (!frame) return;
+    var startX = 0, startY = 0, startRot = 0, downT = 0, moved = false;
+    frame.addEventListener("pointerdown", function(e){
+      if (e.target && e.target.closest && e.target.closest("button")) return;
+      watchDragging = true; watchTouched = true;
+      startX = e.clientX; startY = e.clientY; startRot = watchRot;
+      downT = Date.now(); moved = false;
+      watchSpring.active = false;
+      if (frame.setPointerCapture){ try { frame.setPointerCapture(e.pointerId); } catch (err) {} }
+      e.preventDefault();
+    });
+    frame.addEventListener("pointermove", function(e){
+      if (!watchDragging) return;
+      if (Math.abs(e.clientX - startX) > 8 || Math.abs(e.clientY - startY) > 8) moved = true;
+      var deg = startRot + (e.clientX - startX) * 0.28;
+      if (deg > 55) deg = 55;
+      if (deg < -55) deg = -55;
+      setWatchRot(deg);
+    });
+    function endDrag(e){
+      if (!watchDragging) return;
+      watchDragging = false;
+      var isTap = !moved && (Date.now() - downT) < 600;
+      watchSpring.go(0, watchRot);
+      if (isTap && e && e.target && !(e.target.closest && e.target.closest("button"))) heroFaceTap();
+    }
+    frame.addEventListener("pointerup", endDrag);
+    frame.addEventListener("pointercancel", endDrag);
+    /* 首次出现时轻轻晃一下，提示可以拖动 */
+    setTimeout(function(){
+      if (!watchTouched){ watchSpring.go(-16, watchRot); setTimeout(function(){ if (!watchTouched) watchSpring.go(0); }, 550); }
+    }, 1000);
+  }
+
+  /* ---------- v24：Hero 手表变真实迷你应用：标题 / 游戏 / 画廊 / 设置，四页可玩 ---------- */
+  var HERO_WATCH_GAME = { long: "cafe", round: "cafe", capsule: "narcissu", rw6: "katawa" };
+  var HERO_GALLERY = {
+    cafe: [
+      { img: "covers/cafestella.jpg", cap: "封面 · 星光咖啡馆" },
+      { bg: "covers/cafestella.jpg", sprite: "sprites/nozomi.png", cap: "立绘 · 希" }
+    ],
+    katawa: [
+      { img: "covers/katawa.jpg", cap: "封面 · 片轮少女" },
+      { img: "shots/katawa-rw6-dialogue.png", cap: "实机 · 红米 Watch 6" }
+    ],
+    narcissu: [
+      { img: "covers/narcissu.jpg", cap: "封面 · 水仙" },
+      { img: "covers/narcissu_field.jpg", cap: "CG · 水仙花田" }
+    ],
+    ddlc: [
+      { img: "covers/ddlc.jpg", cap: "封面 · 心跳文学部" },
+      { poem: "窗外的云走得很慢\n我把今天写进诗里\n——纱世里", cap: "诗 · 纱世里" }
+    ]
+  };
+  var heroPage = "title", heroGameIdx = 0, heroGalIdx = 0, heroAutoTimer = null;
+  var heroSettings = { dark: false, vibrate: true, autoplay: false };
+  try {
+    var _hs = JSON.parse(localStorage.getItem("heroSettings") || "null");
+    if (_hs) heroSettings = _hs;
+  } catch (err) {}
+  function heroGame(){ return DEMO_GAMES[HERO_WATCH_GAME[curWatch]]; }
+  function heroSaveSettings(){ try { localStorage.setItem("heroSettings", JSON.stringify(heroSettings)); } catch (err) {} }
+  function heroVibrate(ms){
+    if (heroSettings.vibrate && navigator.vibrate){ try { navigator.vibrate(ms || 8); } catch (err) {} }
+  }
+  function heroStopAuto(){ if (heroAutoTimer){ clearInterval(heroAutoTimer); heroAutoTimer = null; } }
+  function heroSetRow(key, label, on){
+    return '<div class="hw-set-row" data-hero-set="' + key + '" data-spring><span>' + label + '</span><span class="hw-toggle' + (on ? " on" : "") + '"></span></div>';
+  }
+  function heroFaceHTML(){
+    var w = WATCHES[curWatch], g = heroGame();
+    if (heroPage === "game"){
+      var html = '<div class="hw-page">';
+      html += '<div class="hw-bg" data-bg="' + g.bg + '"></div>';
+      if (g.sprite) html += '<img class="hw-sprite" src="' + g.sprite + '" alt="">';
+      html += '<div class="hw-shade"></div>';
+      if (heroGameIdx >= g.lines.length){
+        html += '<div class="hw-end"><b>试玩结束</b><p>' + esc(g.endNote) + '</p><button class="hw-btn" data-hero-replay data-spring>再玩一次</button><button class="hw-btn ghost" data-hero-go="title" data-spring>‹ 返回标题</button></div>';
+      } else {
+        var line = g.lines[heroGameIdx];
+        html += '<div class="hw-box">' + (line.sp ? '<span class="hw-name">' + esc(line.sp) + '</span>' : '') + '<div class="hw-text">' + esc(line.tx) + '</div><span class="hw-next">▼</span></div>';
+      }
+      html += '</div>';
+      return html;
+    }
+    if (heroPage === "gallery"){
+      var items = HERO_GALLERY[HERO_WATCH_GAME[curWatch]];
+      var it = items[heroGalIdx % items.length];
+      var html = '<div class="hw-page">';
+      if (it.poem){
+        html += '<div class="hw-poem">' + esc(it.poem).replace(/\n/g, "<br>") + '</div>';
+      } else if (it.sprite){
+        html += '<div class="hw-bg" data-bg="' + it.bg + '"></div><img class="hw-sprite" src="' + it.sprite + '" alt="">';
+      } else {
+        html += '<div class="hw-bg" data-bg="' + it.img + '"></div>';
+      }
+      html += '<div class="hw-cap">' + esc(it.cap) + ' · ' + (heroGalIdx % items.length + 1) + '/' + items.length + '</div>';
+      html += '<button class="hw-back" data-hero-go="title" data-spring>‹ 返回</button>';
+      html += '</div>';
+      return html;
+    }
+    if (heroPage === "settings"){
+      var html = '<div class="hw-page hw-set">';
+      html += '<div class="hw-set-title">设置</div>';
+      html += heroSetRow("dark", "深色表盘", heroSettings.dark);
+      html += heroSetRow("vibrate", "震动反馈", heroSettings.vibrate);
+      html += heroSetRow("autoplay", "自动播放", heroSettings.autoplay);
+      html += '<button class="hw-back" data-hero-go="title" data-spring>‹ 返回</button>';
+      html += '</div>';
+      return html;
+    }
+    return '<div class="hw-page"><div class="watch-mock" data-bg="' + w.cover + '"><div class="wm-title">' + esc(w.title) + '</div><button class="wm-btn" data-hero-go="game" data-spring>开始游戏</button><div class="hw-title-row"><button class="hw-link" data-hero-go="gallery" data-spring>画廊</button><button class="hw-link" data-hero-go="settings" data-spring>设置</button></div></div></div>';
+  }
+  function renderHeroFace(){
+    var face = document.getElementById("watchFace");
+    if (!face) return;
+    face.innerHTML = heroFaceHTML();
+    face.classList.toggle("hw-dark", !!heroSettings.dark);
+    armImgLoading(face);
+    if (heroPage === "game" && heroSettings.autoplay && heroGameIdx < heroGame().lines.length){
+      heroStopAuto();
+      heroAutoTimer = setInterval(function(){ heroGameAdvance(); }, 2500);
+    } else {
+      heroStopAuto();
+    }
+  }
+  function heroGo(page){
+    heroPage = page;
+    if (page === "game"){ heroGameIdx = 0; }
+    if (page === "gallery"){ heroGalIdx = 0; }
+    heroVibrate(8);
+    renderHeroFace();
+  }
+  function heroGameAdvance(){
+    var g = heroGame();
+    if (heroPage !== "game") return;
+    if (heroGameIdx < g.lines.length){
+      heroGameIdx++;
+      heroVibrate(6);
+      renderHeroFace();
+    }
+  }
+  function heroGalNext(){
+    if (heroPage !== "gallery") return;
+    heroGalIdx++;
+    heroVibrate(6);
+    renderHeroFace();
+  }
+  function heroToggleSetting(key){
+    if (key === "dark"){ heroSettings.dark = !heroSettings.dark; }
+    else if (key === "vibrate"){ heroSettings.vibrate = !heroSettings.vibrate; }
+    else if (key === "autoplay"){ heroSettings.autoplay = !heroSettings.autoplay; }
+    heroSaveSettings();
+    heroVibrate(10);
+    renderHeroFace();
+  }
+  function heroFaceTap(){
+    if (heroPage === "game") heroGameAdvance();
+    else if (heroPage === "gallery") heroGalNext();
+  }
+
+  /* ---------- v27：顶部展示换成立体表，立体表可换四种表型 ---------- */
+  var MODEL_SHAPES = { long: "长表", round: "圆表", capsule: "胶囊表", rw6: "红米" };
+  var modelShape = "long";
+  function updateModelMeta(){
+    var g = demoGameData();
+    var t = document.getElementById("demoMetaTitle");
+    if (t) t.textContent = g.title + " · " + MODEL_SHAPES[modelShape] + "试玩";
+  }
+  function setModelShape(shape){
+    if (!MODEL_SHAPES[shape] || shape === modelShape) return;
+    modelShape = shape;
+    var w = document.getElementById("modelWatch");
+    if (w) w.className = "model-watch mshape-" + shape;
+    var seg = document.getElementById("modelShapeSeg");
+    if (seg){
+      seg.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-model-shape") === shape); });
+      moveIndicator(seg);
+    }
+    updateModelMeta();
+  }
+
+  /* ---------- v22：3D 模表试玩：立体表身 + 实机画面模拟 + 可选游戏 + 苹果转圈加载 ---------- */
+  var DEMO_GAMES = {
+    cafe: {
+      name: "咖啡馆", title: "星光咖啡馆与死神之蝶", bg: "covers/cafestella.jpg", sprite: "sprites/nozomi.png",
+      note: "一小段原创小剧场，完整版有 5 条路线。",
+      lines: [
+        { sp: "", tx: "放学后，我推开了那家咖啡馆的门。风铃响了。" },
+        { sp: "她", tx: "欢迎光临……啊，是你。" },
+        { sp: "我", tx: "今天也是老位置吗？" },
+        { sp: "她", tx: "嗯。靠窗的那张桌子，一直给你留着。" },
+        { sp: "", tx: "她把一杯热可可放在我面前，热气慢慢升起来。" },
+        { sp: "她", tx: "呐，今天想喝点什么？还是老样子？" }
+      ],
+      choice: ["老样子。", "今天想试试新的。"],
+      ends: [
+        [ { sp: "她", tx: "好，一杯热可可，马上来。" }, { sp: "", tx: "她转身走向吧台，裙摆轻轻扬起来。" } ],
+        [ { sp: "她", tx: "那……试试我新学的拉花？可能会失败哦。" }, { sp: "", tx: "她有点不好意思地笑了。" } ]
+      ],
+      endNote: "完整版有 5 条路线，等你来续写这个夏天。"
+    },
+    katawa: {
+      name: "片轮", title: "片轮少女", bg: "covers/katawa.jpg", sprite: "sprites/emi.png",
+      note: "一小段原创小剧场，完整版有 5 条路线。",
+      lines: [
+        { sp: "", tx: "放学后，操场边的樱花落了一地。" },
+        { sp: "绘美", tx: "嘿！你也是来跑步的吗？一起来啊！" },
+        { sp: "我", tx: "……我只是路过。" },
+        { sp: "绘美", tx: "路过也行！先跑一圈再说，跑起来！" }
+      ],
+      choice: null, ends: null,
+      endNote: "完整版里，她的故事才刚刚开始。"
+    },
+    narcissu: {
+      name: "水仙", title: "水仙", bg: "covers/narcissu_field.jpg", sprite: null,
+      note: "一小段原创小剧场，完整版是一段安静的旅程。",
+      lines: [
+        { sp: "", tx: "白色的水仙开满了山坡，风一吹，花瓣就飘了起来。" },
+        { sp: "姬子", tx: "……很漂亮吧。像雪一样。" },
+        { sp: "我", tx: "嗯。" },
+        { sp: "姬子", tx: "走吧。再不走，天就要黑了。" }
+      ],
+      choice: null, ends: null,
+      endNote: "完整版里，这段旅程还有很长的路。"
+    }
+  };
+  var demoGame = "cafe", demoIdx = 0, demoBranch = null, demoMode = "play", demoLoading = false;
+  function demoGameData(){ return DEMO_GAMES[demoGame]; }
+  function demoLine(){
+    var g = demoGameData();
+    if (demoBranch === null) return g.lines[demoIdx];
+    return g.ends[demoBranch][demoIdx - g.lines.length];
+  }
+  function demoRender(){
+    var demo = document.getElementById("mgDemo");
+    if (!demo) return;
+    var g = demoGameData();
+    if (demoLoading){
+      demo.innerHTML = '<div class="mg-loading"><div class="apl-spin" style="--s:18px;color:#fff"><i style="--n:0"></i><i style="--n:1"></i><i style="--n:2"></i><i style="--n:3"></i><i style="--n:4"></i><i style="--n:5"></i><i style="--n:6"></i><i style="--n:7"></i><i style="--n:8"></i><i style="--n:9"></i><i style="--n:10"></i><i style="--n:11"></i></div><span>加载中</span></div>';
+      return;
+    }
+    var html = '<div class="mg-bg" style="background-image:url(' + g.bg + ')"></div>';
+    if (g.sprite) html += '<img class="mg-sprite" src="' + g.sprite + '" alt="">';
+    html += '<div class="mg-shade"></div>';
+    if (demoMode === "choice"){
+      html += '<div class="mg-choice"><button data-demo-choice="0" data-spring>' + esc(g.choice[0]) + '</button><button data-demo-choice="1" data-spring>' + esc(g.choice[1]) + '</button></div>';
+    } else if (demoMode === "end"){
+      html += '<div class="mg-end"><b>试玩结束</b><p>' + esc(g.endNote) + '<br><span style="font-size:10px;opacity:.7">小剧场为原创试玩，非游戏原文</span></p><button class="mg-dl" data-show-dl data-spring>下载完整版 ›</button><button class="mg-re" data-demo-replay data-spring>再玩一次</button></div>';
+    } else {
+      var line = demoLine();
+      html += '<div class="mg-box">' + (line.sp ? '<span class="mg-name">' + esc(line.sp) + '</span>' : '') + '<div class="mg-text">' + esc(line.tx) + '</div><span class="mg-next">▼</span></div>';
+    }
+    demo.innerHTML = html;
+    bindPress(demo);
+  }
+  function demoPreload(g, done){
+    var urls = [g.bg]; if (g.sprite) urls.push(g.sprite);
+    var left = urls.length, finished = false;
+    function fin(){ if (finished) return; finished = true; done(); }
+    urls.forEach(function(u){
+      var im = new Image();
+      im.onload = function(){ if (--left <= 0) fin(); };
+      im.onerror = function(){ if (--left <= 0) fin(); };
+      im.src = u;
+    });
+    setTimeout(fin, 1500);
+  }
+  function demoAdvance(){
+    if (demoLoading || demoMode === "choice" || demoMode === "end") return;
+    var g = demoGameData();
+    demoIdx++;
+    if (demoBranch === null && demoIdx >= g.lines.length){ demoMode = g.choice ? "choice" : "end"; }
+    else if (demoBranch !== null && demoIdx >= g.lines.length + g.ends[demoBranch].length){ demoMode = "end"; }
+    demoRender();
+  }
+  function demoChoose(i){
+    var g = demoGameData();
+    demoBranch = i; demoIdx = g.lines.length; demoMode = "play"; demoRender();
+  }
+  function demoReplay(){
+    demoLoading = true; demoRender();
+    setTimeout(function(){
+      demoIdx = 0; demoBranch = null; demoMode = "play"; demoLoading = false; demoRender();
+    }, 500);
+  }
+  function setDemoGame(id){
+    if (!DEMO_GAMES[id] || id === demoGame) return;
+    demoGame = id;
+    var seg = document.getElementById("demoGameSeg");
+    if (seg){
+      seg.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-demo-game") === id); });
+      moveIndicator(seg);
+    }
+    var g = demoGameData();
+    updateModelMeta();
+    var n = document.getElementById("demoMetaNote");
+    if (n) n.textContent = g.note;
+    demoIdx = 0; demoBranch = null; demoMode = "play"; demoLoading = true; demoRender();
+    demoPreload(g, function(){ demoLoading = false; demoRender(); });
+  }
+  function bindDemoGame(){
+    var seg = document.getElementById("demoGameSeg");
+    if (!seg) return;
+    seg.querySelectorAll("button").forEach(function(btn){
+      btn.addEventListener("click", function(){ setDemoGame(btn.getAttribute("data-demo-game")); });
+    });
+  }
+  var modelRX = 0, modelRY = 0, modelDragging = false, modelTouched = false;
+  var modelSX = new Spring(function(v){ setModelRot(v, null); }, 170, 22);
+  var modelSY = new Spring(function(v){ setModelRot(null, v); }, 170, 22);
+  function setModelRot(rx, ry){
+    if (rx !== null && rx !== undefined) modelRX = rx;
+    if (ry !== null && ry !== undefined) modelRY = ry;
+    var m = document.getElementById("modelWatch");
+    /* v43：表恢复以前那样晃——拖动 3D 倾斜 + 松手弹回正中。v42 把表定死了是误会，表本来就该晃。雾和晃是两回事，雾另有根子（见下面），晃不用背锅。 */
+    if (m) m.style.transform = "perspective(900px) rotateX(" + modelRX.toFixed(2) + "deg) rotateY(" + modelRY.toFixed(2) + "deg)";
+    var gl = document.getElementById("mgGloss");
+    if (gl) gl.style.setProperty("--gloss-x", (modelRY * 0.55).toFixed(1) + "px");
+    var sh = document.getElementById("modelShadow");
+    if (sh){
+      var s = 1 - Math.abs(modelRY) / 75 * 0.35 - Math.abs(modelRX) / 30 * 0.1;
+      sh.style.transform = "scaleX(" + s.toFixed(3) + ")";
+      sh.style.opacity = (1 - Math.abs(modelRY) / 75 * 0.3).toFixed(3);
+    }
+  }
+  function bindModelDrag(){
+    var stage = document.getElementById("modelStage");
+    if (!stage) return;
+    var sx = 0, sy = 0, srx = 0, sry = 0, moved = false, downT = 0, downOnScreen = false;
+    stage.addEventListener("pointerdown", function(e){
+      if (e.target.closest && e.target.closest("button")) return;
+      modelDragging = true; modelTouched = true; moved = false;
+      sx = e.clientX; sy = e.clientY; srx = modelRX; sry = modelRY; downT = Date.now();
+      downOnScreen = !!(e.target.closest && e.target.closest(".model-screen"));
+      modelSX.active = false; modelSY.active = false;
+      if (stage.setPointerCapture){ try { stage.setPointerCapture(e.pointerId); } catch (err) {} }
+    });
+    stage.addEventListener("pointermove", function(e){
+      if (!modelDragging) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) moved = true;
+      if (!moved) return;
+      var ry = sry + dx * 0.35, rx = srx - dy * 0.25;
+      if (ry > 75) ry = 75; if (ry < -75) ry = -75;
+      if (rx > 30) rx = 30; if (rx < -30) rx = -30;
+      setModelRot(rx, ry);
+    });
+    function endModelDrag(){
+      if (!modelDragging) return;
+      modelDragging = false;
+      if (moved){ modelSX.go(0, modelRX); modelSY.go(0, modelRY); }
+      else if (downOnScreen && Date.now() - downT < 600){ demoAdvance(); }
+    }
+    stage.addEventListener("pointerup", endModelDrag);
+    stage.addEventListener("pointercancel", function(){ modelDragging = false; });
+    /* v34：删掉首次自动晃动——晃动用弹簧（rAF），文件查看器里 rAF 被节流，表会卡在 -18° 偏右、压到下面按钮上很久；现在表默认正对前方、居中，用户拖动才转。 */
+  }
+  renderShowcases();
+  armReveal(document);
+  /* v34 兜底：1.5 秒后把视口内的 reveal 元素直接置为不透明、不位移，防止渐进在节流环境里卡住 */
+  setTimeout(function(){ forceRevealInView(document); }, 1500);
+  bindPress(document);
+  renderGames();
+  renderCompare();
+  armImgLoading(document);
+  updateHeroCurrent();
+  demoLoading = true; demoRender();
+  demoPreload(demoGameData(), function(){ demoLoading = false; demoRender(); });
+  bindModelDrag();
+  bindDemoGame();
+  moveIndicator(document.getElementById("modelShapeSeg"));
+  moveIndicator(document.getElementById("demoGameSeg"));
+  updateModelMeta();
+  var initHash = (location.hash || "").replace(/^#/, "");
+  if (initHash && DEVICES[initHash]){ showView("device", initHash); }
+  else if (initHash && VIEWS[initHash]){ showView(initHash); }
+  else { showView("home"); }
+  /* v48：整页加载圈收尾——圈要让人看清在转：最少显示 1 秒（转一圈多），再淡出；2.5 秒保险，免得卡住一直盖着。 */
+  var hideLoader = function(){
+    var pl = document.getElementById("pageLoader");
+    if (!pl || pl.classList.contains("hide")) return;
+    pl.classList.add("hide");
+    setTimeout(function(){ if (pl.parentNode) pl.parentNode.removeChild(pl); }, 400);
+  };
+  setTimeout(hideLoader, 1000);
+  setTimeout(hideLoader, 2500);
+})();
+</script>
+</body>
+</html>
