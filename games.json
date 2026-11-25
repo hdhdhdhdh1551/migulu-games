@@ -1,0 +1,253 @@
+{
+  "version": 61,
+  "updated": "2026-11-25",
+  "games": [
+    {
+      "id": "cafestella",
+      "name": "星光咖啡馆与死神之蝶",
+      "title": "Café Stella and the Reaper's Butterflies · YuzuSoft",
+      "desc": "咖啡馆、死神、与五位女主的夏天。全中文，共通线 + 5 条女主路线及后日谈。",
+      "meta": "长篇恋爱 · 5 条路线 · 全中文",
+      "cover": "https://hdhdhdhdh1551.github.io/migulu-games/covers/cafestella.jpg",
+      "note": "干净版：成人内容已移除，老存档失效。圆表 / 胶囊版未在真机上装机实测。",
+      "test": false,
+      "files": [
+        {
+          "device": "长表",
+          "variant": "clean",
+          "label": "手环 9 Pro / 10 Pro · 干净版 v1.1.9",
+          "file": "com.migulu.cafestella.release.1.1.9.rpk",
+          "version": "v1.1.9",
+          "bytes": 15206841,
+          "md5": "1a7eb1edac0616ea89533dc8fc30e540",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.cafestella.release.1.1.9.rpk",
+          "encrypted": false
+        },
+        {
+          "device": "长表",
+          "variant": "full",
+          "label": "手环 9 Pro / 10 Pro · 完整版 v1.1.7",
+          "file": "com.migulu.cafestella.release.1.1.7.rpk",
+          "version": "v1.1.7",
+          "bytes": 14849589,
+          "md5": "da420c0a5153e98e1be64d323a202b82",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.cafestella.release.1.1.7.rpk",
+          "encrypted": false
+        },
+        {
+          "device": "圆表",
+          "variant": "clean",
+          "label": "圆表 466 · 干净版 v1.1.9",
+          "file": "com.migulu.cafestella.release.1.1.9_round466.rpk",
+          "version": "v1.1.9",
+          "bytes": 17413549,
+          "md5": "58d639932d6e2986269ab81d60862d65",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.cafestella.release.1.1.9_round466.rpk",
+          "encrypted": false
+        },
+        {
+          "device": "圆表",
+          "variant": "full",
+          "label": "圆表 466 · 少 HCG v1.1.9",
+          "file": "com.migulu.cafestella.release.1.1.9_round466_lite.rpk",
+          "version": "v1.1.9",
+          "bytes": 16874514,
+          "md5": "50393788808c21dfff8d4fd949d77331",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.cafestella.release.1.1.9_round466_lite.rpk",
+          "encrypted": false
+        },
+        {
+          "device": "胶囊表",
+          "variant": "clean",
+          "label": "胶囊 192 · 干净版 v1.1.9",
+          "file": "com.migulu.cafestella.release.1.1.9_capsule192.rpk",
+          "version": "v1.1.9",
+          "bytes": 11582564,
+          "md5": "62f25ecdb4bb39640e57e27ed0541c34",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.cafestella.release.1.1.9_capsule192.rpk",
+          "encrypted": false
+        },
+        {
+          "device": "胶囊表",
+          "variant": "full",
+          "label": "胶囊 192 · 少 HCG v1.1.9",
+          "file": "com.migulu.cafestella.release.1.1.9_capsule192_lite.rpk",
+          "version": "v1.1.9",
+          "bytes": 11536821,
+          "md5": "b49709c7335d34834a0681719571d950",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.cafestella.release.1.1.9_capsule192_lite.rpk",
+          "encrypted": false
+        }
+      ]
+    },
+    {
+      "id": "katawa",
+      "name": "片轮少女",
+      "title": "Katawa Shoujo · Four Leaf Studios",
+      "desc": "与五位少女的青春物语。全中文，共通线 + 5 条女主路线。",
+      "meta": "长篇恋爱 · 5 条路线 · 全中文",
+      "cover": "https://hdhdhdhdh1551.github.io/migulu-games/covers/katawa.jpg",
+      "note": "干净版：成人内容已移除。红米 Watch 6 版、圆表 / 胶囊版未在真机上装机实测。",
+      "test": false,
+      "files": [
+        {
+          "device": "长表",
+          "variant": "clean",
+          "label": "手环 9 Pro / 10 Pro · 干净版 v1.0.0",
+          "file": "com.migulu.katawa.release.1.0.0.clean.rpk",
+          "version": "v1.0.0",
+          "bytes": 9786675,
+          "md5": "d77efdfaa093e98d786398c3f872ccc5",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.katawa.release.1.0.0.clean.rpk",
+          "encrypted": false
+        },
+        {
+          "device": "长表",
+          "variant": "full",
+          "label": "手环 9 Pro / 10 Pro · 完整版 v1.0.0",
+          "file": "com.migulu.katawa.release.1.0.0.rpk",
+          "version": "v1.0.0",
+          "bytes": 10188674,
+          "md5": "3b5d75d765b30362bb265268dbd4cde2",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.katawa.release.1.0.0.rpk",
+          "encrypted": false
+        },
+        {
+          "device": "红米 Watch 6",
+          "variant": "full",
+          "label": "红米 Watch 6 · 完整版 v1.0.0",
+          "file": "com.migulu.katawa.rw6.debug.1.0.0.bin",
+          "version": "v1.0.0",
+          "bytes": 13654194,
+          "md5": "9816f23da2e6701d397aa94eac01c997",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.katawa.rw6.debug.1.0.0.bin",
+          "encrypted": false
+        },
+        {
+          "device": "圆表",
+          "variant": "full",
+          "label": "圆表 466 · 全 CG v1.0.0",
+          "file": "com.migulu.katawa.release.1.0.0_round466.rpk",
+          "version": "v1.0.0",
+          "bytes": 11030074,
+          "md5": "f1c7772ba37cd151f217b868efe38565",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.katawa.release.1.0.0_round466.rpk",
+          "encrypted": false
+        },
+        {
+          "device": "圆表",
+          "variant": "full",
+          "label": "圆表 466 · 少 HCG v1.0.0",
+          "file": "com.migulu.katawa.release.1.0.0_round466_lite.rpk",
+          "version": "v1.0.0",
+          "bytes": 10716460,
+          "md5": "230584f3b471463ba3f5821e23edd230",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.katawa.release.1.0.0_round466_lite.rpk",
+          "encrypted": false
+        },
+        {
+          "device": "胶囊表",
+          "variant": "full",
+          "label": "胶囊 192 · 全 CG v1.0.0",
+          "file": "com.migulu.katawa.release.1.0.0_capsule192.rpk",
+          "version": "v1.0.0",
+          "bytes": 7579045,
+          "md5": "e95fc9e617473776b36d7d2ad456dfdb",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.katawa.release.1.0.0_capsule192.rpk",
+          "encrypted": false
+        },
+        {
+          "device": "胶囊表",
+          "variant": "full",
+          "label": "胶囊 192 · 少 HCG v1.0.0",
+          "file": "com.migulu.katawa.release.1.0.0_capsule192_lite.rpk",
+          "version": "v1.0.0",
+          "bytes": 7362375,
+          "md5": "b05a2daa1902e8c5eaf4425878991d4a",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.katawa.release.1.0.0_capsule192_lite.rpk",
+          "encrypted": false
+        }
+      ]
+    },
+    {
+      "id": "narcissu",
+      "name": "水仙",
+      "title": "Narcissu · stage-nana",
+      "desc": "绝症少女与少年的最后一次旅行。短篇催泪，全年龄，没有成人内容。",
+      "meta": "短篇催泪 · 全年龄",
+      "cover": "https://hdhdhdhdh1551.github.io/migulu-games/covers/narcissu.jpg",
+      "note": "圆表 / 胶囊版未在真机上装机实测。",
+      "test": false,
+      "files": [
+        {
+          "device": "圆表",
+          "variant": "all",
+          "label": "圆表 466 · v1.0.0",
+          "file": "com.migulu.narcissu.release.1.0.0_round466.rpk",
+          "version": "v1.0.0",
+          "bytes": 1836313,
+          "md5": "45a7d478f08bc2863541a8aae023857a",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.narcissu.release.1.0.0_round466.rpk",
+          "encrypted": false
+        },
+        {
+          "device": "胶囊表",
+          "variant": "all",
+          "label": "胶囊 192 · v1.0.0",
+          "file": "com.migulu.narcissu.release.1.0.0_capsule192.rpk",
+          "version": "v1.0.0",
+          "bytes": 1190833,
+          "md5": "8c7f9ce26cad5ec47135bb16c08af5f6",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.narcissu.release.1.0.0_capsule192.rpk",
+          "encrypted": false
+        }
+      ]
+    },
+    {
+      "id": "riddlejoker",
+      "name": "谜语小丑",
+      "title": "Riddle Joker · YuzuSoft",
+      "desc": "柚子社校园恋爱喜剧，全中文。干净版，成人内容已移除。",
+      "meta": "长篇恋爱 · 全中文 · 干净版",
+      "cover": "https://hdhdhdhdh1551.github.io/migulu-games/covers/riddlejoker_cover_3x2.jpg",
+      "note": "干净版：成人内容已移除。测试版，未正式发布；未在真机上装机实测。这是加密文件，需要密码解密，密码找群主拿。",
+      "test": true,
+      "files": [
+        {
+          "device": "长表",
+          "variant": "clean",
+          "label": "手环 9 Pro / 10 Pro · 干净版 v1.0.6",
+          "file": "com.migulu.riddlejoker.release.1.0.6.rpk.enc",
+          "version": "v1.0.6",
+          "bytes": 10348871,
+          "md5": "f7455949b3be6e2c8c2f4918a7e61ffa",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.riddlejoker.release.1.0.6.rpk.enc",
+          "encrypted": true
+        }
+      ]
+    },
+    {
+      "id": "amakano3",
+      "name": "甜蜜女友三",
+      "title": "アマカノ3 · Azarashi Soft",
+      "desc": "甜蜜女友系列第三作，全中文。完整版，含成人内容。",
+      "meta": "长篇恋爱 · 全中文 · 完整版",
+      "cover": "https://hdhdhdhdh1551.github.io/migulu-games/covers/amakano3-title.jpg",
+      "note": "debug 测试版；加密文件 20,601,414 字节，解密后 20,601,370 字节，已超 20 MB 上限，可能装不上，仅供测试。需要密码解密，密码找群主拿。未在真机上装机实测。",
+      "test": true,
+      "files": [
+        {
+          "device": "长表",
+          "variant": "full",
+          "label": "手环 9 Pro / 10 Pro · 完整版 v1.0.4 debug",
+          "file": "com.migulu.amakano3.debug.1.0.4_0_iowl.rpk.enc",
+          "version": "v1.0.4 debug",
+          "bytes": 20601414,
+          "md5": "d70b987eb23f084e226719b4935ed84a",
+          "url": "https://hdhdhdhdh1551.github.io/migulu-games/downloads/com.migulu.amakano3.debug.1.0.4_0_iowl.rpk.enc",
+          "encrypted": true
+        }
+      ]
+    }
+  ]
+}
